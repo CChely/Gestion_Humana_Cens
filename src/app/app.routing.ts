@@ -1,6 +1,5 @@
 import { Route } from '@angular/router';
-import { AuthGuard } from 'app/core/auth/guards/auth.guard';
-import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
+import { authGuard, noAuthGuard } from 'app/core/auth/auth.guard';
 import { LayoutComponent } from 'app/layout/layout.component';
 import { InitialDataResolver } from 'app/app.resolvers';
 
@@ -22,8 +21,8 @@ export const appRoutes: Route[] = [
     // Auth routes for guests
     {
         path: '',
-        canActivate: [NoAuthGuard],
-        canActivateChild: [NoAuthGuard],
+        canActivate: [noAuthGuard],
+        canActivateChild: [noAuthGuard],
         component: LayoutComponent,
         data: {
             layout: 'empty'
@@ -40,8 +39,8 @@ export const appRoutes: Route[] = [
     // Auth routes for authenticated users
     {
         path: '',
-        canActivate: [AuthGuard],
-        canActivateChild: [AuthGuard],
+        canActivate: [authGuard],
+        canActivateChild: [authGuard],
         component: LayoutComponent,
         data: {
             layout: 'empty'
@@ -67,8 +66,8 @@ export const appRoutes: Route[] = [
     // Admin routes
     {
         path       : '',
-        canActivate: [AuthGuard],
-        canActivateChild: [AuthGuard],
+        canActivate: [authGuard],
+        canActivateChild: [authGuard],
         component  : LayoutComponent,
         resolve    : {
             initialData: InitialDataResolver,
@@ -123,18 +122,18 @@ export const appRoutes: Route[] = [
 
             // Pages
             {path: 'pages', children: [
- 
+
                 // Error
                 {path: 'error', children: [
                     {path: '404', loadChildren: () => import('app/modules/admin/pages/error/error-404/error-404.module').then(m => m.Error404Module)},
                     {path: '500', loadChildren: () => import('app/modules/admin/pages/error/error-500/error-500.module').then(m => m.Error500Module)}
                 ]},
 
-                 
-                 
+
+
             ]},
 
-             
+
             // 404 & Catch all
             {path: '404-not-found', pathMatch: 'full', loadChildren: () => import('app/modules/admin/pages/error/error-404/error-404.module').then(m => m.Error404Module)},
             {path: '**', redirectTo: '404-not-found'}

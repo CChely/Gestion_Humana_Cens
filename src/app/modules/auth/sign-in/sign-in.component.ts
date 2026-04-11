@@ -72,8 +72,14 @@ export class AuthSignInComponent implements OnInit
         // Hide the alert
         this.showAlert = false;
 
+        // Prepare the request payload - mapear email a correo para el endpoint
+        const loginData = {
+            correo: this.signInForm.get('email').value,
+            password: this.signInForm.get('password').value
+        };
+
         // Sign in
-        this._authService.signIn(this.signInForm.value)
+        this._authService.signIn(loginData)
             .subscribe(
                 () => {
 
@@ -87,7 +93,7 @@ export class AuthSignInComponent implements OnInit
                     this._router.navigateByUrl(redirectURL);
 
                 },
-                (response) => {
+                (error: any) => {
 
                     // Re-enable the form
                     this.signInForm.enable();
@@ -95,10 +101,10 @@ export class AuthSignInComponent implements OnInit
                     // Reset the form
                     this.signInNgForm.resetForm();
 
-                    // Set the alert
+                    // Set the alert with the error message from the API
                     this.alert = {
                         type   : 'error',
-                        message: 'Wrong email or password'
+                        message: error?.error?.message || 'An error occurred during sign in'
                     };
 
                     // Show the alert
