@@ -4,6 +4,7 @@ import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
 import { Router } from '@angular/router';
+import { environment } from 'environments/environment';
 
 export interface LoginResponse {
     data: {
@@ -137,7 +138,7 @@ export class AuthService
      */
     signIn(credentials: { correo: string; password: string }): Observable<LoginResponse>
     {
-        return this._httpClient.post<LoginResponse>('http://localhost:8080/api/v1/auth/login', credentials).pipe(
+        return this._httpClient.post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials).pipe(
             switchMap((response: LoginResponse) => {
 
                 // Validar que la respuesta sea exitosa

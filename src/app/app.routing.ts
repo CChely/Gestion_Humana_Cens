@@ -104,6 +104,7 @@ export const appRoutes: Route[] = [
             {path: 'gestion-personal', children: [
                 {path: 'maestro-empleado', loadChildren: () => import('app/modules/gestionPersonal/maestro-empleado/maestro-empleado.module').then(m => m.MaestroEmpleadoModule)},
                 {path: 'contrato', loadChildren: () => import('app/modules/gestionPersonal/contrato/contrato.module').then(m => m.ContratoModule)},
+                {path: 'registro-usuario', loadChildren: () => import('app/modules/gestionPersonal/registro-usuario/registro-usuario.module').then(m => m.RegistroUsuarioModule)},
             ]},
 
             // Mantenimiento
