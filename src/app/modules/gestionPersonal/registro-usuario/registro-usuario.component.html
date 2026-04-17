@@ -1,1 +1,500 @@
-<router-outlet></router-outlet>
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+
+    <mat-drawer-container class="flex-auto h-full bg-card dark:bg-transparent">
+
+        <!-- ===================== DRAWER ===================== -->
+        <mat-drawer
+            class="w-full md:w-160 dark:bg-gray-900"
+            [mode]="drawerMode"
+            [opened]="false"
+            [position]="'end'"
+            [disableClose]="true"
+            #matDrawer>
+
+            <div class="flex flex-col w-full h-full overflow-auto">
+
+                <!-- Colored header band -->
+                <div class="relative w-full h-40 sm:h-48 px-8 sm:px-12 bg-accent-100 dark:bg-accent-700 flex-shrink-0">
+                    <div class="flex items-center justify-end w-full h-full">
+                        <button mat-icon-button (click)="closeDrawer()">
+                            <mat-icon class="text-white" [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="relative flex flex-col flex-auto items-center p-6 pt-0 sm:p-12 sm:pt-0">
+                    <div class="w-full max-w-3xl">
+
+                        <!-- Avatar + Edit button row -->
+                        <div class="flex items-end -mt-16 mb-6">
+                            <!-- Avatar -->
+                            <div class="flex items-center justify-center w-32 h-32 rounded-full overflow-hidden ring-4 ring-bg-card bg-gray-200 dark:bg-gray-700 flex-shrink-0">
+                                <span class="text-6xl font-bold uppercase text-gray-600 dark:text-gray-200">
+                                    <ng-container *ngIf="selectedUsuario">{{ getInitial(selectedUsuario.Correo) }}</ng-container>
+                                    <ng-container *ngIf="!selectedUsuario">N</ng-container>
+                                </span>
+                            </div>
+
+                            <!-- Edit / view toggle button (only in view mode) -->
+                            <div class="flex items-center ml-auto mb-1" *ngIf="drawerAction === 'view' && !isEditing">
+                                <button mat-stroked-button (click)="enterEditMode()">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                    <span class="ml-2">Editar</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ======================================================= -->
+                        <!-- VIEW MODE                                                -->
+                        <!-- ======================================================= -->
+                        <ng-container *ngIf="drawerAction === 'view' && selectedUsuario && !isEditing">
+
+                            <div class="text-3xl font-bold truncate">{{ selectedUsuario.Correo }}</div>
+
+                            <div class="mt-2">
+                                <span
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                                    [ngClass]="{
+                                        'bg-green-100 text-green-800': selectedUsuario.Estado,
+                                        'bg-red-100 text-red-800': !selectedUsuario.Estado
+                                    }">
+                                    {{ selectedUsuario.Estado ? 'Activo' : 'Inactivo' }}
+                                </span>
+                            </div>
+
+                            <div class="flex flex-col mt-6 pt-6 border-t space-y-6">
+
+                                <div class="flex items-center">
+                                    <mat-icon class="icon-size-5 text-hint" [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                                    <div class="ml-4">
+                                        <div class="text-xs font-semibold uppercase text-secondary tracking-wide">ID de usuario</div>
+                                        <div class="font-medium mt-0.5"># {{ selectedUsuario.UsuarioId }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center">
+                                    <mat-icon class="icon-size-5 text-hint" [svgIcon]="'heroicons_solid:mail'"></mat-icon>
+                                    <div class="ml-4">
+                                        <div class="text-xs font-semibold uppercase text-secondary tracking-wide">Correo electrónico</div>
+                                        <div class="font-medium mt-0.5">{{ selectedUsuario.Correo }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center">
+                                    <mat-icon class="icon-size-5 text-hint" [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                                    <div class="ml-4">
+                                        <div class="text-xs font-semibold uppercase text-secondary tracking-wide">Fecha de creación</div>
+                                        <div class="font-medium mt-0.5">{{ formatDate(selectedUsuario.FechaCreacion) }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start">
+                                    <mat-icon class="icon-size-5 text-hint mt-0.5" [svgIcon]="'heroicons_solid:shield-check'"></mat-icon>
+                                    <div class="ml-4">
+                                        <div class="text-xs font-semibold uppercase text-secondary tracking-wide">Roles asignados</div>
+                                        <div class="flex flex-wrap gap-2 mt-2">
+                                            <ng-container *ngFor="let rol of selectedUsuario.roles">
+                                                <div class="flex flex-col">
+                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200">
+                                                        {{ rol.NombreRol }}
+                                                    </span>
+                                                    <span class="text-xs text-secondary mt-1 ml-1">{{ rol.DescripcionRol }}</span>
+                                                </div>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </ng-container>
+
+                        <!-- ======================================================= -->
+                        <!-- EDIT MODE                                                -->
+                        <!-- ======================================================= -->
+                        <ng-container *ngIf="drawerAction === 'view' && selectedUsuario && isEditing">
+
+                            <form [formGroup]="editForm" class="flex flex-col space-y-6">
+
+                                <!-- Correo electrónico -->
+                                <div class="flex flex-col">
+                                    <label class="font-semibold mb-2">
+                                        Correo electrónico
+                                        <span class="text-warn ml-0.5">*</span>
+                                    </label>
+                                    <mat-form-field class="fuse-mat-no-subscript fuse-mat-rounded w-full">
+                                        <mat-icon matPrefix class="icon-size-5 text-hint" [svgIcon]="'heroicons_solid:mail'"></mat-icon>
+                                        <input
+                                            matInput
+                                            formControlName="correo"
+                                            type="email"
+                                            placeholder="correo@ejemplo.com">
+                                    </mat-form-field>
+                                    <mat-error *ngIf="editForm.get('correo').touched && editForm.get('correo').hasError('required')" class="mt-1 text-sm">
+                                        El correo es requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="editForm.get('correo').touched && editForm.get('correo').hasError('email')" class="mt-1 text-sm">
+                                        Ingrese un correo válido
+                                    </mat-error>
+                                </div>
+
+                                <!-- Roles como checkboxes -->
+                                <div class="flex flex-col">
+                                    <label class="font-semibold mb-3">
+                                        Roles
+                                        <span class="text-warn ml-0.5">*</span>
+                                    </label>
+
+                                    <!-- Loading roles -->
+                                    <ng-container *ngIf="isLoadingRoles">
+                                        <div class="flex items-center gap-2 px-4 py-3 border rounded-lg text-secondary">
+                                            <mat-progress-spinner [diameter]="18" [mode]="'indeterminate'"></mat-progress-spinner>
+                                            <span class="text-sm">Cargando roles...</span>
+                                        </div>
+                                    </ng-container>
+
+                                    <!-- Checkboxes list -->
+                                    <ng-container *ngIf="!isLoadingRoles">
+                                        <div class="flex flex-col divide-y border rounded-lg overflow-hidden">
+                                            <label
+                                                *ngFor="let rol of availableRoles"
+                                                class="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                                [class.bg-primary-50]="isRolChecked(rol.RolId)"
+                                                [class.dark:bg-primary-900]="isRolChecked(rol.RolId)">
+
+                                                <mat-checkbox
+                                                    [color]="'primary'"
+                                                    [checked]="isRolChecked(rol.RolId)"
+                                                    [disabled]="isSaving"
+                                                    (change)="toggleRol(rol.RolId)">
+                                                </mat-checkbox>
+
+                                                <div class="flex flex-col min-w-0">
+                                                    <span class="font-medium leading-5">{{ rol.Nombre }}</span>
+                                                    <span class="text-sm text-secondary truncate">{{ rol.Descripcion }}</span>
+                                                </div>
+
+                                            </label>
+                                        </div>
+
+                                        <!-- Validation hint -->
+                                        <div *ngIf="selectedRolIds.size === 0" class="mt-1.5 text-sm text-warn">
+                                            Seleccione al menos un rol
+                                        </div>
+                                    </ng-container>
+                                </div>
+
+                                <!-- Fecha de creación (read-only) -->
+                                <div class="flex flex-col">
+                                    <label class="font-semibold mb-2">Fecha de creación</label>
+                                    <mat-form-field class="fuse-mat-no-subscript fuse-mat-rounded w-full">
+                                        <mat-icon matPrefix class="icon-size-5 text-hint" [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                                        <input
+                                            matInput
+                                            [value]="formatDate(selectedUsuario.FechaCreacion)"
+                                            readonly>
+                                    </mat-form-field>
+                                </div>
+
+                            </form>
+
+                            <!-- -------------------------------------------------- -->
+                            <!-- Footer actions: Delete | Cancel | Save              -->
+                            <!-- -------------------------------------------------- -->
+                            <div class="flex items-center mt-10 pt-6 border-t">
+
+                                <!-- Delete -->
+                                <button
+                                    mat-button
+                                    class="text-warn px-0"
+                                    [disabled]="isSaving">
+                                    Eliminar
+                                </button>
+
+                                <div class="flex-auto"></div>
+
+                                <!-- Cancel -->
+                                <button
+                                    mat-button
+                                    class="mr-3"
+                                    [disabled]="isSaving"
+                                    (click)="cancelEdit()">
+                                    Cancelar
+                                </button>
+
+                                <!-- Save -->
+                                <button
+                                    mat-flat-button
+                                    [color]="'primary'"
+                                    [disabled]="editForm.invalid || isSaving || selectedRolIds.size === 0"
+                                    (click)="saveChanges()">
+                                    <ng-container *ngIf="!isSaving">Guardar</ng-container>
+                                    <ng-container *ngIf="isSaving">
+                                        <mat-progress-spinner [diameter]="20" [mode]="'indeterminate'" class="text-white"></mat-progress-spinner>
+                                    </ng-container>
+                                </button>
+
+                            </div>
+
+                        </ng-container>
+
+                        <!-- ======================================================= -->
+                        <!-- NEW MODE                                                 -->
+                        <!-- ======================================================= -->
+                        <ng-container *ngIf="drawerAction === 'new'">
+                            <div class="text-3xl font-bold truncate">Nuevo Usuario</div>
+
+                            <form [formGroup]="newForm" class="flex flex-col space-y-6 mt-6 pt-6 border-t">
+
+                                <!-- Correo -->
+                                <div class="flex flex-col">
+                                    <label class="font-semibold mb-2">
+                                        Correo electrónico
+                                        <span class="text-warn ml-0.5">*</span>
+                                    </label>
+                                    <mat-form-field class="fuse-mat-no-subscript fuse-mat-rounded w-full">
+                                        <mat-icon matPrefix class="icon-size-5 text-hint" [svgIcon]="'heroicons_solid:mail'"></mat-icon>
+                                        <input
+                                            matInput
+                                            formControlName="correo"
+                                            type="email"
+                                            placeholder="correo@ejemplo.com">
+                                    </mat-form-field>
+                                    <mat-error *ngIf="newForm.get('correo').touched && newForm.get('correo').hasError('required')" class="mt-1 text-sm">
+                                        El correo es requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="newForm.get('correo').touched && newForm.get('correo').hasError('email')" class="mt-1 text-sm">
+                                        Ingrese un correo válido
+                                    </mat-error>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="flex flex-col">
+                                    <label class="font-semibold mb-2">
+                                        Contraseña
+                                        <span class="text-warn ml-0.5">*</span>
+                                    </label>
+                                    <mat-form-field class="fuse-mat-no-subscript fuse-mat-rounded w-full">
+                                        <mat-icon matPrefix class="icon-size-5 text-hint" [svgIcon]="'heroicons_solid:lock-closed'"></mat-icon>
+                                        <input
+                                            matInput
+                                            formControlName="password"
+                                            [type]="showNewPassword ? 'text' : 'password'"
+                                            placeholder="Mínimo 6 caracteres">
+                                        <!-- Toggle visibility -->
+                                        <button
+                                            mat-icon-button
+                                            matSuffix
+                                            type="button"
+                                            [matTooltip]="showNewPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                                            (click)="showNewPassword = !showNewPassword">
+                                            <mat-icon
+                                                class="icon-size-5"
+                                                [svgIcon]="showNewPassword ? 'heroicons_solid:eye-off' : 'heroicons_solid:eye'">
+                                            </mat-icon>
+                                        </button>
+                                        <!-- Generate random password -->
+                                        <button
+                                            mat-icon-button
+                                            matSuffix
+                                            type="button"
+                                            matTooltip="Generar contraseña aleatoria"
+                                            (click)="generatePassword()">
+                                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+                                        </button>
+                                    </mat-form-field>
+                                    <mat-error *ngIf="newForm.get('password').touched && newForm.get('password').hasError('required')" class="mt-1 text-sm">
+                                        La contraseña es requerida
+                                    </mat-error>
+                                    <mat-error *ngIf="newForm.get('password').touched && newForm.get('password').hasError('minlength')" class="mt-1 text-sm">
+                                        Mínimo 6 caracteres
+                                    </mat-error>
+                                </div>
+
+                                <!-- Roles checkboxes -->
+                                <div class="flex flex-col">
+                                    <label class="font-semibold mb-3">
+                                        Roles
+                                        <span class="text-warn ml-0.5">*</span>
+                                    </label>
+
+                                    <ng-container *ngIf="isLoadingNewRoles">
+                                        <div class="flex items-center gap-2 px-4 py-3 border rounded-lg text-secondary">
+                                            <mat-progress-spinner [diameter]="18" [mode]="'indeterminate'"></mat-progress-spinner>
+                                            <span class="text-sm">Cargando roles...</span>
+                                        </div>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="!isLoadingNewRoles">
+                                        <div class="flex flex-col divide-y border rounded-lg overflow-hidden">
+                                            <label
+                                                *ngFor="let rol of availableRoles"
+                                                class="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                                [class.bg-primary-50]="isNewRolChecked(rol.RolId)">
+
+                                                <mat-checkbox
+                                                    [color]="'primary'"
+                                                    [checked]="isNewRolChecked(rol.RolId)"
+                                                    [disabled]="isSaving"
+                                                    (change)="toggleNewRol(rol.RolId)">
+                                                </mat-checkbox>
+
+                                                <div class="flex flex-col min-w-0">
+                                                    <span class="font-medium leading-5">{{ rol.Nombre }}</span>
+                                                    <span class="text-sm text-secondary truncate">{{ rol.Descripcion }}</span>
+                                                </div>
+
+                                            </label>
+                                        </div>
+
+                                        <div *ngIf="newRolIds.size === 0" class="mt-1.5 text-sm text-warn">
+                                            Seleccione al menos un rol
+                                        </div>
+                                    </ng-container>
+                                </div>
+
+                            </form>
+
+                            <!-- Footer: Cancel | Save -->
+                            <div class="flex items-center justify-end mt-10 pt-6 border-t gap-3">
+                                <button
+                                    mat-button
+                                    [disabled]="isSaving"
+                                    (click)="cancelNew()">
+                                    Cancelar
+                                </button>
+                                <button
+                                    mat-flat-button
+                                    [color]="'primary'"
+                                    [disabled]="newForm.invalid || isSaving || newRolIds.size === 0"
+                                    (click)="createUsuario()">
+                                    <ng-container *ngIf="!isSaving">Guardar</ng-container>
+                                    <ng-container *ngIf="isSaving">
+                                        <mat-progress-spinner [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
+                                    </ng-container>
+                                </button>
+                            </div>
+
+                        </ng-container>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </mat-drawer>
+        <!-- ================== END DRAWER ==================== -->
+
+        <!-- Main content -->
+        <mat-drawer-content class="flex flex-col">
+
+            <div class="flex flex-col flex-auto min-w-0">
+
+                <!-- Header -->
+                <div class="flex flex-col py-8 px-6 md:px-8 border-b">
+
+                    <div class="mb-4">
+                        <div class="text-4xl font-extrabold tracking-tight leading-none">Registro de usuario</div>
+                        <div class="ml-0.5 font-medium text-secondary">
+                            <ng-container *ngIf="(usuarios$ | async) as usuarios">
+                                {{ usuarios.length }}
+                                {{ usuarios.length | i18nPlural: {
+                                    '=0'   : 'Sin usuarios',
+                                    '=1'   : 'usuario',
+                                    'other': 'usuarios'
+                                } }}
+                            </ng-container>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded w-full">
+                                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                <input matInput [formControl]="searchInputControl" [autocomplete]="'off'" [placeholder]="'Buscar usuario'">
+                            </mat-form-field>
+                        </div>
+                        <button
+                            class="flex-shrink-0"
+                            mat-flat-button
+                            [color]="'primary'"
+                            (click)="openNewUsuario()">
+                            <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                            <span class="ml-2 mr-1">Agregar</span>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Loading -->
+                <ng-container *ngIf="isLoading">
+                    <div class="flex items-center justify-center p-16">
+                        <mat-progress-spinner [diameter]="40" [mode]="'indeterminate'"></mat-progress-spinner>
+                    </div>
+                </ng-container>
+
+                <!-- Users list -->
+                <ng-container *ngIf="!isLoading">
+                    <div class="flex-auto overflow-y-auto">
+                        <ng-container *ngIf="(usuarios$ | async) as usuarios">
+                            <ng-container *ngIf="usuarios.length; else noUsuarios">
+                                <ng-container *ngFor="let usuario of usuarios; let i = index; trackBy: trackByFn">
+
+                                    <ng-container *ngIf="i === 0 || usuario.Correo.charAt(0).toUpperCase() !== usuarios[i - 1].Correo.charAt(0).toUpperCase()">
+                                        <div class="z-10 sticky top-0 -mt-px px-6 py-1 md:px-8 border-t border-b font-medium uppercase text-secondary bg-gray-50 dark:bg-gray-900">
+                                            {{ usuario.Correo.charAt(0).toUpperCase() }}
+                                        </div>
+                                    </ng-container>
+
+                                    <div
+                                        class="z-20 flex items-center px-6 py-4 md:px-8 cursor-pointer border-b"
+                                        [ngClass]="{
+                                            'hover:bg-gray-100 dark:hover:bg-hover': !selectedUsuario || selectedUsuario.UsuarioId !== usuario.UsuarioId,
+                                            'bg-primary-50 dark:bg-hover': selectedUsuario && selectedUsuario.UsuarioId === usuario.UsuarioId
+                                        }"
+                                        (click)="selectUsuario(usuario)">
+
+                                        <div class="flex flex-0 items-center justify-center w-10 h-10 rounded-full overflow-hidden">
+                                            <div class="flex items-center justify-center w-full h-full rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                                                {{ getInitial(usuario.Correo) }}
+                                            </div>
+                                        </div>
+
+                                        <div class="min-w-0 ml-4 flex-auto">
+                                            <div class="font-medium leading-5 truncate">{{ usuario.Correo }}</div>
+                                            <div class="leading-5 truncate text-secondary">{{ getPrimaryRole(usuario) }}</div>
+                                        </div>
+
+                                        <div class="flex items-center ml-4">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                                [ngClass]="{
+                                                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': usuario.Estado,
+                                                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !usuario.Estado
+                                                }">
+                                                {{ usuario.Estado ? 'Activo' : 'Inactivo' }}
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </ng-container>
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-template #noUsuarios>
+                            <div class="p-8 sm:p-16 border-t text-4xl font-semibold tracking-tight text-center">
+                                No hay usuarios registrados
+                            </div>
+                        </ng-template>
+
+                    </div>
+                </ng-container>
+
+            </div>
+
+        </mat-drawer-content>
+
+    </mat-drawer-container>
+
+</div>

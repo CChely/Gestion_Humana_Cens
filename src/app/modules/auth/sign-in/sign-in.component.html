@@ -31,14 +31,18 @@
             <form
                 class="mt-8"
                 [formGroup]="signInForm"
-                #signInNgForm="ngForm">
+                #signInNgForm="ngForm"
+                autocomplete="on">
 
                 <!-- Email field -->
                 <mat-form-field class="w-full">
                     <mat-label>Email address</mat-label>
                     <input
                         id="email"
+                        name="email"
                         matInput
+                        type="email"
+                        autocomplete="username email"
                         [formControlName]="'email'">
                     <mat-error *ngIf="signInForm.get('email').hasError('required')">
                         Email address is required
@@ -53,8 +57,10 @@
                     <mat-label>Password</mat-label>
                     <input
                         id="password"
+                        name="password"
                         matInput
                         type="password"
+                        autocomplete="current-password"
                         [formControlName]="'password'"
                         #passwordField>
                     <button
@@ -81,7 +87,7 @@
                     <mat-checkbox
                         [color]="'primary'"
                         [formControlName]="'rememberMe'">
-                        Remember me
+                        Recuerda me
                     </mat-checkbox>
                     <a
                         class="text-md font-medium text-primary-500 hover:underline"

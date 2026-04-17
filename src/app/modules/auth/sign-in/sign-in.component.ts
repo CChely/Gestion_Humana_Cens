@@ -5,6 +5,19 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
 
+// Extend CredentialRequestOptions to include password property
+interface PasswordCredentialRequestOptions extends CredentialRequestOptions {
+    password?: boolean;
+}
+
+// Declare PasswordCredential for browsers that support it
+declare global {
+    interface Window {
+        PasswordCredential: any;
+    }
+    const PasswordCredential: any;
+}
+
 @Component({
     selector     : 'auth-sign-in',
     templateUrl  : './sign-in.component.html',
@@ -45,15 +58,46 @@ export class AuthSignInComponent implements OnInit
     {
         // Create the form
         this.signInForm = this._formBuilder.group({
-            email     : ['hughes.brian@company.com', [Validators.required, Validators.email]],
-            password  : ['admin', Validators.required],
+            email     : ['', [Validators.required, Validators.email]],
+            password  : ['', Validators.required],
             rememberMe: ['']
         });
+
+        // Try to retrieve stored credentials using Credential Management API
+        this.retrieveStoredCredentials();
     }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Retrieve stored credentials from browser
+     */
+    private retrieveStoredCredentials(): void
+    {
+        // Check if Credential Management API is available
+        if ('credentials' in navigator && 'PasswordCredential' in window) {
+            const options: PasswordCredentialRequestOptions = {
+                password: true,
+                mediation: 'optional' // 'optional' allows silent retrieval, 'required' shows account chooser
+            };
+
+            navigator.credentials.get(options).then((credential: any) => {
+                if (credential && credential.type === 'password') {
+                    // Populate the form with stored credentials
+                    this.signInForm.patchValue({
+                        email: credential.id,
+                        password: credential.password,
+                        rememberMe: true
+                    });
+                }
+            }).catch((error) => {
+                // Silently fail - user will need to enter credentials manually
+                console.debug('No stored credentials found or user declined:', error);
+            });
+        }
+    }
 
     /**
      * Sign in
@@ -72,16 +116,38 @@ export class AuthSignInComponent implements OnInit
         // Hide the alert
         this.showAlert = false;
 
+        // Get form values
+        const email = this.signInForm.get('email').value;
+        const password = this.signInForm.get('password').value;
+        const rememberMe = this.signInForm.get('rememberMe').value;
+
         // Prepare the request payload - mapear email a correo para el endpoint
         const loginData = {
-            correo: this.signInForm.get('email').value,
-            password: this.signInForm.get('password').value
+            correo: email,
+            password: password
         };
 
         // Sign in
         this._authService.signIn(loginData)
             .subscribe(
                 () => {
+                    // If rememberMe is checked, store credentials using Credential Management API
+                    if (rememberMe && 'credentials' in navigator && 'PasswordCredential' in window) {
+                        try {
+                            const credential = new PasswordCredential({
+                                id: email,
+                                password: password,
+                                name: email
+                            });
+
+                            // Store the credential
+                            navigator.credentials.store(credential).catch((error) => {
+                                console.warn('Failed to store credentials:', error);
+                            });
+                        } catch (error) {
+                            console.warn('Credential Management API not fully supported:', error);
+                        }
+                    }
 
                     // Set the redirect url.
                     // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
