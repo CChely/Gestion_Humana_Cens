@@ -103,4 +103,22 @@ export class RegistroUsuarioService
             })
         );
     }
+
+    /**
+     * Delete user — DELETE /usuarios/:id
+     */
+    deleteUsuario(usuarioId: number): Observable<any>
+    {
+        return this._httpClient.delete<any>(`${environment.apiUrl}/usuarios/${usuarioId}`).pipe(
+            tap((response) => {
+                if (response?.status) {
+                    const current = this._usuarios.getValue();
+                    if (current) {
+                        const updated = current.filter(u => u.UsuarioId !== usuarioId);
+                        this._usuarios.next(updated);
+                    }
+                }
+            })
+        );
+    }
 }

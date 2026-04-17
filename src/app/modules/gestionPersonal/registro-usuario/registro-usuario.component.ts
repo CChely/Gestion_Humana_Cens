@@ -10,6 +10,7 @@ import { takeUntil, debounceTime, distinctUntilChanged, map, startWith } from 'r
 import { RegistroUsuarioService } from './registro-usuario.service';
 import { RolCatalogo, Rol, Usuario } from './registro-usuario.types';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
     selector       : 'registro-usuario',
@@ -57,7 +58,8 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
         private _fb: FormBuilder,
         private _registroUsuarioService: RegistroUsuarioService,
         private _changeDetectorRef: ChangeDetectorRef,
-        private _fuseMediaWatcherService: FuseMediaWatcherService
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
+        private _fuseConfirmationService: FuseConfirmationService
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -395,6 +397,62 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
                     this._changeDetectorRef.markForCheck();
                 }
             });
+    }
+
+    /**
+     * Delete the selected user
+     */
+    deleteUsuario(): void
+    {
+        if (!this.selectedUsuario) { return; }
+
+        // Open confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Eliminar usuario',
+            message: '¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.',
+            actions: {
+                confirm: {
+                    label: 'Eliminar',
+                    color: 'warn'
+                },
+                cancel: {
+                    label: 'Cancelar'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation closed event
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                this.isSaving = true;
+                this.successMessage = null;
+                this.errorMessage = null;
+                this._changeDetectorRef.markForCheck();
+
+                this._registroUsuarioService.deleteUsuario(this.selectedUsuario.UsuarioId)
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe({
+                        next: (response) => {
+                            this.isSaving = false;
+                            
+                            if (response.status) {
+                                this.closeDrawer();
+                            } else {
+                                this.errorMessage = response.message || 'Error al eliminar usuario';
+                            }
+                            this._changeDetectorRef.markForCheck();
+                        },
+                        error: (error) => {
+                            this.isSaving = false;
+                            this.errorMessage = error.error?.message || 'Ocurrió un error inesperado al eliminar';
+                            this._changeDetectorRef.markForCheck();
+                        }
+                    });
+            }
+        });
     }
 
     closeDrawer(): Promise<MatDrawerToggleResult>
