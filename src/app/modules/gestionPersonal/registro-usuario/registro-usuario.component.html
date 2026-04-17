@@ -196,6 +196,21 @@
                                     </mat-form-field>
                                 </div>
 
+                                <!-- Success and Error Messages -->
+                                <div
+                                    *ngIf="successMessage"
+                                    class="flex items-center p-4 rounded-lg bg-green-50 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                    <mat-icon class="icon-size-5 text-current" [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                                    <span class="ml-2 font-medium">{{ successMessage }}</span>
+                                </div>
+
+                                <div
+                                    *ngIf="errorMessage"
+                                    class="flex items-center p-4 rounded-lg bg-red-50 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                    <mat-icon class="icon-size-5 text-current" [svgIcon]="'heroicons_solid:x-circle'"></mat-icon>
+                                    <span class="ml-2 font-medium">{{ errorMessage }}</span>
+                                </div>
+
                             </form>
 
                             <!-- -------------------------------------------------- -->

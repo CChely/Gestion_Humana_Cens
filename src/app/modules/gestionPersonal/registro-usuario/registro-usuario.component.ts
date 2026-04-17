@@ -26,6 +26,8 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
     searchInputControl: FormControl = new FormControl('');
     isLoading: boolean = false;
     isSaving: boolean = false;
+    successMessage: string | null = null;
+    errorMessage: string | null = null;
     drawerMode: 'side' | 'over';
 
     // Drawer state
@@ -332,50 +334,64 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
         this.showNewPassword = true;
         this._changeDetectorRef.markForCheck();
     }
+    /**
+     * Save changes for the existing user
+     */
     saveChanges(): void
     {
         if (this.editForm.invalid || !this.selectedUsuario) { return; }
         if (this.selectedRolIds.size === 0) { return; }
 
         this.isSaving = true;
+        this.successMessage = null;
+        this.errorMessage = null;
         this.editForm.disable();
         this._changeDetectorRef.markForCheck();
 
         const correo  = this.editForm.get('correo').value;
         const rolIds  = Array.from(this.selectedRolIds);
 
+        // API call to PUT /api/v1/usuarios/{id}
+        // Note: The token is automatically sent by the AuthInterceptor
         this._registroUsuarioService.updateUsuario(this.selectedUsuario.UsuarioId, correo, rolIds)
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe({
-                next: () => {
+                next: (response) => {
                     this.isSaving = false;
                     this.editForm.enable();
 
-                    // Update local selectedUsuario with new values
-                    const updatedRoles: Rol[] = rolIds.map(id => {
-                        const cat = this.availableRoles.find(r => r.RolId === id);
-                        const existing = this.selectedUsuario.roles.find(r => r.RolId === id);
-                        return {
-                            RolId          : id,
-                            NombreRol      : cat?.Nombre ?? existing?.NombreRol ?? '',
-                            DescripcionRol : cat?.Descripcion ?? existing?.DescripcionRol ?? '',
-                            FechaAsignacion: existing?.FechaAsignacion ?? new Date().toISOString()
+                    if (response.status) {
+                        this.successMessage = 'Usuario actualizado correctamente';
+                        
+                        // Update local selectedUsuario with new values
+                        const updatedRoles: Rol[] = rolIds.map(id => {
+                            const cat = this.availableRoles.find(r => r.RolId === id);
+                            const existing = this.selectedUsuario.roles.find(r => r.RolId === id);
+                            return {
+                                RolId          : id,
+                                NombreRol      : cat?.Nombre ?? existing?.NombreRol ?? '',
+                                DescripcionRol : cat?.Descripcion ?? existing?.DescripcionRol ?? '',
+                                FechaAsignacion: existing?.FechaAsignacion ?? new Date().toISOString()
+                            };
+                        });
+
+                        this.selectedUsuario = {
+                            ...this.selectedUsuario,
+                            Correo: correo,
+                            roles : updatedRoles
                         };
-                    });
 
-                    this.selectedUsuario = {
-                        ...this.selectedUsuario,
-                        Correo: correo,
-                        roles : updatedRoles
-                    };
-
-                    this.isEditing = false;
-                    this.selectedRolIds = new Set();
+                        this.isEditing = false;
+                        this.selectedRolIds = new Set();
+                    } else {
+                        this.errorMessage = response.message || 'Error al actualizar usuario';
+                    }
                     this._changeDetectorRef.markForCheck();
                 },
-                error: () => {
+                error: (error) => {
                     this.isSaving = false;
                     this.editForm.enable();
+                    this.errorMessage = error.error?.message || 'Ocurrió un error inesperado';
                     this._changeDetectorRef.markForCheck();
                 }
             });
