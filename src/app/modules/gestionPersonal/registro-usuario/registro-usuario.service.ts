@@ -23,6 +23,14 @@ export class RegistroUsuarioService
         return this._usuarios.asObservable();
     }
 
+    /**
+     * Synchronous snapshot of the current users list
+     */
+    getUsuariosSnapshot(): Usuario[] | null
+    {
+        return this._usuarios.getValue();
+    }
+
     get rolesCatalogo$(): Observable<RolCatalogo[]>
     {
         return this._rolesCatalogo.asObservable();
@@ -40,7 +48,16 @@ export class RegistroUsuarioService
         return this._httpClient.get<UsuariosResponse>(`${environment.apiUrl}/usuarios`).pipe(
             tap((response) => {
                 if (response.status) {
-                    this._usuarios.next(response.data);
+                    // Normalize roles: ensure NombreRol is always populated
+                    const normalized = response.data.map(u => ({
+                        ...u,
+                        roles: (u.roles ?? []).map(r => ({
+                            ...r,
+                            NombreRol     : r.NombreRol ?? (r as any).Nombre ?? '',
+                            DescripcionRol: r.DescripcionRol ?? (r as any).Descripcion ?? ''
+                        }))
+                    }));
+                    this._usuarios.next(normalized);
                 }
             })
         );

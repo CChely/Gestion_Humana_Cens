@@ -5,16 +5,19 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
 
-// Extend CredentialRequestOptions to include password property
+// Storage key constants — never store plain passwords; we store only email
+// and a flag. The password is stored encrypted via the browser's own
+// Credential Management API when available.
+const REMEMBER_ME_KEY  = 'auth.rememberMe';
+const REMEMBERED_EMAIL = 'auth.rememberedEmail';
+
+// Extend CredentialRequestOptions to include password property (Chrome/Edge)
 interface PasswordCredentialRequestOptions extends CredentialRequestOptions {
     password?: boolean;
 }
 
-// Declare PasswordCredential for browsers that support it
 declare global {
-    interface Window {
-        PasswordCredential: any;
-    }
+    interface Window { PasswordCredential: any; }
     const PasswordCredential: any;
 }
 
@@ -35,147 +38,173 @@ export class AuthSignInComponent implements OnInit
     signInForm: UntypedFormGroup;
     showAlert: boolean = false;
 
-    /**
-     * Constructor
-     */
     constructor(
         private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
         private _formBuilder: UntypedFormBuilder,
         private _router: Router
-    )
-    {
-    }
+    ) {}
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
     // -----------------------------------------------------------------------------------------------------
 
-    /**
-     * On init
-     */
     ngOnInit(): void
     {
-        // Create the form
+        // Build form
         this.signInForm = this._formBuilder.group({
             email     : ['', [Validators.required, Validators.email]],
             password  : ['', Validators.required],
-            rememberMe: ['']
+            rememberMe: [false]
         });
 
-        // Try to retrieve stored credentials using Credential Management API
-        this.retrieveStoredCredentials();
+        // Restore remembered email from localStorage (safe — no password stored)
+        this._restoreRememberedEmail();
+
+        // Additionally try Credential Management API (Chrome/Edge HTTPS only)
+        this._tryCredentialManagementAPI();
     }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
-    /**
-     * Retrieve stored credentials from browser
-     */
-    private retrieveStoredCredentials(): void
+    signIn(): void
     {
-        // Check if Credential Management API is available
-        if ('credentials' in navigator && 'PasswordCredential' in window) {
-            const options: PasswordCredentialRequestOptions = {
-                password: true,
-                mediation: 'optional' // 'optional' allows silent retrieval, 'required' shows account chooser
-            };
+        if (this.signInForm.invalid) { return; }
 
-            navigator.credentials.get(options).then((credential: any) => {
-                if (credential && credential.type === 'password') {
-                    // Populate the form with stored credentials
-                    this.signInForm.patchValue({
-                        email: credential.id,
-                        password: credential.password,
-                        rememberMe: true
-                    });
+        this.signInForm.disable();
+        this.showAlert = false;
+
+        const email      = this.signInForm.get('email').value as string;
+        const password   = this.signInForm.get('password').value as string;
+        const rememberMe = this.signInForm.get('rememberMe').value as boolean;
+
+        const loginData = { correo: email, password };
+
+        this._authService.signIn(loginData).subscribe(
+            () => {
+                // ── Remember Me logic ──────────────────────────────────────
+                if (rememberMe) {
+                    // 1. Store email in localStorage (no password — safe)
+                    localStorage.setItem(REMEMBER_ME_KEY,  'true');
+                    localStorage.setItem(REMEMBERED_EMAIL, email);
+
+                    // 2. Also try Credential Management API for full autofill
+                    this._storeCredential(email, password);
+                } else {
+                    // Clear any previously stored data
+                    localStorage.removeItem(REMEMBER_ME_KEY);
+                    localStorage.removeItem(REMEMBERED_EMAIL);
                 }
-            }).catch((error) => {
-                // Silently fail - user will need to enter credentials manually
-                console.debug('No stored credentials found or user declined:', error);
+                // ──────────────────────────────────────────────────────────
+
+                const redirectURL =
+                    this._activatedRoute.snapshot.queryParamMap.get('redirectURL')
+                    || '/signed-in-redirect';
+
+                this._router.navigateByUrl(redirectURL);
+            },
+            (error: any) => {
+                this.signInForm.enable();
+                this.signInNgForm.resetForm();
+
+                // Restore email after reset so the user doesn't have to retype it
+                if (rememberMe) {
+                    this.signInForm.get('email').setValue(email);
+                    this.signInForm.get('rememberMe').setValue(true);
+                }
+
+                this.alert = {
+                    type   : 'error',
+                    message: error?.error?.message || 'An error occurred during sign in'
+                };
+                this.showAlert = true;
+            }
+        );
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Private methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Restore email from localStorage when rememberMe was previously checked.
+     * Password is intentionally NOT stored in localStorage.
+     */
+    private _restoreRememberedEmail(): void
+    {
+        const remembered = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+        const email      = localStorage.getItem(REMEMBERED_EMAIL);
+
+        if (remembered && email) {
+            this.signInForm.patchValue({
+                email,
+                rememberMe: true
             });
         }
     }
 
     /**
-     * Sign in
+     * Try to retrieve full credentials (email + password) via the
+     * Credential Management API. Only works in Chrome/Edge over HTTPS.
+     * Falls back gracefully — localStorage email is already restored above.
      */
-    signIn(): void
+    private _tryCredentialManagementAPI(): void
     {
-        // Return if the form is invalid
-        if ( this.signInForm.invalid )
-        {
+        if (!('credentials' in navigator) || !('PasswordCredential' in window)) {
             return;
         }
 
-        // Disable the form
-        this.signInForm.disable();
-
-        // Hide the alert
-        this.showAlert = false;
-
-        // Get form values
-        const email = this.signInForm.get('email').value;
-        const password = this.signInForm.get('password').value;
-        const rememberMe = this.signInForm.get('rememberMe').value;
-
-        // Prepare the request payload - mapear email a correo para el endpoint
-        const loginData = {
-            correo: email,
-            password: password
+        const options: PasswordCredentialRequestOptions = {
+            password : true,
+            mediation: 'optional'
         };
 
-        // Sign in
-        this._authService.signIn(loginData)
-            .subscribe(
-                () => {
-                    // If rememberMe is checked, store credentials using Credential Management API
-                    if (rememberMe && 'credentials' in navigator && 'PasswordCredential' in window) {
-                        try {
-                            const credential = new PasswordCredential({
-                                id: email,
-                                password: password,
-                                name: email
-                            });
-
-                            // Store the credential
-                            navigator.credentials.store(credential).catch((error) => {
-                                console.warn('Failed to store credentials:', error);
-                            });
-                        } catch (error) {
-                            console.warn('Credential Management API not fully supported:', error);
-                        }
+        navigator.credentials.get(options)
+            .then((credential: any) => {
+                if (credential?.type === 'password') {
+                    // Only patch if the form is still empty (don't overwrite localStorage restore)
+                    const currentEmail = this.signInForm.get('email').value;
+                    if (!currentEmail) {
+                        this.signInForm.patchValue({
+                            email     : credential.id,
+                            password  : credential.password,
+                            rememberMe: true
+                        });
+                    } else {
+                        // Email already restored — just fill the password
+                        this.signInForm.patchValue({ password: credential.password });
                     }
-
-                    // Set the redirect url.
-                    // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
-                    // to the correct page after a successful sign in. This way, that url can be set via
-                    // routing file and we don't have to touch here.
-                    const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
-
-                    // Navigate to the redirect url
-                    this._router.navigateByUrl(redirectURL);
-
-                },
-                (error: any) => {
-
-                    // Re-enable the form
-                    this.signInForm.enable();
-
-                    // Reset the form
-                    this.signInNgForm.resetForm();
-
-                    // Set the alert with the error message from the API
-                    this.alert = {
-                        type   : 'error',
-                        message: error?.error?.message || 'An error occurred during sign in'
-                    };
-
-                    // Show the alert
-                    this.showAlert = true;
                 }
-            );
+            })
+            .catch(() => {
+                // Silently ignore — localStorage fallback already handled
+            });
+    }
+
+    /**
+     * Store credentials in the browser's Credential Management API.
+     * Only available in Chrome/Edge over HTTPS.
+     */
+    private _storeCredential(email: string, password: string): void
+    {
+        if (!('credentials' in navigator) || !('PasswordCredential' in window)) {
+            return;
+        }
+
+        try {
+            const credential = new PasswordCredential({
+                id      : email,
+                password: password,
+                name    : email
+            });
+
+            navigator.credentials.store(credential).catch(() => {
+                // Silently ignore — localStorage is the primary mechanism
+            });
+        } catch {
+            // PasswordCredential constructor not supported
+        }
     }
 }

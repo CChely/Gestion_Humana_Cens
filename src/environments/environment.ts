@@ -4,7 +4,7 @@
 
 export const environment = {
     production: false,
-    apiUrl: 'https://recursoshumanos.cens.cloud/api/v1'
+    apiUrl: 'http://localhost:8080/api/v1'
 };
 
 /*

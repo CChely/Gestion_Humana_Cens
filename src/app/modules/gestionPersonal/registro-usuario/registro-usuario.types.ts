@@ -3,6 +3,9 @@ export interface Rol {
     DescripcionRol: string;
     FechaAsignacion: string;
     RolId: number;
+    // Some API responses use these alternative field names
+    Nombre?: string;
+    Descripcion?: string;
 }
 
 // Rol as returned by GET /roles endpoint
