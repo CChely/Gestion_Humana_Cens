@@ -8,7 +8,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         subtitle: 'Custom made page designs',
         type: 'group',
         icon: 'heroicons_outline:document',
-        children: [ 
+        children: [
 
             {
                 id: 'pages.error',
@@ -62,6 +62,13 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 type: 'basic',
                 icon: 'heroicons_outline:document-text',
                 link: '/gestion-personal/contrato'
+            },
+            {
+                id: 'gestion-personal.registro-usuario',
+                title: 'Registro de usuario',
+                type: 'basic',
+                icon: 'heroicons_outline:user-add',
+                link: '/gestion-personal/registro-usuario'
             }
         ]
     },
@@ -106,7 +113,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
             }
         ]
     },
-  
+
     {
         id: 'ajustes',
         title: 'Ajustes',
@@ -385,7 +392,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
     // }
 ];
 export const compactNavigation: FuseNavigationItem[] = [
-   
+
     {
         id: 'apps',
         title: 'Apps',
@@ -393,7 +400,7 @@ export const compactNavigation: FuseNavigationItem[] = [
         type: 'aside',
         icon: 'heroicons_outline:qrcode',
         children: [] // This will be filled from defaultNavigation so we don't have to manage multiple sets of the same navigation
-    }, 
+    },
     // {
     //     id: 'navigation-features',
     //     title: 'Navigation',
@@ -404,7 +411,7 @@ export const compactNavigation: FuseNavigationItem[] = [
     // }
 ];
 export const futuristicNavigation: FuseNavigationItem[] = [
-    
+
     {
         id: 'apps',
         title: 'APPS',
@@ -415,7 +422,7 @@ export const futuristicNavigation: FuseNavigationItem[] = [
         id: 'others',
         title: 'OTHERS',
         type: 'group'
-    }, 
+    },
     {
         id: 'user-interface',
         title: 'User Interface',
@@ -468,14 +475,14 @@ export const horizontalNavigation: FuseNavigationItem[] = [
         type: 'group',
         icon: 'heroicons_outline:database',
         children: []
-    }, 
+    },
     {
         id: 'ajustes',
         title: 'Ajustes',
         type: 'group',
         icon: 'heroicons_outline:adjustments',
         children: [] // This will be filled from defaultNavigation so we don't have to manage multiple sets of the same navigation
-    }, 
+    },
     {
         id: 'apps',
         title: 'Apps',
@@ -489,7 +496,7 @@ export const horizontalNavigation: FuseNavigationItem[] = [
         type: 'group',
         icon: 'heroicons_outline:document-duplicate',
         children: [] // This will be filled from defaultNavigation so we don't have to manage multiple sets of the same navigation
-    }, 
+    },
     // {
     //     id: 'navigation-features',
     //     title: 'Misc',

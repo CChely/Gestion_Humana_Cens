@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +12,7 @@ import { SharedModule } from 'app/shared/shared.module';
         UserComponent
     ],
     imports     : [
+        RouterModule,
         MatButtonModule,
         MatDividerModule,
         MatIconModule,
