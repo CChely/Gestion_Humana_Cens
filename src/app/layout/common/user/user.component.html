@@ -24,38 +24,56 @@
 <mat-menu
     [xPosition]="'before'"
     #userActions="matMenu">
-    <button mat-menu-item>
-        <span class="flex flex-col leading-none">
-            <span>Signed in as</span>
-            <span class="mt-1.5 text-md font-medium">{{user.email}}</span>
-        </span>
+    <!-- User Profile Header -->
+    <button mat-menu-item class="px-4 py-3">
+        <div class="flex items-center">
+            <img
+                class="w-10 h-10 rounded-full mr-3"
+                [src]="user.avatar || 'assets/images/avatars/default.jpg'">
+            <div class="flex flex-col leading-none">
+                <span class="text-sm font-semibold">{{user.name}}</span>
+                <span class="text-xs text-gray-500">{{user.status === 'online' ? 'Online' : (user.status || 'Offline')}}</span>
+            </div>
+        </div>
     </button>
+
     <mat-divider class="my-2"></mat-divider>
+
+    <!-- Profile Link -->
     <button
         mat-menu-item
         [routerLink]="['/ajustes/configuracion-perfil']">
         <mat-icon [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
         <span>Profile</span>
     </button>
+
+    <!-- Settings Link -->
     <button mat-menu-item>
         <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
         <span>Settings</span>
     </button>
+
+    <!-- Status Link with submenu -->
     <button
         mat-menu-item
         [matMenuTriggerFor]="userStatus">
         <mat-icon [svgIcon]="'heroicons_outline:dots-circle-horizontal'"></mat-icon>
-        <span>Status</span>
+        <span class="flex-auto">Status</span>
     </button>
+
     <mat-divider class="my-2"></mat-divider>
+
+    <!-- Sign out Link (Red styled) -->
     <button
         mat-menu-item
-        (click)="signOut()">
-        <mat-icon [svgIcon]="'heroicons_outline:logout'"></mat-icon>
-        <span>Sign out</span>
+        (click)="signOut()"
+        class="text-red-500">
+        <mat-icon [svgIcon]="'heroicons_outline:logout'" class="text-red-500"></mat-icon>
+        <span class="text-red-500">Log out</span>
     </button>
 </mat-menu>
 
+<!-- Status Sub-menu -->
 <mat-menu
     class="user-status-menu"
     #userStatus="matMenu">
