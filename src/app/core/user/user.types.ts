@@ -1,22 +1,19 @@
-export interface User
-{
+export interface User {
     id: string;
     name: string;
-    email: string;
+    correo: string;
     avatar?: string;
     status?: string;
 }
 
-export interface Rol
-{
+export interface Rol {
     RolId: number;
     NombreRol: string;
     DescripcionRol: string;
     FechaAsignacion: string;
 }
 
-export interface Usuario
-{
+export interface Usuario {
     UsuarioId: number;
     Correo: string;
     Estado: boolean;
@@ -24,8 +21,7 @@ export interface Usuario
     roles: Rol[];
 }
 
-export interface UsuariosResponse
-{
+export interface UsuariosResponse {
     data: Usuario[];
     errors: any[];
     message: string;
@@ -33,15 +29,13 @@ export interface UsuariosResponse
     status: boolean;
 }
 
-export interface RolCatalogo
-{
+export interface RolCatalogo {
     RolId: number;
     Nombre: string;
     Descripcion: string;
 }
 
-export interface RolesResponse
-{
+export interface RolesResponse {
     data: RolCatalogo[];
     errors: any[];
     message: string;
@@ -49,15 +43,13 @@ export interface RolesResponse
     status: boolean;
 }
 
-export interface RegistroUsuarioRequest
-{
+export interface RegistroUsuarioRequest {
     correo: string;
     password: string;
     roles: number[];
 }
 
-export interface RegistroUsuarioResponse
-{
+export interface RegistroUsuarioResponse {
     data: any;
     errors: any[];
     message: string;
