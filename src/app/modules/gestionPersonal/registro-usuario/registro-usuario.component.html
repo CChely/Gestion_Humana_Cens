@@ -33,10 +33,17 @@
                         <div class="flex items-end -mt-16 mb-6">
                             <!-- Avatar -->
                             <div class="flex items-center justify-center w-32 h-32 rounded-full overflow-hidden ring-4 ring-bg-card bg-gray-200 dark:bg-gray-700 flex-shrink-0">
-                                <span class="text-6xl font-bold uppercase text-gray-600 dark:text-gray-200">
-                                    <ng-container *ngIf="selectedUsuario">{{ getInitial(selectedUsuario.Correo) }}</ng-container>
-                                    <ng-container *ngIf="!selectedUsuario">N</ng-container>
-                                </span>
+                                <ng-container *ngIf="selectedUsuario && selectedUsuario.avatar">
+                                    <img [src]="selectedUsuario.avatar" alt="Avatar" class="w-full h-full object-cover">
+                                </ng-container>
+                                <ng-container *ngIf="selectedUsuario && !selectedUsuario.avatar">
+                                    <span class="text-6xl font-bold uppercase text-gray-600 dark:text-gray-200">
+                                        {{ getInitial(selectedUsuario.Correo) }}
+                                    </span>
+                                </ng-container>
+                                <ng-container *ngIf="!selectedUsuario">
+                                    <span class="text-6xl font-bold uppercase text-gray-600 dark:text-gray-200">N</span>
+                                </ng-container>
                             </div>
 
                             <!-- Edit / view toggle button (only in view mode) -->
@@ -53,7 +60,8 @@
                         <!-- ======================================================= -->
                         <ng-container *ngIf="drawerAction === 'view' && selectedUsuario && !isEditing">
 
-                            <div class="text-3xl font-bold truncate">{{ selectedUsuario.Correo }}</div>
+                            <div class="text-3xl font-bold truncate">{{ selectedUsuario.Nombres || selectedUsuario.Correo }}</div>
+                            <div class="text-lg text-secondary mt-1" *ngIf="selectedUsuario.Nombres">{{ selectedUsuario.Correo }}</div>
 
                             <div class="mt-2">
                                 <span
@@ -67,6 +75,14 @@
                             </div>
 
                             <div class="flex flex-col mt-6 pt-6 border-t space-y-6">
+
+                                <div class="flex items-center" *ngIf="selectedUsuario.Nombres">
+                                    <mat-icon class="icon-size-5 text-hint" [svgIcon]="'heroicons_solid:user'"></mat-icon>
+                                    <div class="ml-4">
+                                        <div class="text-xs font-semibold uppercase text-secondary tracking-wide">Nombres</div>
+                                        <div class="font-medium mt-0.5">{{ selectedUsuario.Nombres }}</div>
+                                    </div>
+                                </div>
 
                                 <div class="flex items-center">
                                     <mat-icon class="icon-size-5 text-hint" [svgIcon]="'heroicons_solid:mail'"></mat-icon>
@@ -110,6 +126,83 @@
                         <ng-container *ngIf="drawerAction === 'view' && selectedUsuario && isEditing">
 
                             <form [formGroup]="editForm" class="flex flex-col space-y-6">
+
+                                <!-- Avatar upload -->
+                                <div class="flex flex-col">
+                                    <label class="font-semibold mb-3">Foto de perfil</label>
+
+                                    <div class="flex items-center gap-4">
+                                        <!-- Avatar preview -->
+                                        <div class="flex items-center justify-center w-24 h-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0 relative">
+                                            <ng-container *ngIf="avatarPreviewUrl">
+                                                <img [src]="avatarPreviewUrl" alt="Avatar preview" class="w-full h-full object-cover">
+                                            </ng-container>
+                                            <ng-container *ngIf="!avatarPreviewUrl && selectedUsuario.avatar">
+                                                <img [src]="selectedUsuario.avatar" alt="Avatar" class="w-full h-full object-cover">
+                                            </ng-container>
+                                            <ng-container *ngIf="!avatarPreviewUrl && !selectedUsuario.avatar">
+                                                <span class="text-4xl font-bold uppercase text-gray-600 dark:text-gray-200">
+                                                    {{ getInitial(selectedUsuario.Correo) }}
+                                                </span>
+                                            </ng-container>
+
+                                            <!-- Upload spinner overlay -->
+                                            <div *ngIf="isUploadingAvatar" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                                <mat-progress-spinner [diameter]="32" [mode]="'indeterminate'" class="text-white"></mat-progress-spinner>
+                                            </div>
+                                        </div>
+
+                                        <!-- Upload button -->
+                                        <div class="flex flex-col gap-2">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                class="hidden"
+                                                #avatarFileInput
+                                                (change)="onAvatarSelected($event)">
+
+                                            <button
+                                                type="button"
+                                                mat-stroked-button
+                                                [disabled]="isSaving || isUploadingAvatar"
+                                                (click)="avatarFileInput.click()">
+                                                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:upload'"></mat-icon>
+                                                <span class="ml-2">{{ isUploadingAvatar ? 'Subiendo...' : 'Subir imagen' }}</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                mat-button
+                                                class="text-warn"
+                                                [disabled]="isSaving || isUploadingAvatar || (!avatarPreviewUrl && !selectedUsuario.avatar)"
+                                                (click)="removeAvatar()">
+                                                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                <span class="ml-2">Eliminar</span>
+                                            </button>
+
+                                            <span class="text-xs text-secondary">Máximo 5MB (JPG, PNG, GIF)</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Nombres -->
+                                <div class="flex flex-col">
+                                    <label class="font-semibold mb-2">
+                                        Nombres
+                                        <span class="text-warn ml-0.5">*</span>
+                                    </label>
+                                    <mat-form-field class="fuse-mat-no-subscript fuse-mat-rounded w-full">
+                                        <mat-icon matPrefix class="icon-size-5 text-hint" [svgIcon]="'heroicons_solid:user'"></mat-icon>
+                                        <input
+                                            matInput
+                                            formControlName="nombres"
+                                            type="text"
+                                            placeholder="Ingrese nombres completos">
+                                    </mat-form-field>
+                                    <mat-error *ngIf="editForm.get('nombres').touched && editForm.get('nombres').hasError('required')" class="mt-1 text-sm">
+                                        Los nombres son requeridos
+                                    </mat-error>
+                                </div>
 
                                 <!-- Correo electrónico -->
                                 <div class="flex flex-col">
@@ -256,6 +349,78 @@
                             <div class="text-3xl font-bold truncate">Nuevo Usuario</div>
 
                             <form [formGroup]="newForm" class="flex flex-col space-y-6 mt-6 pt-6 border-t">
+
+                                <!-- Avatar upload -->
+                                <div class="flex flex-col">
+                                    <label class="font-semibold mb-3">Foto de perfil</label>
+
+                                    <div class="flex items-center gap-4">
+                                        <!-- Avatar preview -->
+                                        <div class="flex items-center justify-center w-24 h-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0 relative">
+                                            <ng-container *ngIf="newAvatarPreviewUrl">
+                                                <img [src]="newAvatarPreviewUrl" alt="Avatar preview" class="w-full h-full object-cover">
+                                            </ng-container>
+                                            <ng-container *ngIf="!newAvatarPreviewUrl">
+                                                <span class="text-4xl font-bold uppercase text-gray-600 dark:text-gray-200">N</span>
+                                            </ng-container>
+
+                                            <!-- Upload spinner overlay -->
+                                            <div *ngIf="isUploadingAvatar" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                                <mat-progress-spinner [diameter]="32" [mode]="'indeterminate'" class="text-white"></mat-progress-spinner>
+                                            </div>
+                                        </div>
+
+                                        <!-- Upload button -->
+                                        <div class="flex flex-col gap-2">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                class="hidden"
+                                                #newAvatarFileInput
+                                                (change)="onNewAvatarSelected($event)">
+
+                                            <button
+                                                type="button"
+                                                mat-stroked-button
+                                                [disabled]="isSaving || isUploadingAvatar"
+                                                (click)="newAvatarFileInput.click()">
+                                                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:upload'"></mat-icon>
+                                                <span class="ml-2">{{ isUploadingAvatar ? 'Subiendo...' : 'Subir imagen' }}</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                mat-button
+                                                class="text-warn"
+                                                [disabled]="isSaving || isUploadingAvatar || !newAvatarPreviewUrl"
+                                                (click)="removeNewAvatar()">
+                                                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                <span class="ml-2">Eliminar</span>
+                                            </button>
+
+                                            <span class="text-xs text-secondary">Máximo 5MB (JPG, PNG, GIF)</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Nombres -->
+                                <div class="flex flex-col">
+                                    <label class="font-semibold mb-2">
+                                        Nombres
+                                        <span class="text-warn ml-0.5">*</span>
+                                    </label>
+                                    <mat-form-field class="fuse-mat-no-subscript fuse-mat-rounded w-full">
+                                        <mat-icon matPrefix class="icon-size-5 text-hint" [svgIcon]="'heroicons_solid:user'"></mat-icon>
+                                        <input
+                                            matInput
+                                            formControlName="nombres"
+                                            type="text"
+                                            placeholder="Ingrese nombres completos">
+                                    </mat-form-field>
+                                    <mat-error *ngIf="newForm.get('nombres').touched && newForm.get('nombres').hasError('required')" class="mt-1 text-sm">
+                                        Los nombres son requeridos
+                                    </mat-error>
+                                </div>
 
                                 <!-- Correo -->
                                 <div class="flex flex-col">
@@ -463,14 +628,19 @@
                                         (click)="selectUsuario(usuario)">
 
                                         <div class="flex flex-0 items-center justify-center w-10 h-10 rounded-full overflow-hidden">
-                                            <div class="flex items-center justify-center w-full h-full rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
-                                                {{ getInitial(usuario.Correo) }}
-                                            </div>
+                                            <ng-container *ngIf="usuario.avatar">
+                                                <img [src]="usuario.avatar" alt="Avatar" class="w-full h-full object-cover">
+                                            </ng-container>
+                                            <ng-container *ngIf="!usuario.avatar">
+                                                <div class="flex items-center justify-center w-full h-full rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                                                    {{ getInitial(usuario.Correo) }}
+                                                </div>
+                                            </ng-container>
                                         </div>
 
                                         <div class="min-w-0 ml-4 flex-auto">
-                                            <div class="font-medium leading-5 truncate">{{ usuario.Correo }}</div>
-                                            <div class="leading-5 truncate text-secondary">{{ getPrimaryRole(usuario) }}</div>
+                                            <div class="font-medium leading-5 truncate">{{ usuario.Nombres || usuario.Correo }}</div>
+                                            <div class="leading-5 truncate text-secondary">{{ usuario.Nombres ? usuario.Correo : getPrimaryRole(usuario) }}</div>
                                         </div>
 
                                         <div class="flex items-center ml-4">

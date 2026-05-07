@@ -48,6 +48,15 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
     isLoadingNewRoles: boolean = false;
     showNewPassword: boolean = false;
 
+    // Avatar handling
+    selectedAvatarFile: File | null = null;
+    avatarPreviewUrl: string | null = null;
+    avatarReference: string | null = null; // Reference returned from upload endpoint
+    newAvatarFile: File | null = null;
+    newAvatarPreviewUrl: string | null = null;
+    newAvatarReference: string | null = null; // Reference returned from upload endpoint
+    isUploadingAvatar: boolean = false;
+
     // Roles catalogue
     availableRoles: RolCatalogo[] = [];
     isLoadingRoles: boolean = false;
@@ -72,11 +81,13 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
     ngOnInit(): void
     {
         this.editForm = this._fb.group({
-            correo: ['', [Validators.required, Validators.email]]
+            correo : ['', [Validators.required, Validators.email]],
+            nombres: ['', [Validators.required]]
         });
 
         this.newForm = this._fb.group({
             correo  : ['', [Validators.required, Validators.email]],
+            nombres : ['', [Validators.required]],
             password: ['', [Validators.required, Validators.minLength(6)]]
         });
 
@@ -147,6 +158,7 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
 
         this.filteredUsuarios = all.filter(u =>
             u.Correo.toLowerCase().includes(query) ||
+            (u.Nombres && u.Nombres.toLowerCase().includes(query)) ||
             u.roles.some(r => (r.NombreRol ?? r.Nombre ?? '').toLowerCase().includes(query))
         );
     }
@@ -162,6 +174,9 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
         this.isEditing = false;
         this.newForm.reset();
         this.newRolIds = new Set();
+        this.newAvatarFile = null;
+        this.newAvatarPreviewUrl = null;
+        this.newAvatarReference = null;
         this.isLoadingNewRoles = true;
         this._changeDetectorRef.markForCheck();
 
@@ -200,9 +215,15 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
         this.isLoadingRoles = true;
         this.successMessage = null;
         this.errorMessage = null;
+        this.selectedAvatarFile = null;
+        this.avatarPreviewUrl = this.selectedUsuario.avatar || null;
+        this.avatarReference = null;
         this._changeDetectorRef.markForCheck();
 
-        this.editForm.patchValue({ correo: this.selectedUsuario.Correo });
+        this.editForm.patchValue({
+            correo : this.selectedUsuario.Correo,
+            nombres: this.selectedUsuario.Nombres || ''
+        });
         this.selectedRolIds = new Set(this.selectedUsuario.roles.map(r => r.RolId));
 
         this._registroUsuarioService.getRolesCatalogo()
@@ -243,6 +264,9 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
         this.isEditing = false;
         this.editForm.reset();
         this.selectedRolIds = new Set();
+        this.selectedAvatarFile = null;
+        this.avatarPreviewUrl = null;
+        this.avatarReference = null;
         this.successMessage = null;
         this.errorMessage = null;
         this._changeDetectorRef.markForCheck();
@@ -270,10 +294,12 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
         this._changeDetectorRef.markForCheck();
 
         const correo   = this.newForm.get('correo')!.value as string;
+        const nombres  = this.newForm.get('nombres')!.value as string;
         const password = this.newForm.get('password')!.value as string;
         const roles    = Array.from(this.newRolIds);
 
-        this._registroUsuarioService.crearUsuario(correo, password, roles)
+        // Always send avatar reference, empty string if not uploaded
+        this._registroUsuarioService.crearUsuario(correo, password, roles, nombres, this.newAvatarReference || '')
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe({
                 next: () => {
@@ -281,6 +307,9 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
                     this.newForm.enable();
                     this.newForm.reset();
                     this.newRolIds = new Set();
+                    this.newAvatarFile = null;
+                    this.newAvatarPreviewUrl = null;
+                    this.newAvatarReference = null;
                     this.closeDrawer();
                     this._changeDetectorRef.markForCheck();
                 },
@@ -296,6 +325,9 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
     {
         this.newForm.reset();
         this.newRolIds = new Set();
+        this.newAvatarFile = null;
+        this.newAvatarPreviewUrl = null;
+        this.newAvatarReference = null;
         this.closeDrawer();
     }
 
@@ -336,10 +368,24 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
         this.editForm.disable();
         this._changeDetectorRef.markForCheck();
 
-        const correo = this.editForm.get('correo')!.value as string;
-        const rolIds = Array.from(this.selectedRolIds);
+        const correo  = this.editForm.get('correo')!.value as string;
+        const nombres = this.editForm.get('nombres')!.value as string;
+        const rolIds  = Array.from(this.selectedRolIds);
 
-        this._registroUsuarioService.updateUsuario(this.selectedUsuario.UsuarioId, correo, rolIds)
+        // Determine if we're removing the avatar
+        const removeAvatar = !this.avatarPreviewUrl && !this.avatarReference && !!this.selectedUsuario.avatar;
+
+        // Always send avatar reference, empty string if not uploaded or being removed
+        const avatarToSend = removeAvatar ? '' : (this.avatarReference || this.selectedUsuario.avatar || '');
+
+        this._registroUsuarioService.updateUsuario(
+            this.selectedUsuario.UsuarioId,
+            correo,
+            rolIds,
+            nombres,
+            avatarToSend,
+            removeAvatar
+        )
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe({
                 next: (response) => {
@@ -364,12 +410,16 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
 
                         this.selectedUsuario = {
                             ...this.selectedUsuario!,
-                            Correo: correo,
-                            roles : updatedRoles
+                            Correo : correo,
+                            Nombres: nombres,
+                            roles  : updatedRoles
                         };
 
                         this.isEditing = false;
                         this.selectedRolIds = new Set();
+                        this.selectedAvatarFile = null;
+                        this.avatarPreviewUrl = null;
+                        this.avatarReference = null;
 
                         // Reload the full list from API
                         this._registroUsuarioService.getUsuarios()
@@ -437,6 +487,12 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
         this.isEditing = false;
         this.editForm.reset();
         this.selectedRolIds = new Set();
+        this.selectedAvatarFile = null;
+        this.avatarPreviewUrl = null;
+        this.avatarReference = null;
+        this.newAvatarFile = null;
+        this.newAvatarPreviewUrl = null;
+        this.newAvatarReference = null;
         this.successMessage = null;
         this.errorMessage = null;
         this._changeDetectorRef.markForCheck();
@@ -466,5 +522,167 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy
     trackByFn(_index: number, item: Usuario): number
     {
         return item.UsuarioId;
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Avatar handling methods
+    // -----------------------------------------------------------------------------------------------------
+
+    onAvatarSelected(event: Event): void
+    {
+        const input = event.target as HTMLInputElement;
+        if (!input.files || input.files.length === 0) { return; }
+
+        const file = input.files[0];
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            this.errorMessage = 'Por favor seleccione un archivo de imagen válido';
+            this._changeDetectorRef.markForCheck();
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            this.errorMessage = 'La imagen no debe superar los 5MB';
+            this._changeDetectorRef.markForCheck();
+            return;
+        }
+
+        this.selectedAvatarFile = file;
+        this.errorMessage = null;
+
+        // Create preview URL
+        const reader = new FileReader();
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+            this.avatarPreviewUrl = e.target?.result as string;
+            this._changeDetectorRef.markForCheck();
+        };
+        reader.readAsDataURL(file);
+
+        // Upload image to get reference
+        this.isUploadingAvatar = true;
+        this._changeDetectorRef.markForCheck();
+
+        this._registroUsuarioService.uploadAvatar(file)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe({
+                next: (response) => {
+                    this.isUploadingAvatar = false;
+                    if (response.status && response.data) {
+                        this.avatarReference = response.data;
+                        this.successMessage = 'Imagen cargada correctamente';
+                    } else {
+                        this.errorMessage = response.message || 'Error al cargar la imagen';
+                        this.selectedAvatarFile = null;
+                        this.avatarPreviewUrl = null;
+                        this.avatarReference = null;
+                    }
+                    this._changeDetectorRef.markForCheck();
+                },
+                error: (err) => {
+                    this.isUploadingAvatar = false;
+                    this.errorMessage = err?.error?.message || 'Error al cargar la imagen';
+                    this.selectedAvatarFile = null;
+                    this.avatarPreviewUrl = null;
+                    this.avatarReference = null;
+                    this._changeDetectorRef.markForCheck();
+                }
+            });
+    }
+
+    onNewAvatarSelected(event: Event): void
+    {
+        const input = event.target as HTMLInputElement;
+        if (!input.files || input.files.length === 0) { return; }
+
+        const file = input.files[0];
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            this.errorMessage = 'Por favor seleccione un archivo de imagen válido';
+            this._changeDetectorRef.markForCheck();
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            this.errorMessage = 'La imagen no debe superar los 5MB';
+            this._changeDetectorRef.markForCheck();
+            return;
+        }
+
+        this.newAvatarFile = file;
+        this.errorMessage = null;
+
+        // Create preview URL
+        const reader = new FileReader();
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+            this.newAvatarPreviewUrl = e.target?.result as string;
+            this._changeDetectorRef.markForCheck();
+        };
+        reader.readAsDataURL(file);
+
+        // Upload image to get reference
+        this.isUploadingAvatar = true;
+        this._changeDetectorRef.markForCheck();
+
+        this._registroUsuarioService.uploadAvatar(file)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe({
+                next: (response) => {
+                    this.isUploadingAvatar = false;
+                    if (response.status && response.data) {
+                        this.newAvatarReference = response.data;
+                    } else {
+                        this.errorMessage = response.message || 'Error al cargar la imagen';
+                        this.newAvatarFile = null;
+                        this.newAvatarPreviewUrl = null;
+                        this.newAvatarReference = null;
+                    }
+                    this._changeDetectorRef.markForCheck();
+                },
+                error: (err) => {
+                    this.isUploadingAvatar = false;
+                    this.errorMessage = err?.error?.message || 'Error al cargar la imagen';
+                    this.newAvatarFile = null;
+                    this.newAvatarPreviewUrl = null;
+                    this.newAvatarReference = null;
+                    this._changeDetectorRef.markForCheck();
+                }
+            });
+    }
+
+    removeAvatar(): void
+    {
+        this.selectedAvatarFile = null;
+        this.avatarPreviewUrl = null;
+        this.avatarReference = null;
+
+        // If the user had an avatar, mark it for removal
+        if (this.selectedUsuario && this.selectedUsuario.avatar) {
+            this.selectedUsuario = {
+                ...this.selectedUsuario,
+                avatar: undefined
+            };
+        }
+
+        this._changeDetectorRef.markForCheck();
+    }
+
+    removeNewAvatar(): void
+    {
+        this.newAvatarFile = null;
+        this.newAvatarPreviewUrl = null;
+        this.newAvatarReference = null;
+        this._changeDetectorRef.markForCheck();
+    }
+
+    getAvatarDisplay(usuario: Usuario): string
+    {
+        if (usuario.avatar) {
+            return usuario.avatar;
+        }
+        return '';
     }
 }

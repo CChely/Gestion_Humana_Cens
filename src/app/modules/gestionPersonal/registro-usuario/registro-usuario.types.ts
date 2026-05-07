@@ -29,6 +29,9 @@ export interface Usuario {
     Estado: boolean;
     FechaCreacion: string;
     roles: Rol[];
+    avatar?: string;
+    Nombres?: string;
+    ProveedorArchivos?: string;
 }
 
 export interface UsuariosResponse {

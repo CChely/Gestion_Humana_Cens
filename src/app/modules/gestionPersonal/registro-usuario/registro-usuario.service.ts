@@ -80,15 +80,37 @@ export class RegistroUsuarioService
     }
 
     /**
+     * Upload avatar image and get reference — POST /upload/avatar or similar
+     */
+    uploadAvatar(file: File): Observable<{ status: boolean; data: string; message?: string }>
+    {
+        const formData = new FormData();
+        formData.append('avatar', file, file.name);
+
+        return this._httpClient.post<{ status: boolean; data: string; message?: string }>(
+            `${environment.apiUrl}/upload/avatar`,
+            formData
+        );
+    }
+
+    /**
      * Create a new user — POST /usuarios/registrar
      */
-    crearUsuario(correo: string, password: string, roles: number[]): Observable<any>
+    crearUsuario(correo: string, password: string, roles: number[], nombres?: string, avatarRef?: string): Observable<any>
     {
-        return this._httpClient.post<any>(`${environment.apiUrl}/usuarios/registrar`, {
+        const body: any = {
             correo,
             password,
-            roles
-        }).pipe(
+            roles,
+            avatar: avatarRef || '', // Always send avatar as string, empty if not provided
+            ProveedorArchivos: 'censdrive' // Automatically set to 'censdrive'
+        };
+
+        if (nombres) {
+            body.nombres = nombres;
+        }
+
+        return this._httpClient.post<any>(`${environment.apiUrl}/usuarios/registrar`, body).pipe(
             tap((response) => {
                 if (response?.status) {
                     // Reload full list to get server-assigned ID and data
@@ -101,18 +123,30 @@ export class RegistroUsuarioService
     /**
      * Update user email and roles — PUT /usuarios/:id
      */
-    updateUsuario(usuarioId: number, correo: string, rolIds: number[]): Observable<any>
+    updateUsuario(usuarioId: number, correo: string, rolIds: number[], nombres?: string, avatarRef?: string | null, removeAvatar?: boolean): Observable<any>
     {
-        return this._httpClient.put<any>(`${environment.apiUrl}/usuarios/${usuarioId}`, {
+        const body: any = {
             correo,
-            roles: rolIds
-        }).pipe(
+            roles: rolIds,
+            avatar: avatarRef || '' // Always send avatar as string, empty if not provided
+        };
+
+        if (nombres) {
+            body.nombres = nombres;
+        }
+
+        if (removeAvatar) {
+            body.removeAvatar = true;
+            body.avatar = ''; // Explicitly set to empty string when removing
+        }
+
+        return this._httpClient.put<any>(`${environment.apiUrl}/usuarios/${usuarioId}`, body).pipe(
             tap((response) => {
                 if (response?.status) {
                     const current = this._usuarios.getValue();
                     if (current) {
                         const updated = current.map(u =>
-                            u.UsuarioId === usuarioId ? { ...u, Correo: correo } : u
+                            u.UsuarioId === usuarioId ? { ...u, Correo: correo, Nombres: nombres } : u
                         );
                         this._usuarios.next(updated);
                     }
