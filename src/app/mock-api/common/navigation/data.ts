@@ -143,6 +143,13 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 link: '/ajustes/configuracion-perfil'
             },
             {
+                id: 'ajustes.configuracion-almacenamiento',
+                title: 'Configuración de almacenamiento',
+                type: 'basic',
+                icon: 'heroicons_outline:cloud',
+                link: '/ajustes/configuracion-almacenamiento'
+            },
+            {
                 id: 'ajustes.empresa',
                 title: 'Empresa',
                 type: 'basic',
@@ -446,7 +453,7 @@ export const horizontalNavigation: FuseNavigationItem[] = [
         icon: 'heroicons_outline:user-group',
         children: []
     },
-     {
+    {
         id: 'carga-masiva',
         title: 'Carga-masiva',
         type: 'basic',
@@ -454,7 +461,7 @@ export const horizontalNavigation: FuseNavigationItem[] = [
         link: '/carga-masiva',
         children: []
     },
-     {
+    {
         id: 'alertas',
         title: 'Alertas',
         type: 'basic',
