@@ -1,0 +1,58 @@
+// ─────────────────────────────────────────────────────────────
+// empresa.component.scss
+// Estilos específicos del módulo Empresa
+// ─────────────────────────────────────────────────────────────
+
+// ── Mat Form Field: reducir altura en el formulario ──────────
+:host {
+    // Spinner inline dentro del botón guardar
+    .mat-mdc-progress-spinner {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+// ── Indicador lateral de hover ───────────────────────────────
+// La barra izquierda de la fila se maneja con Tailwind (opacity-0 → opacity-100),
+// pero aseguramos la transición suave aquí.
+.group:hover {
+    .side-indicator {
+        opacity: 1;
+    }
+}
+
+// ── Animación de entrada de filas de la lista ─────────────────
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Aplica la animación a cada fila de empresa
+.empresa-row {
+    animation: fadeSlideIn 220ms ease-out both;
+
+    @for $i from 1 through 20 {
+        &:nth-child(#{$i}) {
+            animation-delay: #{($i - 1) * 40}ms;
+        }
+    }
+}
+
+// ── Avatar fallback (iniciales) ───────────────────────────────
+.empresa-avatar-initials {
+    user-select: none;
+    font-variant: small-caps;
+    letter-spacing: 0.05em;
+}
+
+// ── Mat Progress Spinner alineado en botón ────────────────────
+button .mat-mdc-progress-spinner circle {
+    stroke: currentColor;
+}
