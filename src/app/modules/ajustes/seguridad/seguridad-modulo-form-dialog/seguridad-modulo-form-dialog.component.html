@@ -1,0 +1,99 @@
+<div class="flex flex-col w-full overflow-hidden bg-card dark:bg-slate-900 rounded-2xl shadow-2xl">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 sm:py-8 md:px-8 border-b bg-slate-50 dark:bg-transparent">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
+                <mat-icon class="icon-size-6" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 leading-none tracking-tight">
+                    Nuevo Módulo
+                </h2>
+                <p class="text-sm text-secondary mt-1 font-medium">Completa los datos para el nuevo módulo</p>
+            </div>
+        </div>
+        <button mat-icon-button (click)="close()" class="text-slate-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors rounded-full">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Content -->
+    <form [formGroup]="form" class="p-6 md:p-8 overflow-y-auto max-h-160 bg-white dark:bg-slate-900">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+            
+            <!-- Modulo Padre -->
+            <mat-form-field class="col-span-full fuse-mat-dense">
+                <mat-label>Módulo Padre (Opcional)</mat-label>
+                <mat-select formControlName="p_IdModuloPadre" [disableOptionCentering]="true">
+                    <mat-option [value]="null">-- Ninguno (Módulo Principal) --</mat-option>
+                    <mat-option *ngFor="let parent of parentModulos" [value]="parent.ModuloId">
+                        {{ parent.NombreModulo }}
+                    </mat-option>
+                </mat-select>
+                <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-400" [svgIcon]="'heroicons_outline:folder'"></mat-icon>
+            </mat-form-field>
+
+            <!-- Codigo -->
+            <mat-form-field class="fuse-mat-dense">
+                <mat-label>Código</mat-label>
+                <input matInput formControlName="p_Codigo" placeholder="Ej: seguridad.roles">
+                <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-400" [svgIcon]="'heroicons_outline:code-bracket'"></mat-icon>
+            </mat-form-field>
+
+            <!-- Nombre -->
+            <mat-form-field class="fuse-mat-dense">
+                <mat-label>Nombre</mat-label>
+                <input matInput formControlName="p_Nombre" placeholder="Ej: Gestión de Roles">
+                <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-400" [svgIcon]="'heroicons_outline:pencil-square'"></mat-icon>
+            </mat-form-field>
+
+            <!-- Ruta -->
+            <mat-form-field class="fuse-mat-dense">
+                <mat-label>Ruta</mat-label>
+                <input matInput formControlName="p_Ruta" placeholder="Ej: /ajustes/seguridad/roles">
+                <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-400" [svgIcon]="'heroicons_outline:link'"></mat-icon>
+            </mat-form-field>
+
+            <!-- Icono -->
+            <mat-form-field class="fuse-mat-dense">
+                <mat-label>Icono</mat-label>
+                <input matInput formControlName="p_Icono" placeholder="Ej: heroicons_outline:shield-check">
+                <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-400" [svgIcon]="'heroicons_outline:sparkles'"></mat-icon>
+            </mat-form-field>
+
+            <!-- Orden -->
+            <mat-form-field class="fuse-mat-dense">
+                <mat-label>Orden</mat-label>
+                <input matInput type="number" formControlName="p_Orden">
+                <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-400" [svgIcon]="'heroicons_outline:bars-3-bottom-left'"></mat-icon>
+            </mat-form-field>
+
+            <!-- Switches -->
+            <div class="sm:col-span-2 space-y-4 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 mt-2">
+                <mat-slide-toggle [color]="'primary'" formControlName="p_EsVisibleMenu" class="w-full">
+                    <span class="font-semibold text-slate-700 dark:text-slate-200 ml-2">Visible en Menú</span>
+                </mat-slide-toggle>
+                <mat-slide-toggle [color]="'primary'" formControlName="p_EsActivo" class="w-full">
+                    <span class="font-semibold text-slate-700 dark:text-slate-200 ml-2">Módulo Activo</span>
+                </mat-slide-toggle>
+            </div>
+
+        </div>
+    </form>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-end px-8 py-6 border-t bg-slate-50 dark:bg-transparent gap-3">
+        <button mat-stroked-button (click)="close()" class="rounded-full px-8 h-11 font-medium text-slate-600 dark:text-slate-300 transition-all duration-200">
+            Cancelar
+        </button>
+        <button mat-flat-button (click)="save()" [disabled]="form.invalid || isSaving" class="rounded-full px-10 h-11 font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200 dark:shadow-none transition-all duration-200">
+            <span *ngIf="!isSaving" class="flex items-center">
+                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                Guardar Módulo
+            </span>
+            <mat-progress-spinner *ngIf="isSaving" [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
+        </button>
+    </div>
+
+</div>
