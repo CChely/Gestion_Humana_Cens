@@ -16,39 +16,50 @@ export class SeguridadModuloFormDialogComponent implements OnInit {
     isSaving: boolean = false;
 
     constructor(
-        @Inject(MAT_DIALOG_DATA) private _data: any,
+        @Inject(MAT_DIALOG_DATA) public data: any,
         private _dialogRef: MatDialogRef<SeguridadModuloFormDialogComponent>,
         private _fb: FormBuilder,
         private _seguridadService: SeguridadService
     ) {
-        this.parentModulos = _data.parentModulos || [];
-        if (_data.selectedParentId) {
-            const parent = this.parentModulos.find(m => m.ModuloId === _data.selectedParentId);
+        this.parentModulos = data.parentModulos || [];
+        if (data.selectedParentId) {
+            const parent = this.parentModulos.find(m => m.ModuloId === data.selectedParentId);
+            this.parentModuloName = parent ? parent.NombreModulo : '';
+        }
+        
+        // Si viene un módulo para editar, asignar el nombre del padre si lo tiene
+        if (data.modulo && data.modulo.ModuloPadreId) {
+            const parent = this.parentModulos.find(m => m.ModuloId === data.modulo.ModuloPadreId);
             this.parentModuloName = parent ? parent.NombreModulo : '';
         }
     }
 
     ngOnInit(): void {
+        const modulo = this.data.modulo;
+
         this.form = this._fb.group({
-            p_IdModuloPadre: [this._data.selectedParentId || null],
-            p_Codigo: [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(100)]],
-            p_Nombre: ['', [Validators.required, Validators.maxLength(150)]],
-            p_Ruta: ['', [Validators.maxLength(300)]],
-            p_Icono: ['', [Validators.maxLength(100)]],
-            p_Orden: [0],
-            p_EsVisibleMenu: [true],
-            p_EsActivo: [true]
+            p_IdModulo: [modulo?.ModuloId || null],
+            p_IdModuloPadre: [modulo?.ModuloPadreId || this.data.selectedParentId || null],
+            p_Codigo: [{ value: modulo?.CodigoModulo || '', disabled: true }, [Validators.required, Validators.maxLength(100)]],
+            p_Nombre: [modulo?.NombreModulo || '', [Validators.required, Validators.maxLength(150)]],
+            p_Ruta: [modulo?.RutaModulo || '', [Validators.maxLength(300)]],
+            p_Icono: [modulo?.IconoModulo || '', [Validators.maxLength(100)]],
+            p_Orden: [modulo?.OrdenModulo || 0],
+            p_EsVisibleMenu: [modulo ? modulo.EsVisibleMenu === 1 : true],
+            p_EsActivo: [modulo ? modulo.EsActivo === 1 : true]
         });
 
-        // Generar código desde el nombre automáticamente
-        this.form.get('p_Nombre').valueChanges.subscribe(value => {
-            if (value) {
-                const slug = this._slugify(value);
-                this.form.get('p_Codigo').setValue(slug);
-            } else {
-                this.form.get('p_Codigo').setValue('');
-            }
-        });
+        // Generar código desde el nombre automáticamente (solo si es nuevo)
+        if (!modulo) {
+            this.form.get('p_Nombre').valueChanges.subscribe(value => {
+                if (value) {
+                    const slug = this._slugify(value);
+                    this.form.get('p_Codigo').setValue(slug);
+                } else {
+                    this.form.get('p_Codigo').setValue('');
+                }
+            });
+        }
     }
 
     /**

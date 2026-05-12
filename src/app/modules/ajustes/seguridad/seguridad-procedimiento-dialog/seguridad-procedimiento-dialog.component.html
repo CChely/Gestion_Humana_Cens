@@ -4,14 +4,14 @@
     <div class="flex items-center justify-between p-6 sm:py-8 md:px-8 border-b bg-slate-50 dark:bg-transparent">
         <div class="flex items-center gap-4">
             <div class="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400">
-                <mat-icon class="icon-size-6" [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
+                <mat-icon class="icon-size-6" [svgIcon]="'heroicons_outline:command-line'"></mat-icon>
             </div>
             <div>
                 <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 leading-none tracking-tight">
-                    {{ mode === 'create' ? 'Nuevo Rol' : 'Editar Rol' }}
+                    {{ mode === 'create' ? 'Nuevo Procedimiento' : 'Editar Procedimiento' }}
                 </h2>
                 <p class="text-sm text-secondary mt-1 font-medium">
-                    Gestione la identidad y descripción del perfil
+                    Configure las propiedades técnicas del proceso
                 </p>
             </div>
         </div>
@@ -20,19 +20,20 @@
         </button>
     </div>
 
-    <!-- Body (Sección 6 y 12 de DESING.md) -->
-    <div class="p-8 bg-white dark:bg-slate-900">
+    <!-- Body -->
+    <div class="p-8 bg-white dark:bg-slate-900 overflow-y-auto max-h-[70vh]">
         <form [formGroup]="form" class="flex flex-col space-y-6">
             
             <!-- Nombre -->
             <div class="flex flex-col gap-2">
-                <label class="text-sm font-bold text-slate-800 dark:text-slate-200 ml-4">Nombre del Rol <span class="text-rose-500">*</span></label>
+                <label class="text-sm font-bold text-slate-800 dark:text-slate-200 ml-4">Nombre del Procedimiento <span class="text-rose-500">*</span></label>
                 <div class="relative flex items-center w-full group">
                     <mat-icon class="absolute left-6 icon-size-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-200" 
-                              [svgIcon]="'heroicons_outline:identification'"></mat-icon>
-                    <input matInput formControlName="NombreRol"
+                              [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+                    <input formControlName="p_Nombre"
+                           (blur)="onNombreBlur()"
                            class="w-full pl-14 pr-6 h-12 rounded-full border bg-transparent text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none border-slate-200 dark:border-slate-700"
-                           placeholder="Ej. Administrador">
+                           placeholder="Ej. Listar Usuarios del Sistema">
                 </div>
             </div>
 
@@ -42,16 +43,28 @@
                 <div class="relative flex w-full group">
                     <mat-icon class="absolute left-6 top-4 icon-size-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-200" 
                               [svgIcon]="'heroicons_outline:chat-bubble-bottom-center-text'"></mat-icon>
-                    <textarea matInput formControlName="DescripcionRol"
-                              class="w-full pl-14 pr-6 py-4 rounded-3xl border bg-transparent text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none border-slate-200 dark:border-slate-700 min-h-32 resize-none"
-                              placeholder="Ej. Acceso total a todas las funcionalidades"></textarea>
+                    <textarea formControlName="p_Descripcion"
+                              class="w-full pl-14 pr-6 py-4 rounded-3xl border bg-transparent text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none border-slate-200 dark:border-slate-700 min-h-24 resize-none"
+                              placeholder="Describe el propósito de este proceso técnico..."></textarea>
+                </div>
+            </div>
+
+            <!-- Toggles Estado y Público -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200">¿Público?</span>
+                    <mat-slide-toggle [color]="'primary'" formControlName="p_EsPublico"></mat-slide-toggle>
+                </div>
+                <div class="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200">¿Activo?</span>
+                    <mat-slide-toggle [color]="'primary'" formControlName="p_EsActivo"></mat-slide-toggle>
                 </div>
             </div>
 
         </form>
     </div>
 
-    <!-- Footer (Sección 4 de DESING.md) -->
+    <!-- Footer -->
     <div class="flex items-center justify-end px-8 py-6 border-t bg-slate-50 dark:bg-transparent gap-3">
         <button mat-stroked-button (click)="close()" class="rounded-full px-8 h-11 font-medium text-slate-600 dark:text-slate-300 transition-all duration-200">
             Cancelar
@@ -59,7 +72,7 @@
         <button mat-flat-button (click)="save()" [disabled]="form.invalid || isSaving" class="rounded-full px-10 h-11 font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200 dark:shadow-none transition-all duration-200">
             <span *ngIf="!isSaving" class="flex items-center">
                 <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                {{ mode === 'create' ? 'Crear Rol' : 'Guardar Cambios' }}
+                {{ mode === 'create' ? 'Crear' : 'Guardar Cambios' }}
             </span>
             <mat-progress-spinner *ngIf="isSaving" [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
         </button>

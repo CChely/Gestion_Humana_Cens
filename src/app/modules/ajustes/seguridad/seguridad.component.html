@@ -1,7 +1,7 @@
 <div class="flex flex-col flex-auto min-w-0">
 
     <!-- Header (Sección 13.2 de DESING.md) -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between p-6 sm:py-12 md:px-8 border-b bg-card dark:bg-transparent">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between p-6 sm:py-8 md:px-8 border-b bg-card dark:bg-transparent">
         <div>
             <h1 class="text-4xl font-extrabold tracking-tight leading-none text-slate-900 dark:text-slate-100">
                 Gestión de Roles y Permisos
@@ -11,106 +11,303 @@
                 <span>Administre los roles del sistema y sus permisos asociados</span>
             </div>
         </div>
-        <!-- Actions -->
         <div class="mt-4 sm:mt-0">
-            <button mat-flat-button [color]="'primary'" (click)="openCreateDialog()">
+            <button mat-flat-button 
+                    [color]="'primary'" 
+                    (click)="selectedTabIndex === 0 ? openCreateDialog() : (selectedTabIndex === 1 ? openPermisoDialog() : openProcedimientoDialog())"
+                    class="rounded-full px-6 transition-all duration-300">
                 <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
-                <span class="ml-2">Nuevo Rol</span>
+                <span class="ml-2">
+                    {{ selectedTabIndex === 0 ? 'Nuevo Rol' : (selectedTabIndex === 1 ? 'Nuevo Permiso' : 'Nuevo Procedimiento') }}
+                </span>
             </button>
         </div>
     </div>
 
     <!-- Main (Sección 13.3 de DESING.md) -->
-    <div class="p-6 md:p-8">
+    <div class="p-4 md:p-6">
         
-        <div class="w-full space-y-8">
+        <mat-tab-group [(selectedIndex)]="selectedTabIndex" [animationDuration]="'600ms'" class="fuse-mat-no-header-bg">
+            
+            <!-- Tab de Roles -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <div class="flex items-center gap-2">
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
+                        <span class="font-bold uppercase tracking-wider text-xs">Roles del Sistema</span>
+                    </div>
+                </ng-template>
 
-            <!-- Loading State -->
-            <ng-container *ngIf="isLoading">
-                <div class="flex flex-col items-center justify-center p-12">
-                    <mat-progress-spinner [diameter]="40" [mode]="'indeterminate'"></mat-progress-spinner>
-                    <div class="mt-4 text-secondary">Cargando roles...</div>
+                <div class="w-full space-y-4 mt-4">
+                    <!-- Loading State -->
+                    <ng-container *ngIf="isLoading">
+                        <div class="flex flex-col items-center justify-center p-12">
+                            <mat-progress-spinner [diameter]="40" [mode]="'indeterminate'"></mat-progress-spinner>
+                            <div class="mt-4 text-secondary">Cargando roles...</div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Content Card Roles -->
+                    <ng-container *ngIf="!isLoading">
+                        <div class="bg-card dark:bg-slate-800 rounded-2xl shadow overflow-hidden border border-slate-200 dark:border-slate-700">
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Rol</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Descripción</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Permisos</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Estado</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-right">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                                        <tr *ngFor="let rol of roles; trackBy: trackByFn" 
+                                            class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-150">
+                                            <td class="py-4 px-6 whitespace-nowrap">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-400 font-bold text-xs uppercase">
+                                                        {{ rol.NombreRol.substring(0,2) }}
+                                                    </div>
+                                                    <span class="font-bold text-slate-900 dark:text-slate-100">{{ rol.NombreRol }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <span class="text-sm text-slate-600 dark:text-slate-300">{{ rol.DescripcionRol }}</span>
+                                            </td>
+                                            <td class="py-4 px-6 text-center">
+                                                <div class="flex flex-col items-center gap-1">
+                                                    <span class="inline-flex items-center px-2 py-0.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 rounded text-[10px] font-bold uppercase tracking-wide">
+                                                        {{ rol.permisos?.length || 0 }} Permisos
+                                                    </span>
+                                                    <span class="inline-flex items-center px-2 py-0.5 bg-sky-50 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 rounded text-[10px] font-bold uppercase tracking-wide">
+                                                        {{ rol.modulos?.length || 0 }} Módulos
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6 text-center">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                                      [ngClass]="rol.activo ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'">
+                                                    {{ rol.activo ? 'Activo' : 'Inactivo' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                                <div class="flex items-center justify-end space-x-1">
+                                                    <button mat-icon-button (click)="openModulosDialog(rol)" 
+                                                            class="text-slate-400 hover:text-sky-600 transition-colors duration-200"
+                                                            matTooltip="Ver Módulos">
+                                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                                    </button>
+                                                    <button mat-icon-button (click)="openEditDialog(rol)" 
+                                                            class="text-slate-400 hover:text-indigo-600 transition-colors duration-200"
+                                                            matTooltip="Editar">
+                                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                                    </button>
+                                                    <button mat-icon-button (click)="deleteRol(rol)" 
+                                                            class="text-slate-400 hover:text-rose-600 transition-colors duration-200"
+                                                            matTooltip="Eliminar">
+                                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- No Results Roles -->
+                            <div *ngIf="roles.length === 0" class="p-12 text-center text-secondary border-t">
+                                No se encontraron roles registrados.
+                            </div>
+                        </div>
+                    </ng-container>
                 </div>
-            </ng-container>
+            </mat-tab>
 
-            <!-- Content Card (Sección 2 de DESING.md) -->
-            <ng-container *ngIf="!isLoading">
-                <div class="bg-card dark:bg-slate-800 rounded-2xl shadow overflow-hidden border border-slate-200 dark:border-slate-700">
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
-                                    <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Rol</th>
-                                    <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Descripción</th>
-                                    <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Permisos</th>
-                                    <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Estado</th>
-                                    <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-right">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-                                <tr *ngFor="let rol of roles; trackBy: trackByFn" 
-                                    class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-150">
-                                    <td class="py-4 px-6 whitespace-nowrap">
-                                        <div class="flex items-center gap-3">
-                                            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-400 font-bold text-xs uppercase">
-                                                {{ rol.NombreRol.substring(0,2) }}
-                                            </div>
-                                            <span class="font-bold text-slate-900 dark:text-slate-100">{{ rol.NombreRol }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        <span class="text-sm text-slate-600 dark:text-slate-300">{{ rol.DescripcionRol }}</span>
-                                    </td>
-                                    <td class="py-4 px-6 text-center">
-                                        <div class="flex flex-col items-center gap-1">
-                                            <span class="inline-flex items-center px-2 py-0.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 rounded text-[10px] font-bold uppercase tracking-wide">
-                                                {{ rol.permisos?.length || 0 }} Permisos
-                                            </span>
-                                            <span class="inline-flex items-center px-2 py-0.5 bg-sky-50 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 rounded text-[10px] font-bold uppercase tracking-wide">
-                                                {{ rol.modulos?.length || 0 }} Módulos
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-6 text-center">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                              [ngClass]="rol.activo ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'">
-                                            {{ rol.activo ? 'Activo' : 'Inactivo' }}
-                                        </span>
-                                    </td>
-                                    <td class="py-4 px-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end space-x-1">
-                                            <button mat-icon-button (click)="openModulosDialog(rol)" 
-                                                    class="text-slate-400 hover:text-sky-600 transition-colors duration-200"
-                                                    matTooltip="Ver Módulos">
-                                                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:eye'"></mat-icon>
-                                            </button>
-                                            <button mat-icon-button (click)="openEditDialog(rol)" 
-                                                    class="text-slate-400 hover:text-indigo-600 transition-colors duration-200"
-                                                    matTooltip="Editar">
-                                                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
-                                            </button>
-                                            <button mat-icon-button (click)="deleteRol(rol)" 
-                                                    class="text-slate-400 hover:text-rose-600 transition-colors duration-200"
-                                                    matTooltip="Eliminar">
-                                                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+            <!-- Tab de Permisos -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <div class="flex items-center gap-2">
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:shield-check'"></mat-icon>
+                        <span class="font-bold uppercase tracking-wider text-xs">Catálogo de Permisos</span>
+                    </div>
+                </ng-template>
+
+                <div class="w-full space-y-4 mt-4">
+                    <!-- Loading State Permisos -->
+                    <ng-container *ngIf="isLoadingPermisos">
+                        <div class="flex flex-col items-center justify-center p-12">
+                            <mat-progress-spinner [diameter]="40" [mode]="'indeterminate'"></mat-progress-spinner>
+                            <div class="mt-4 text-secondary">Cargando catálogo de permisos...</div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Content Card Permisos -->
+                    <ng-container *ngIf="!isLoadingPermisos">
+                        <div class="bg-card dark:bg-slate-800 rounded-2xl shadow overflow-hidden border border-slate-200 dark:border-slate-700">
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Código</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Descripción</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Módulo</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Acción</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-right">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                                        <tr *ngFor="let perm of permisos" 
+                                            class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-150">
+                                            <td class="py-4 px-6 whitespace-nowrap">
+                                                <span class="font-mono text-xs font-bold px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-600">
+                                                    {{ perm.CodigoPermiso }}
+                                                </span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <span class="text-sm text-slate-900 dark:text-slate-100 font-medium">{{ perm.DescripcionPermiso }}</span>
+                                            </td>
+                                            <td class="py-4 px-6 whitespace-nowrap">
+                                                <div class="flex items-center gap-2">
+                                                    <mat-icon class="icon-size-4 text-sky-500" [svgIcon]="'heroicons_outline:folder'"></mat-icon>
+                                                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ perm.NombreModulo }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6 text-center">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                                                    {{ perm.NombreAccion || 'EJECUTAR' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                                <div class="flex items-center justify-end space-x-1">
+                                                    <button mat-icon-button (click)="openPermisoDialog(perm)" 
+                                                            class="text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-full transition-colors"
+                                                            matTooltip="Editar Permiso">
+                                                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                                    </button>
+                                                    <button mat-icon-button (click)="deletePermiso(perm)" 
+                                                            class="text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors"
+                                                            matTooltip="Eliminar Permiso">
+                                                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- No Results Permisos -->
+                            <div *ngIf="permisos.length === 0" class="p-12 text-center text-secondary border-t">
+                                No se encontraron permisos registrados en el sistema.
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+            </mat-tab>
+
+            <!-- Tab de Procedimientos -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <div class="flex items-center gap-2">
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:command-line'"></mat-icon>
+                        <span class="font-bold uppercase tracking-wider text-xs">Catálogo de Procedimientos</span>
+                    </div>
+                </ng-template>
+
+                <div class="w-full space-y-4 mt-4">
+                    <!-- Search and Stats -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="relative flex items-center w-full sm:max-w-80 group">
+                            <mat-icon class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" 
+                                      [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                            <input [(ngModel)]="searchQueryProcedimientos" 
+                                   (input)="filterProcedimientos()"
+                                   class="w-full pl-12 pr-4 h-10 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
+                                   placeholder="Buscar procedimiento...">
+                        </div>
+                        <div class="flex items-center text-xs font-bold text-slate-400 uppercase tracking-widest px-4">
+                            <span>{{ filteredProcedimientos.length }} procedimientos encontrados</span>
+                        </div>
                     </div>
 
-                    <!-- No Results -->
-                    <div *ngIf="roles.length === 0" class="p-12 text-center text-secondary border-t">
-                        No se encontraron roles registrados.
-                    </div>
+                    <!-- Loading State Procedimientos -->
+                    <ng-container *ngIf="isLoadingProcedimientos">
+                        <div class="flex flex-col items-center justify-center p-12">
+                            <mat-progress-spinner [diameter]="40" [mode]="'indeterminate'"></mat-progress-spinner>
+                            <div class="mt-4 text-secondary">Cargando procedimientos...</div>
+                        </div>
+                    </ng-container>
 
+                    <!-- Content Card Procedimientos -->
+                    <ng-container *ngIf="!isLoadingProcedimientos">
+                        <div class="bg-card dark:bg-slate-800 rounded-2xl shadow overflow-hidden border border-slate-200 dark:border-slate-700">
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Nombre</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Descripción</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Público</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Estado</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Creado</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-right">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                                        <tr *ngFor="let proc of filteredProcedimientos" 
+                                            class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-150">
+                                            <td class="py-4 px-6">
+                                                <span class="text-sm text-slate-900 dark:text-slate-100 font-bold uppercase tracking-tight">{{ proc.NombreProcedimiento }}</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <span class="text-sm text-slate-600 dark:text-slate-400 line-clamp-1">{{ proc.Descripcion }}</span>
+                                            </td>
+                                            <td class="py-4 px-6 text-center">
+                                                <mat-icon *ngIf="proc.EsPublico" class="text-emerald-500 icon-size-5" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+                                                <mat-icon *ngIf="!proc.EsPublico" class="text-slate-300 icon-size-5" [svgIcon]="'heroicons_outline:minus-circle'"></mat-icon>
+                                            </td>
+                                            <td class="py-4 px-6 text-center">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
+                                                      [ngClass]="proc.EsActivo ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600'">
+                                                    {{ proc.EsActivo ? 'Activo' : 'Inactivo' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-4 px-6 text-center whitespace-nowrap">
+                                                <span class="text-xs text-slate-500 font-medium">{{ proc.FechaCreacion | date:'dd/MM/yyyy' }}</span>
+                                            </td>
+                                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                                <div class="flex items-center justify-end space-x-1">
+                                                    <button mat-icon-button (click)="openProcedimientoDialog(proc)" 
+                                                            class="text-slate-400 hover:text-indigo-600 transition-colors duration-200"
+                                                            matTooltip="Editar Procedimiento">
+                                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                                    </button>
+                                                    <button mat-icon-button (click)="deleteProcedimiento(proc)" 
+                                                            class="text-slate-400 hover:text-rose-600 transition-colors duration-200"
+                                                            matTooltip="Eliminar">
+                                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- No Results Procedimientos -->
+                            <div *ngIf="filteredProcedimientos.length === 0" class="p-12 text-center text-secondary border-t">
+                                No se encontraron procedimientos que coincidan con la búsqueda.
+                            </div>
+                        </div>
+                    </ng-container>
                 </div>
-            </ng-container>
-
-        </div>
+            </mat-tab>
+            
+        </mat-tab-group>
 
     </div>
 

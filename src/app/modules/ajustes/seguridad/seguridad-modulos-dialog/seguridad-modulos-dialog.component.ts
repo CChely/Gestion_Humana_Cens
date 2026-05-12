@@ -1,13 +1,25 @@
 import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef, MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { forkJoin } from 'rxjs';
+import { finalize, take } from 'rxjs/operators';
 import { Rol, Modulo, Permiso } from '../seguridad.types';
 import { SeguridadService } from '../seguridad.service';
+import { UserService } from 'app/core/user/user.service';
 import { SeguridadModuloFormDialogComponent } from '../seguridad-modulo-form-dialog/seguridad-modulo-form-dialog.component';
 
 @Component({
     selector     : 'app-seguridad-modulos-dialog',
     templateUrl  : './seguridad-modulos-dialog.component.html',
+    styles       : [`
+        app-seguridad-modulos-dialog .mat-expansion-panel {
+            margin: 0 !important;
+            transition: margin 225ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        app-seguridad-modulos-dialog .mat-expansion-panel-spacing {
+            margin: 0 !important;
+        }
+    `],
     encapsulation: ViewEncapsulation.None
 })
 export class SeguridadModulosDialogComponent implements OnInit {
@@ -25,7 +37,8 @@ export class SeguridadModulosDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) private _data: any,
         private _dialogRef: MatDialogRef<SeguridadModulosDialogComponent>,
         private _dialog: MatDialog,
-        private _seguridadService: SeguridadService
+        private _seguridadService: SeguridadService,
+        private _userService: UserService
     ) {
         this.rol = _data.rol;
         // Inicializar permisos seleccionados desde el rol
@@ -34,6 +47,21 @@ export class SeguridadModulosDialogComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadModulos();
+        this.loadSelectedPermisos();
+    }
+
+    /**
+     * Cargar los permisos asignados actualmente al rol desde la BD
+     */
+    loadSelectedPermisos(): void {
+        this._seguridadService.getPermisosByRol(this.rol.RolId).subscribe(res => {
+            if (res.status && res.data) {
+                // Mapear los IDs de permisos asignados
+                this.selectedPermisosIds = res.data.map(p => p.PermisoId);
+                // También actualizar la lista en el objeto rol para el filtrado de saveChanges
+                this.rol.permisos = res.data;
+            }
+        });
     }
 
     /**
@@ -88,7 +116,29 @@ export class SeguridadModulosDialogComponent implements OnInit {
                 selectedParentId: parentId
             },
             width: '100%',
-            maxWidth: '600px'
+            maxWidth: '600px',
+            panelClass: 'custom-security-dialog'
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this.loadModulos();
+            }
+        });
+    }
+
+    /**
+     * Abrir diálogo para editar un módulo existente
+     */
+    openEditarModuloDialog(modulo: Modulo): void {
+        const dialogRef = this._dialog.open(SeguridadModuloFormDialogComponent, {
+            data: {
+                parentModulos: this.parentModulos,
+                modulo: modulo
+            },
+            width: '100%',
+            maxWidth: '600px',
+            panelClass: 'custom-security-dialog'
         });
 
         dialogRef.afterClosed().subscribe(result => {
@@ -149,14 +199,38 @@ export class SeguridadModulosDialogComponent implements OnInit {
      */
     saveChanges(): void {
         this.isSaving = true;
-        // En una implementación real, aquí también se guardaría el nuevo orden (p_Orden)
-        console.log('Permisos seleccionados:', this.selectedPermisosIds);
-        console.log('Orden actual de módulos:', this.parentModulos);
-        
-        setTimeout(() => {
+
+        // Identificar los permisos que son nuevos para este rol
+        const currentIds = this.rol.permisos ? this.rol.permisos.map(p => p.PermisoId) : [];
+        const newIds = this.selectedPermisosIds.filter(id => !currentIds.includes(id));
+
+        // Si no hay nuevos permisos, cerramos directamente
+        if (newIds.length === 0) {
             this.isSaving = false;
             this._dialogRef.close(true);
-        }, 1000);
+            return;
+        }
+
+        // Obtener el usuario actual y ejecutar las peticiones
+        this._userService.user$.pipe(take(1)).subscribe(user => {
+            const userId = parseInt(user.id) || 1;
+            const observables = newIds.map(id => this._seguridadService.assignPermisoToRol(this.rol.RolId, id, userId));
+
+            forkJoin(observables)
+                .pipe(
+                    finalize(() => {
+                        this.isSaving = false;
+                    })
+                )
+                .subscribe({
+                    next: () => {
+                        this._dialogRef.close(true);
+                    },
+                    error: (error) => {
+                        console.error('Error al guardar permisos:', error);
+                    }
+                });
+        });
     }
 
     close(): void {

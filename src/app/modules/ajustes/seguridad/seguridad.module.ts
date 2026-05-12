@@ -19,6 +19,8 @@ import { SeguridadComponent } from './seguridad.component';
 import { SeguridadDialogComponent } from './seguridad-dialog/seguridad-dialog.component';
 import { SeguridadModulosDialogComponent } from './seguridad-modulos-dialog/seguridad-modulos-dialog.component';
 import { SeguridadModuloFormDialogComponent } from './seguridad-modulo-form-dialog/seguridad-modulo-form-dialog.component';
+import { SeguridadPermisoDialogComponent } from './seguridad-permiso-dialog/seguridad-permiso-dialog.component';
+import { SeguridadProcedimientoDialogComponent } from './seguridad-procedimiento-dialog/seguridad-procedimiento-dialog.component';
 import { Route } from '@angular/router';
 
 const routes: Route[] = [
@@ -33,7 +35,9 @@ const routes: Route[] = [
         SeguridadComponent,
         SeguridadDialogComponent,
         SeguridadModulosDialogComponent,
-        SeguridadModuloFormDialogComponent
+        SeguridadModuloFormDialogComponent,
+        SeguridadPermisoDialogComponent,
+        SeguridadProcedimientoDialogComponent
     ],
     imports     : [
         RouterModule.forChild(routes),

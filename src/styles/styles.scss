@@ -22,3 +22,12 @@
         border-radius: 0 !important;
     }
 }
+
+.custom-security-dialog {
+    .mat-dialog-container {
+        padding: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+}

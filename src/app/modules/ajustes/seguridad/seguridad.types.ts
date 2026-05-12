@@ -50,3 +50,19 @@ export interface ModuloResponse {
     data: Modulo[];
     message: string;
 }
+
+export interface Procedimiento {
+    ProcedimientoId: number;
+    NombreProcedimiento: string;
+    Descripcion: string;
+    EsPublico: number;
+    EsActivo: number;
+    FechaCreacion: string;
+    FechaActualizacion: string;
+}
+
+export interface ProcedimientoResponse {
+    status: boolean;
+    data: Procedimiento[];
+    message: string;
+}

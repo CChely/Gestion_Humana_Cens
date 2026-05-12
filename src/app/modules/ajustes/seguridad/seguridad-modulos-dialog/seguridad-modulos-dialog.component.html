@@ -1,24 +1,29 @@
-<div class="flex flex-col w-full overflow-hidden bg-card dark:bg-slate-900 rounded-3xl shadow-2xl">
-    
+<div
+    class="flex flex-col w-full overflow-hidden bg-card dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-slate-700/50">
+
     <!-- Header -->
     <div class="flex items-center justify-between p-8 border-b bg-slate-50 dark:bg-transparent">
         <div class="flex items-center gap-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 dark:bg-sky-900 dark:text-sky-400 shadow-sm">
+            <div
+                class="flex items-center justify-center w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 dark:bg-sky-900 dark:text-sky-400 shadow-sm">
                 <mat-icon class="icon-size-7" [svgIcon]="'heroicons_outline:view-columns'"></mat-icon>
             </div>
             <div>
                 <h2 class="text-xl font-black text-slate-800 dark:text-slate-100 leading-none tracking-tight">
                     Módulos Asignados
                 </h2>
-                <p class="text-xs text-secondary mt-1 font-medium">Rol: <span class="text-sky-600 dark:text-sky-400 font-bold uppercase">{{ rol.NombreRol }}</span></p>
+                <p class="text-xs text-secondary mt-1 font-medium">Rol: <span
+                        class="text-sky-600 dark:text-sky-400 font-bold uppercase">{{ rol.NombreRol }}</span></p>
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <button mat-flat-button [color]="'primary'" (click)="openNuevoModuloDialog()" class="fuse-mat-button-rounded rounded-full px-5 h-10 font-medium text-sm transition-all duration-200 ease-in-out">
+            <button mat-flat-button [color]="'primary'" (click)="openNuevoModuloDialog()"
+                class="fuse-mat-button-rounded rounded-full px-5 h-10 font-medium text-sm transition-all duration-200 ease-in-out">
                 <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
                 <span class="ml-2">Nuevo Módulo</span>
             </button>
-            <button mat-icon-button (click)="close()" class="text-slate-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors duration-200 rounded-full">
+            <button mat-icon-button (click)="close()"
+                class="text-slate-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors duration-200 rounded-full">
                 <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
             </button>
         </div>
@@ -26,47 +31,52 @@
 
     <!-- Content -->
     <div class="p-8 max-h-180 overflow-y-auto bg-slate-50/30 dark:bg-transparent">
-        
-        <mat-accordion *ngIf="parentModulos.length > 0" 
-                       multi="true" 
-                       cdkDropList 
-                       (cdkDropListDropped)="dropParent($event)"
-                       [cdkDropListData]="parentModulos"
-                       class="flex flex-col space-y-0 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-            
-            <mat-expansion-panel *ngFor="let parent of parentModulos" 
-                                 cdkDrag
-                                 [cdkDragData]="parent"
-                                 [expanded]="isParentExpanded(parent.ModuloId)"
-                                 (opened)="onParentExpansionChange(parent.ModuloId, true)"
-                                 (closed)="onParentExpansionChange(parent.ModuloId, false)"
-                                 class="shadow-none border-b border-slate-200 dark:border-slate-800 last:border-b-0 bg-white dark:bg-slate-900 rounded-none">
-                
-                <mat-expansion-panel-header class="h-20 px-8 bg-slate-50/50 dark:bg-slate-800/30 hover:bg-white dark:hover:bg-slate-800 transition-all duration-300">
+
+        <mat-accordion *ngIf="parentModulos.length > 0" multi="true" cdkDropList
+            (cdkDropListDropped)="dropParent($event)" [cdkDropListData]="parentModulos"
+            class="flex flex-col space-y-0 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+
+            <mat-expansion-panel *ngFor="let parent of parentModulos" cdkDrag [cdkDragData]="parent"
+                [expanded]="isParentExpanded(parent.ModuloId)" (opened)="onParentExpansionChange(parent.ModuloId, true)"
+                (closed)="onParentExpansionChange(parent.ModuloId, false)"
+                class="shadow-none border-b border-slate-200 dark:border-slate-800 last:border-b-0 bg-white dark:bg-slate-900 rounded-none">
+
+                <mat-expansion-panel-header
+                    class="h-20 px-8 bg-slate-50/50 dark:bg-slate-800/30 hover:bg-white dark:hover:bg-slate-800 transition-all duration-300">
                     <mat-panel-title class="flex items-center gap-5">
                         <!-- Drag Handle -->
                         <div cdkDragHandle class="cursor-move text-slate-500 hover:text-sky-600 transition-colors mr-2">
                             <mat-icon class="icon-size-6" [svgIcon]="'heroicons_outline:arrows-expand'"></mat-icon>
                         </div>
 
-                        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white dark:bg-slate-800 text-sky-500 shadow-sm border border-slate-100 dark:border-slate-700">
+                        <div
+                            class="flex items-center justify-center w-12 h-12 rounded-xl bg-white dark:bg-slate-800 text-sky-500 shadow-sm border border-slate-100 dark:border-slate-700">
                             <mat-icon class="icon-size-6" [svgIcon]="'heroicons_outline:folder-open'"></mat-icon>
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight text-base leading-tight">
+                            <span
+                                class="font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight text-base leading-tight">
                                 {{ parent.NombreModulo }}
                             </span>
-                            <span class="text-[10px] text-secondary font-bold uppercase tracking-widest mt-1 opacity-60">
+                            <span
+                                class="text-[10px] text-secondary font-bold uppercase tracking-widest mt-1 opacity-60">
                                 Módulo de Sistema
                             </span>
                         </div>
                         <div class="ml-auto flex items-center gap-3">
+
                             <!-- Create Submodule Button -->
-                            <button mat-flat-button 
-                                    (click)="$event.stopPropagation(); openNuevoModuloDialog(parent.ModuloId)"
-                                    class="rounded-full px-4 h-9 bg-sky-50 text-sky-700 hover:bg-sky-100 dark:bg-sky-900/30 dark:text-sky-300 transition-all font-bold text-[10px] uppercase tracking-tight">
-                                <mat-icon class="icon-size-4 mr-2" [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
-                                Nuevo Submódulo
+                            <button mat-flat-button
+                                (click)="$event.stopPropagation(); openNuevoModuloDialog(parent.ModuloId)"
+                                class="text-slate-400 hover:text-indigo-600 transition-colors duration-200">
+                                <mat-icon class="icon-size-4 mr-2" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                            </button>
+
+                            <!-- Edit Module Button -->
+                            <button mat-icon-button (click)="$event.stopPropagation(); openEditarModuloDialog(parent)"
+                                class="text-slate-400 hover:text-indigo-600 transition-colors duration-200"
+                                matTooltip="Editar Módulo">
+                                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
                             </button>
 
                             <span class="px-3 py-1 rounded-full bg-sky-500 text-white text-[10px] font-black uppercase">
@@ -77,34 +87,39 @@
                 </mat-expansion-panel-header>
 
                 <div class="p-6 bg-white dark:bg-slate-900">
-                    
-                    <mat-accordion multi="true" 
-                                   cdkDropList 
-                                   (cdkDropListDropped)="dropChild($event, parent.ModuloId)"
-                                   [cdkDropListData]="getChildren(parent.ModuloId)"
-                                   class="flex flex-col space-y-4">
-                        
-                        <mat-expansion-panel *ngFor="let child of getChildren(parent.ModuloId)" 
-                                             cdkDrag
-                                             [cdkDragData]="child"
-                                             [expanded]="false"
-                                             class="shadow-none border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 rounded-2xl overflow-hidden transition-all group">
-                            
-                            <mat-expansion-panel-header class="h-16 px-6 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+
+                    <mat-accordion multi="true" cdkDropList (cdkDropListDropped)="dropChild($event, parent.ModuloId)"
+                        [cdkDropListData]="getChildren(parent.ModuloId)" class="flex flex-col space-y-4">
+
+                        <mat-expansion-panel *ngFor="let child of getChildren(parent.ModuloId)" cdkDrag
+                            [cdkDragData]="child" [expanded]="false"
+                            class="shadow-none border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 rounded-2xl overflow-hidden transition-all group">
+
+                            <mat-expansion-panel-header
+                                class="h-16 px-6 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                 <mat-panel-title class="flex items-center gap-4">
                                     <!-- Drag Handle -->
-                                    <div cdkDragHandle class="cursor-move text-slate-500 hover:text-sky-600 transition-colors">
-                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:arrows-expand'"></mat-icon>
+                                    <div cdkDragHandle
+                                        class="cursor-move text-slate-500 hover:text-sky-600 transition-colors">
+                                        <mat-icon class="icon-size-5"
+                                            [svgIcon]="'heroicons_outline:arrows-expand'"></mat-icon>
                                     </div>
 
-                                    <div class="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-colors">
-                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:chevron-right'"></mat-icon>
-                                    </div>
                                     <span class="font-black text-slate-700 dark:text-slate-200 text-lg tracking-tight">
                                         {{ child.NombreModulo }}
                                     </span>
                                     <div class="ml-auto flex items-center gap-2 mr-4">
-                                        <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-800 text-[10px] font-bold text-slate-400 border border-slate-100 dark:border-slate-700 uppercase">
+                                        <!-- Edit Submodule Button -->
+                                        <button mat-icon-button
+                                            (click)="$event.stopPropagation(); openEditarModuloDialog(child)"
+                                            class="text-slate-400 hover:text-indigo-600 transition-colors duration-200"
+                                            matTooltip="Editar Submódulo">
+                                            <mat-icon class="icon-size-5"
+                                                [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                        </button>
+
+                                        <span
+                                            class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-800 text-[10px] font-bold text-slate-400 border border-slate-100 dark:border-slate-700 uppercase">
                                             {{ getPermisosByModulo(child.ModuloId).length }} Permisos
                                         </span>
                                     </div>
@@ -113,19 +128,18 @@
 
                             <!-- Permissions List -->
                             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-3 bg-white dark:bg-slate-900">
-                                <div *ngFor="let perm of getPermisosByModulo(child.ModuloId)" 
-                                     (click)="togglePermiso(perm.PermisoId)"
-                                     class="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer group/perm">
-                                    
-                                    <mat-checkbox [checked]="isPermisoSelected(perm.PermisoId)"
-                                                  [color]="'primary'"
-                                                  (click)="$event.stopPropagation()"
-                                                  (change)="togglePermiso(perm.PermisoId)"
-                                                  class="fuse-mat-dense">
+                                <div *ngFor="let perm of getPermisosByModulo(child.ModuloId)"
+                                    (click)="togglePermiso(perm.PermisoId)"
+                                    class="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer group/perm">
+
+                                    <mat-checkbox [checked]="isPermisoSelected(perm.PermisoId)" [color]="'primary'"
+                                        (click)="$event.stopPropagation()" (change)="togglePermiso(perm.PermisoId)"
+                                        class="fuse-mat-dense">
                                     </mat-checkbox>
 
                                     <div class="flex flex-col min-w-0">
-                                        <span class="text-xs font-black text-slate-800 dark:text-slate-100 truncate uppercase leading-none tracking-tight group-hover/perm:text-sky-600 transition-colors">
+                                        <span
+                                            class="text-xs font-black text-slate-800 dark:text-slate-100 truncate uppercase leading-none tracking-tight group-hover/perm:text-sky-600 transition-colors">
                                             {{ perm.CodigoPermiso }}
                                         </span>
                                         <span class="text-[11px] text-slate-400 truncate italic mt-1.5 font-medium">
@@ -133,7 +147,8 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div *ngIf="getPermisosByModulo(child.ModuloId).length === 0" class="col-span-full text-xs text-slate-400 italic py-6 px-4 bg-slate-100/30 dark:bg-slate-800/30 rounded-2xl text-center border-2 border-dashed border-slate-200 dark:border-slate-700">
+                                <div *ngIf="getPermisosByModulo(child.ModuloId).length === 0"
+                                    class="col-span-full text-xs text-slate-400 italic py-6 px-4 bg-slate-100/30 dark:bg-slate-800/30 rounded-2xl text-center border-2 border-dashed border-slate-200 dark:border-slate-700">
                                     No hay permisos configurados para este módulo
                                 </div>
                             </div>
@@ -146,8 +161,10 @@
             </mat-expansion-panel>
         </mat-accordion>
 
-        <div *ngIf="parentModulos.length === 0" class="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
-            <mat-icon class="icon-size-12 text-slate-300 mb-4" [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
+        <div *ngIf="parentModulos.length === 0"
+            class="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+            <mat-icon class="icon-size-12 text-slate-300 mb-4"
+                [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
             <p class="text-secondary font-medium">No hay módulos disponibles en el catálogo.</p>
         </div>
 
@@ -155,10 +172,12 @@
 
     <!-- Footer -->
     <div class="flex items-center justify-end p-8 border-t bg-slate-50 dark:bg-transparent gap-4">
-        <button mat-stroked-button (click)="close()" class="px-8 h-11 rounded-full border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        <button mat-stroked-button (click)="close()"
+            class="px-8 h-11 rounded-full border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             Cerrar
         </button>
-        <button mat-flat-button (click)="saveChanges()" [disabled]="isSaving" class="rounded-full px-10 h-11 font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200 dark:shadow-none transition-all duration-200">
+        <button mat-flat-button (click)="saveChanges()" [disabled]="isSaving"
+            class="rounded-full px-10 h-11 font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200 dark:shadow-none transition-all duration-200">
             <span *ngIf="!isSaving" class="flex items-center">
                 <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:check'"></mat-icon>
                 Guardar Cambios
