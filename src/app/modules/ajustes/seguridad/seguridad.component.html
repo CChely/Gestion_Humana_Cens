@@ -39,11 +39,26 @@
                 </ng-template>
 
                 <div class="w-full space-y-4 mt-4">
-                    <!-- Loading State -->
+                    <!-- Search and Stats Roles -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="relative flex items-center w-full sm:max-w-80 group">
+                            <mat-icon class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors" 
+                                      [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                            <input [(ngModel)]="searchQueryRoles" 
+                                   (input)="filterRoles()"
+                                   class="w-full pl-12 pr-4 h-10 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all outline-none"
+                                   placeholder="Buscar rol...">
+                        </div>
+                        <div class="flex items-center text-xs font-bold text-slate-400 uppercase tracking-widest px-4">
+                            <span>{{ filteredRoles.length }} roles encontrados</span>
+                        </div>
+                    </div>
+
+                    <!-- Loading State Roles -->
                     <ng-container *ngIf="isLoading">
                         <div class="flex flex-col items-center justify-center p-12">
                             <mat-progress-spinner [diameter]="40" [mode]="'indeterminate'"></mat-progress-spinner>
-                            <div class="mt-4 text-secondary">Cargando roles...</div>
+                            <div class="mt-4 text-secondary">Cargando roles del sistema...</div>
                         </div>
                     </ng-container>
 
@@ -55,48 +70,35 @@
                                 <table class="w-full text-left border-collapse">
                                     <thead>
                                         <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
-                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Rol</th>
+                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Nombre del Rol</th>
                                             <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Descripción</th>
-                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Permisos</th>
                                             <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Estado</th>
                                             <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-right">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-                                        <tr *ngFor="let rol of roles; trackBy: trackByFn" 
+                                        <tr *ngFor="let rol of filteredRoles; trackBy: trackByFn" 
                                             class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-150">
-                                            <td class="py-4 px-6 whitespace-nowrap">
-                                                <div class="flex items-center gap-3">
-                                                    <div class="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-400 font-bold text-xs uppercase">
-                                                        {{ rol.NombreRol.substring(0,2) }}
-                                                    </div>
-                                                    <span class="font-bold text-slate-900 dark:text-slate-100">{{ rol.NombreRol }}</span>
+                                            <td class="py-4 px-6">
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-tight">{{ rol.NombreRol }}</span>
+                                                    <span class="text-[10px] text-slate-400 font-medium uppercase tracking-widest mt-0.5">ID: #{{ rol.RolId }}</span>
                                                 </div>
                                             </td>
                                             <td class="py-4 px-6">
-                                                <span class="text-sm text-slate-600 dark:text-slate-300">{{ rol.DescripcionRol }}</span>
+                                                <span class="text-sm text-slate-600 dark:text-slate-400 line-clamp-1">{{ rol.DescripcionRol }}</span>
                                             </td>
                                             <td class="py-4 px-6 text-center">
-                                                <div class="flex flex-col items-center gap-1">
-                                                    <span class="inline-flex items-center px-2 py-0.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 rounded text-[10px] font-bold uppercase tracking-wide">
-                                                        {{ rol.permisos?.length || 0 }} Permisos
-                                                    </span>
-                                                    <span class="inline-flex items-center px-2 py-0.5 bg-sky-50 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 rounded text-[10px] font-bold uppercase tracking-wide">
-                                                        {{ rol.modulos?.length || 0 }} Módulos
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td class="py-4 px-6 text-center">
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                                      [ngClass]="rol.activo ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
+                                                      [ngClass]="rol.activo ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600'">
                                                     {{ rol.activo ? 'Activo' : 'Inactivo' }}
                                                 </span>
                                             </td>
                                             <td class="py-4 px-6 text-right whitespace-nowrap">
                                                 <div class="flex items-center justify-end space-x-1">
                                                     <button mat-icon-button (click)="openModulosDialog(rol)" 
-                                                            class="text-slate-400 hover:text-sky-600 transition-colors duration-200"
-                                                            matTooltip="Ver Módulos">
+                                                            class="text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-900/20 rounded-full transition-colors"
+                                                            matTooltip="Ver Módulos Asignados">
                                                         <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:eye'"></mat-icon>
                                                     </button>
                                                     <button mat-icon-button (click)="openEditDialog(rol)" 
@@ -117,8 +119,8 @@
                             </div>
 
                             <!-- No Results Roles -->
-                            <div *ngIf="roles.length === 0" class="p-12 text-center text-secondary border-t">
-                                No se encontraron roles registrados.
+                            <div *ngIf="filteredRoles.length === 0" class="p-12 text-center text-secondary border-t">
+                                No se encontraron roles que coincidan con la búsqueda.
                             </div>
                         </div>
                     </ng-container>
@@ -135,6 +137,21 @@
                 </ng-template>
 
                 <div class="w-full space-y-4 mt-4">
+                    <!-- Search and Stats Permisos -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="relative flex items-center w-full sm:max-w-80 group">
+                            <mat-icon class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors" 
+                                      [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                            <input [(ngModel)]="searchQueryPermisos" 
+                                   (input)="filterPermisos()"
+                                   class="w-full pl-12 pr-4 h-10 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all outline-none"
+                                   placeholder="Buscar permiso...">
+                        </div>
+                        <div class="flex items-center text-xs font-bold text-slate-400 uppercase tracking-widest px-4">
+                            <span>{{ filteredPermisos.length }} permisos encontrados</span>
+                        </div>
+                    </div>
+
                     <!-- Loading State Permisos -->
                     <ng-container *ngIf="isLoadingPermisos">
                         <div class="flex flex-col items-center justify-center p-12">
@@ -159,7 +176,7 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-                                        <tr *ngFor="let perm of permisos" 
+                                        <tr *ngFor="let perm of filteredPermisos" 
                                             class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-150">
                                             <td class="py-4 px-6 whitespace-nowrap">
                                                 <span class="font-mono text-xs font-bold px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-600">
@@ -200,8 +217,8 @@
                             </div>
 
                             <!-- No Results Permisos -->
-                            <div *ngIf="permisos.length === 0" class="p-12 text-center text-secondary border-t">
-                                No se encontraron permisos registrados en el sistema.
+                            <div *ngIf="filteredPermisos.length === 0" class="p-12 text-center text-secondary border-t">
+                                No se encontraron permisos que coincidan con la búsqueda.
                             </div>
                         </div>
                     </ng-container>

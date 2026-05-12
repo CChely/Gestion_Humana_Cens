@@ -18,9 +18,13 @@ import { finalize } from 'rxjs/operators';
 })
 export class SeguridadComponent implements OnInit {
     roles: Rol[] = [];
+    filteredRoles: Rol[] = [];
     permisos: Permiso[] = [];
+    filteredPermisos: Permiso[] = [];
     procedimientos: Procedimiento[] = [];
     filteredProcedimientos: Procedimiento[] = [];
+    searchQueryRoles: string = '';
+    searchQueryPermisos: string = '';
     searchQueryProcedimientos: string = '';
     isLoading: boolean = false;
     isLoadingPermisos: boolean = false;
@@ -55,8 +59,25 @@ export class SeguridadComponent implements OnInit {
             .subscribe((response) => {
                 if (response.status) {
                     this.roles = response.data;
+                    this.filterRoles();
                 }
             });
+    }
+
+    /**
+     * Filtrar lista de roles localmente
+     */
+    filterRoles(): void {
+        if (!this.searchQueryRoles) {
+            this.filteredRoles = this.roles;
+        } else {
+            const query = this.searchQueryRoles.toLowerCase();
+            this.filteredRoles = this.roles.filter(r => 
+                r.NombreRol.toLowerCase().includes(query) || 
+                (r.DescripcionRol && r.DescripcionRol.toLowerCase().includes(query))
+            );
+        }
+        this._changeDetectorRef.markForCheck();
     }
 
     /**
@@ -74,8 +95,26 @@ export class SeguridadComponent implements OnInit {
             .subscribe((response) => {
                 if (response.status) {
                     this.permisos = response.data;
+                    this.filterPermisos();
                 }
             });
+    }
+
+    /**
+     * Filtrar lista de permisos localmente
+     */
+    filterPermisos(): void {
+        if (!this.searchQueryPermisos) {
+            this.filteredPermisos = this.permisos;
+        } else {
+            const query = this.searchQueryPermisos.toLowerCase();
+            this.filteredPermisos = this.permisos.filter(p => 
+                p.CodigoPermiso.toLowerCase().includes(query) || 
+                p.DescripcionPermiso.toLowerCase().includes(query) ||
+                (p.NombreModulo && p.NombreModulo.toLowerCase().includes(query))
+            );
+        }
+        this._changeDetectorRef.markForCheck();
     }
 
     /**
