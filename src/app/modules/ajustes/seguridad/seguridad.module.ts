@@ -12,6 +12,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { FuseConfirmationModule } from '@fuse/services/confirmation';
 import { SharedModule } from 'app/shared/shared.module';
 import { SeguridadComponent } from './seguridad.component';
@@ -48,6 +49,7 @@ const routes: Route[] = [
         MatDialogModule,
         MatProgressSpinnerModule,
         MatExpansionModule,
+        DragDropModule,
         FuseConfirmationModule,
         SharedModule
     ]
