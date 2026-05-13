@@ -6,6 +6,7 @@ import {
     EmpresaResponse,
     EmpresaRequest,
     EmpresaInsertRequest,
+    EmpresaUpdateRequest,
 } from "./empresa.types";
 
 /** Respuesta del endpoint de subida de archivos */
@@ -35,32 +36,32 @@ export class EmpresaService {
     constructor(private _httpClient: HttpClient) {}
 
     /**
-     * Get list of companies — POST /collection/doit/uspEmpresaListar
+     * Get list of companies — POST /collection/doit/dbo.uspEmpresaListar
      */
     listarEmpresas(): Observable<EmpresaResponse> {
         const request: EmpresaRequest = { data: null, params: null };
         return this._httpClient.post<EmpresaResponse>(
-            `${environment.apiUrl}/collection/doit/uspEmpresaListar`,
+            `${environment.apiUrl}/collection/doit/dbo.uspEmpresaListar`,
             request,
         );
     }
 
     /**
-     * Insert a new company — POST /collection/doit/uspEmpresaInsertar
+     * Insert a new company — POST /collection/doit/dbo.uspEmpresaInsertar
      */
     insertarEmpresa(request: EmpresaInsertRequest): Observable<EmpresaResponse> {
         return this._httpClient.post<EmpresaResponse>(
-            `${environment.apiUrl}/collection/doit/uspEmpresaInsertar`,
+            `${environment.apiUrl}/collection/doit/dbo.uspEmpresaInsertar`,
             request,
         );
     }
 
     /**
-     * Update an existing company — POST /collection/doit/uspEmpresaActualizar
+     * Update an existing company — POST /collection/doit/dbo.uspEmpresaActualizar
      */
-    actualizarEmpresa(request: any): Observable<EmpresaResponse> {
+    actualizarEmpresa(request: EmpresaUpdateRequest): Observable<EmpresaResponse> {
         return this._httpClient.post<EmpresaResponse>(
-            `${environment.apiUrl}/collection/doit/uspEmpresaActualizar`,
+            `${environment.apiUrl}/collection/doit/dbo.uspEmpresaActualizar`,
             request,
         );
     }

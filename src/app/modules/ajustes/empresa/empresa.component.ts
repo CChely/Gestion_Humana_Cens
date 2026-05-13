@@ -76,17 +76,28 @@ export class EmpresaComponent implements OnInit {
     }
 
     /**
-     * Carga las imágenes de todas las empresas en la lista
+     * Carga las imágenes de todas las empresas en la lista (Logo y Firma)
      */
     private loadAllImages(): void {
         this.empresas.forEach(empresa => {
+            // Cargar Logo
             if (empresa.ImagenEmpresa && !this.imageUrls[empresa.ImagenEmpresa]) {
                 this._empresaService.downloadImagen(empresa.ImagenEmpresa).subscribe({
                     next: (res) => {
                         if (res.status && res.data.bytesFile) {
-                            // Construir el data URL: data:{contentType};base64,{bytesFile}
                             const dataUrl = `data:${res.data.contentType};base64,${res.data.bytesFile}`;
                             this.imageUrls[empresa.ImagenEmpresa] = dataUrl;
+                        }
+                    }
+                });
+            }
+            // Cargar Firma
+            if (empresa.FirmaEmpresa && !this.imageUrls[empresa.FirmaEmpresa]) {
+                this._empresaService.downloadImagen(empresa.FirmaEmpresa).subscribe({
+                    next: (res) => {
+                        if (res.status && res.data.bytesFile) {
+                            const dataUrl = `data:${res.data.contentType};base64,${res.data.bytesFile}`;
+                            this.imageUrls[empresa.FirmaEmpresa] = dataUrl;
                         }
                     }
                 });
