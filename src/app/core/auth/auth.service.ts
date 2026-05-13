@@ -27,6 +27,31 @@ export interface AuthState {
         name: string;
     } | null;
     token: string | null;
+    permissions: PermissionParent[] | null;
+}
+
+export interface PermissionChild {
+    nombre: string;
+    EsVisibleMenu: boolean;
+    EsActivo: boolean;
+    icono: string;
+    ruta: string;
+    permisos: string[];
+}
+
+export interface PermissionParent {
+    padre: string;
+    ruta: string;
+    icono: string;
+    hijos: PermissionChild[];
+}
+
+export interface PermissionsResponse {
+    data: PermissionParent[];
+    errors: any[];
+    message: string;
+    metadata: any[];
+    status: boolean;
 }
 
 @Injectable()
@@ -40,12 +65,14 @@ export class AuthService {
         isAuthenticated: false,
         user: null,
         token: null,
+        permissions: null,
     });
 
     // Computed signals para obtener datos derivados
     public isAuthenticated = computed(() => this._authState().isAuthenticated);
     public user = computed(() => this._authState().user);
     public token = computed(() => this._authState().token);
+    public permissions = computed(() => this._authState().permissions);
 
     /**
      * Constructor
@@ -61,6 +88,9 @@ export class AuthService {
                 localStorage.setItem("accessToken", state.token);
                 if (state.user) {
                     localStorage.setItem("user", JSON.stringify(state.user));
+                }
+                if (state.permissions) {
+                    localStorage.setItem("permissions", JSON.stringify(state.permissions));
                 }
             }
         });
@@ -86,10 +116,21 @@ export class AuthService {
                 }
             }
 
+            let permissions = null;
+            const permissionsData = localStorage.getItem("permissions");
+            if (permissionsData) {
+                try {
+                    permissions = JSON.parse(permissionsData);
+                } catch (e) {
+                    console.error("Error parsing permissions data", e);
+                }
+            }
+
             this._authState.set({
                 isAuthenticated: true,
                 user: user,
                 token: token,
+                permissions: permissions,
             });
 
             // Actualizar el usuario en el servicio
@@ -114,6 +155,18 @@ export class AuthService {
         this._authState.update((state) => ({
             ...state,
             token: token,
+        }));
+    }
+
+    /**
+     * Set permissions
+     *
+     * @param permissions
+     */
+    set permissionsValue(permissions: PermissionParent[]) {
+        this._authState.update((state) => ({
+            ...state,
+            permissions: permissions,
         }));
     }
 
@@ -149,7 +202,7 @@ export class AuthService {
                             name: response.data.correo,
                             status:
                                 response.data.roles &&
-                                response.data.roles.length > 0
+                                    response.data.roles.length > 0
                                     ? response.data.roles[0]
                                     : "online",
                         };
@@ -159,6 +212,7 @@ export class AuthService {
                             isAuthenticated: true,
                             user: userData,
                             token: response.data.token,
+                            permissions: null, // Será actualizado por el componente
                         });
 
                         // Actualizar el usuario en el servicio
@@ -218,13 +272,25 @@ export class AuthService {
             isAuthenticated: false,
             user: null,
             token: null,
+            permissions: null,
         });
 
         // Limpiar el usuario del servicio
         this._userService.user = null;
 
         // Redirigir al login
+        localStorage.removeItem("permissions");
         this._router.navigate(["/sign-in"]);
+    }
+
+    /**
+     * Get permissions for the current user
+     */
+    getPermissions(): Observable<PermissionsResponse> {
+        return this._httpClient.get<PermissionsResponse>(
+            `${environment.apiUrl}/auth/permissions`,
+            {},
+        );
     }
 
     /**

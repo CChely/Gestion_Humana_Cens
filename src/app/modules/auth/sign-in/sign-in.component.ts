@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { catchError, of, switchMap } from 'rxjs';
 
 // Storage key constants — never store plain passwords; we store only email
 // and a flag. The password is stored encrypted via the browser's own
@@ -82,7 +83,22 @@ export class AuthSignInComponent implements OnInit
 
         const loginData = { correo: email, password };
 
-        this._authService.signIn(loginData).subscribe(
+        this._authService.signIn(loginData).pipe(
+            switchMap((response) => {
+                // Consultar permisos inmediatamente después del login exitoso
+                return this._authService.getPermissions().pipe(
+                    switchMap((permissionsResponse) => {
+                        // Actualizar el estado de permisos en el servicio
+                        this._authService.permissionsValue = permissionsResponse.data;
+                        return of(response);
+                    }),
+                    catchError(() => {
+                        // Si falla la carga de permisos, igual permitimos el login
+                        return of(response);
+                    })
+                );
+            })
+        ).subscribe(
             () => {
                 // ── Remember Me logic ──────────────────────────────────────
                 if (rememberMe) {
