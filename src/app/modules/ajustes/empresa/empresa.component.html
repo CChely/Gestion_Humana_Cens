@@ -116,6 +116,10 @@
                                     RUC: <span class="font-medium text-slate-700 dark:text-slate-300">{{
                                         empresa.RucEmpresa }}</span>
                                 </span>
+                                <!-- Representante Legal -->
+                                <span *ngIf="empresa.NombreRepresentanteEmpresa" class="text-xs text-slate-400 dark:text-slate-500 hidden sm:inline">
+                                    · Rep. Legal: {{ empresa.NombreRepresentanteEmpresa }}
+                                </span>
                                 <!-- Dirección -->
                                 <span *ngIf="empresa.DireccionEmpresa" class="text-xs text-slate-400 dark:text-slate-500 hidden md:inline">
                                     · {{ empresa.DireccionEmpresa }}
