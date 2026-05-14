@@ -90,6 +90,7 @@ export const appRoutes: Route[] = [
                 {path: 'diccionario-variables', loadChildren: () => import('app/modules/ajustes/diccionario-variables/diccionario-variables.module').then(m => m.DiccionarioVariablesModule)},
                 {path: 'documento-impresion', loadChildren: () => import('app/modules/ajustes/documento-impresion/documento-impresion.module').then(m => m.DocumentoImpresionModule)},
                 {path: 'configuracion-perfil', loadChildren: () => import('app/modules/ajustes/configuracion-perfil/configuracion-perfil.module').then(m => m.ConfiguracionPerfilModule)},
+                {path: 'configuracion-seguridad', loadChildren: () => import('app/modules/ajustes/seguridad/seguridad.module').then(m => m.SeguridadModule)},
                 {path: 'configuracion-almacenamiento', loadChildren: () => import('app/modules/ajustes/configuracion-almacenamiento/configuracion-almacenamiento.module').then(m => m.ConfiguracionAlmacenamientoModule)},
                 {path: 'empresa', loadChildren: () => import('app/modules/ajustes/empresa/empresa.module').then(m => m.EmpresaModule)},
                 {path: 'organigrama', loadChildren: () => import('app/modules/ajustes/organigrama/organigrama.module').then(m => m.OrganigramaModule)},

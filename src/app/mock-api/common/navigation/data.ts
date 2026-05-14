@@ -143,6 +143,13 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 link: '/ajustes/configuracion-perfil'
             },
             {
+                id: 'ajustes.configuracion-seguridad',
+                title: 'Configuración de seguridad',
+                type: 'basic',
+                icon: 'heroicons_outline:shield-check',
+                link: '/ajustes/configuracion-seguridad'
+            },
+            {
                 id: 'ajustes.configuracion-almacenamiento',
                 title: 'Configuración de almacenamiento',
                 type: 'basic',
