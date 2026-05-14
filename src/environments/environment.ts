@@ -4,7 +4,7 @@
 
 export const environment = {
     production: false,
-    apiUrl: 'https://recursoshumanos.cens.cloud/api/v1'
+    apiUrl: 'https://dev.recursoshumanos.cens.cloud/api/v1'
 };
 
 /*

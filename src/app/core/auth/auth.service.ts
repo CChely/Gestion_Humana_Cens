@@ -1,17 +1,21 @@
-import { Injectable, inject, signal, computed, effect } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
-import { AuthUtils } from 'app/core/auth/auth.utils';
-import { UserService } from 'app/core/user/user.service';
-import { Router } from '@angular/router';
-import { environment } from 'environments/environment';
+import { Injectable, inject, signal, computed, effect } from "@angular/core";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { catchError, Observable, of, switchMap, throwError } from "rxjs";
+import { AuthUtils } from "app/core/auth/auth.utils";
+import { UserService } from "app/core/user/user.service";
+import { Router } from "@angular/router";
+import { environment } from "environments/environment";
 
 export interface LoginResponse {
     data: {
+        contenedorArchivo: string;
+        proveedorArchivo: string;
         correo: string;
         roles: string[];
+        avatar: string;
         usuarioId: number;
         token: string;
+        nombres: string;
     };
     errors: any[];
     message: string;
@@ -21,345 +25,264 @@ export interface LoginResponse {
 
 export interface AuthState {
     isAuthenticated: boolean;
-    user: {
-        id: string;
-        email: string;
-        name: string;
-    } | null;
+    user: { id: string; correo: string; name: string } | null;
     token: string | null;
+    containerId: string | null;
 }
 
 @Injectable()
-export class AuthService
-{
+export class AuthService {
     private _httpClient = inject(HttpClient);
     private _userService = inject(UserService);
     private _router = inject(Router);
 
-    // Signals para el estado de autenticación
+    /** Signal holding the current authentication state */
     private _authState = signal<AuthState>({
         isAuthenticated: false,
         user: null,
-        token: null
+        token: null,
+        containerId: null,
     });
 
-    // Computed signals para obtener datos derivados
+    /** Computed signals for easy consumption */
     public isAuthenticated = computed(() => this._authState().isAuthenticated);
     public user = computed(() => this._authState().user);
     public token = computed(() => this._authState().token);
+    public containerId = computed(() => this._authState().containerId);
 
-    /**
-     * Constructor
-     */
-    constructor()
-    {
-        // Sincronizar con localStorage al inicializar
+    constructor() {
+        // Initialise from localStorage on boot
         this._initializeAuthState();
 
-        // Effect para persistir cambios en localStorage
+        // Persist any changes to localStorage for later restores
         effect(() => {
             const state = this._authState();
-            if ( state.token )
-            {
-                localStorage.setItem('accessToken', state.token);
-                if ( state.user )
-                {
-                    localStorage.setItem('user', JSON.stringify(state.user));
+            if (state.token) {
+                localStorage.setItem("accessToken", state.token);
+                localStorage.setItem("containerId", state.containerId ?? "");
+                if (state.user) {
+                    localStorage.setItem("user", JSON.stringify(state.user));
                 }
             }
         });
     }
 
-    /**
-     * Inicializar el estado de autenticación desde localStorage
-     */
-    private _initializeAuthState(): void
-    {
-        const token = localStorage.getItem('accessToken');
-        const userData = localStorage.getItem('user');
+    /** Load state from localStorage if available and valid */
+    private _initializeAuthState(): void {
+        const token = localStorage.getItem("accessToken");
+        const userData = localStorage.getItem("user");
+        const containerId = localStorage.getItem("containerId");
 
-        if ( token && !AuthUtils.isTokenExpired(token) )
-        {
+        if (token && !AuthUtils.isTokenExpired(token)) {
             let user = null;
-            if ( userData )
-            {
-                try
-                {
+            if (userData) {
+                try {
                     user = JSON.parse(userData);
-                }
-                catch ( e )
-                {
-                    console.error('Error parsing user data from localStorage', e);
+                } catch (e) {
+                    console.error(
+                        "Error parsing user data from localStorage",
+                        e,
+                    );
                 }
             }
 
             this._authState.set({
                 isAuthenticated: true,
                 user: user,
-                token: token
+                token: token,
+                containerId: containerId,
             });
 
-            // Actualizar el usuario en el servicio
-            if ( user )
-            {
+            if (user) {
                 this._userService.user = {
                     id: user.id,
-                    email: user.email,
+                    correo: user.correo || user.email,
                     name: user.name,
-                    avatar: '',
-                    status: 'online'
+                    avatar: "",
+                    status: user.status || "online",
                 };
             }
         }
     }
 
-    // Getter para compatibilidad con código existente
-    get accessToken(): string
-    {
-        return this.token() ?? '';
+    /** Compatibility getter for existing code */
+    get accessToken(): string {
+        return this.token() ?? "";
     }
 
-    set accessToken(token: string)
-    {
-        this._authState.update(state => ({
-            ...state,
-            token: token
-        }));
+    /** Compatibility setter for existing code */
+    set accessToken(token: string) {
+        this._authState.update((state) => ({ ...state, token }));
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
+    /** Sign‑in logic, mapping the response to our state */
+    signIn(credentials: {
+        correo: string;
+        password: string;
+    }): Observable<LoginResponse> {
+        return this._httpClient
+            .post<LoginResponse>(
+                `${environment.apiUrl}/auth/login`,
+                credentials,
+            )
+            .pipe(
+                switchMap((response: LoginResponse) => {
+                    if (
+                        response.status &&
+                        response.data &&
+                        response.data.token
+                    ) {
+                        const userData = {
+                            id: response.data.usuarioId.toString(),
+                            correo: response.data.correo,
+                            name: response.data.nombres,
+                        };
 
-    /**
-     * Sign in
-     *
-     * @param credentials
-     */
-    signIn(credentials: { correo: string; password: string }): Observable<LoginResponse>
-    {
-        return this._httpClient.post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials).pipe(
-            switchMap((response: LoginResponse) => {
+                        // Persist both the token and the container id
+                        this._authState.set({
+                            isAuthenticated: true,
+                            user: userData,
+                            token: response.data.token,
+                            containerId: response.data.contenedorArchivo,
+                        });
 
-                // Validar que la respuesta sea exitosa
-                if ( response.status && response.data && response.data.token )
-                {
-                    const userData = {
-                        id: response.data.usuarioId.toString(),
-                        email: response.data.correo,
-                        name: response.data.correo
-                    };
+                        // Persist container id outside the effect path for immediate usage
+                        localStorage.setItem(
+                            "containerId",
+                            response.data.contenedorArchivo ?? "",
+                        );
 
-                    // Actualizar el Signal de estado
-                    this._authState.set({
-                        isAuthenticated: true,
-                        user: userData,
-                        token: response.data.token
-                    });
+                        this._userService.user = {
+                            id: userData.id,
+                            correo: userData.correo,
+                            name: userData.name,
+                            avatar: response.data.avatar || "",
+                            status: "online",
+                        };
 
-                    // Actualizar el usuario en el servicio
-                    this._userService.user = {
-                        id: userData.id,
-                        email: userData.email,
-                        name: userData.name,
-                        avatar: '',
-                        status: 'online'
-                    };
-
-                    return of(response);
-                }
-
-                // Si status es false o no existe token, retornar error
-                return throwError({
-                    error: {
-                        message: response.message || 'An error occurred during sign in'
+                        return of(response);
                     }
-                });
-            }),
-            catchError((error: HttpErrorResponse) => {
-
-                // Manejo de errores HTTP
-                if ( error.status === 400 || error.status === 401 )
-                {
-                    const errorMessage = error.error?.message || 'Invalid credentials';
 
                     return throwError({
-                        error: {
-                            message: errorMessage
-                        }
+                        error: { message: response.message || "Login failed" },
                     });
-                }
-
-                return throwError({
-                    error: {
-                        message: error.error?.message || 'An error occurred'
-                    }
-                });
-            })
-        );
+                }),
+                catchError((error: HttpErrorResponse) => {
+                    const msg = error.error?.message || "Error logging in";
+                    return throwError({ error: { message: msg } });
+                }),
+            );
     }
 
-    /**
-     * Sign out
-     */
-    signOut(): void
-    {
-        // Limpiar localStorage
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('user');
+    /** Sign‑out: clear state and storage */
+    signOut(): void {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("containerId");
 
-        // Resetear el estado
         this._authState.set({
             isAuthenticated: false,
             user: null,
-            token: null
+            token: null,
+            containerId: null,
         });
 
-        // Limpiar el usuario del servicio
         this._userService.user = null;
-
-        // Redirigir al login
-        this._router.navigate(['/sign-in']);
+        this._router.navigate(["/sign-in"]);
     }
 
-    /**
-     * Forgot password
-     *
-     * @param email
-     */
-    forgotPassword(email: string): Observable<any>
-    {
-        return this._httpClient.post('api/auth/forgot-password', email);
+    // Additional auth helpers – minimal implementations
+
+    forgotPassword(email: string): Observable<any> {
+        return this._httpClient.post("api/auth/forgot-password", email);
     }
 
-    /**
-     * Reset password
-     *
-     * @param password
-     */
-    resetPassword(password: string): Observable<any>
-    {
-        return this._httpClient.post('api/auth/reset-password', password);
+    resetPassword(password: string): Observable<any> {
+        return this._httpClient.post("api/auth/reset-password", password);
     }
 
-    /**
-     * Sign up
-     *
-     * @param user
-     */
-    signUp(user: { name: string; email: string; password: string; company: string }): Observable<any>
-    {
-        return this._httpClient.post('api/auth/sign-up', user);
+    signUp(user: {
+        name: string;
+        email: string;
+        password: string;
+        company: string;
+    }): Observable<any> {
+        return this._httpClient.post("api/auth/sign-up", user);
     }
 
-    /**
-     * Unlock session
-     *
-     * @param credentials
-     */
-    unlockSession(credentials: { email: string; password: string }): Observable<any>
-    {
-        return this._httpClient.post('api/auth/unlock-session', credentials);
+    unlockSession(credentials: {
+        email: string;
+        password: string;
+    }): Observable<any> {
+        return this._httpClient.post("api/auth/unlock-session", credentials);
     }
 
-    /**
-     * Log out or destroy session
-     */
-    logOut(): Observable<any>
-    {
-        return this._httpClient.delete('api/auth/logout').pipe(
+    logOut(): Observable<any> {
+        return this._httpClient.delete("api/auth/logout").pipe(
             switchMap(() => {
                 this.signOut();
                 return of(true);
-            })
+            }),
         );
     }
 
-    /**
-     * Confirmation required
-     *
-     * @param confirmationRequired
-     */
-    confirmationRequired(confirmationRequired: boolean): void
-    {
-        // Do something with the confirmation required parameter
+    confirmationRequired(confirmationRequired: boolean): void {
+        // Optional: implement confirmation logic
     }
 
-    /**
-     * Password reset
-     *
-     * @param password
-     */
-    passwordReset(password: string): Observable<any>
-    {
-        return this._httpClient.post('api/auth/password-reset', { password });
+    passwordReset(password: string): Observable<any> {
+        return this._httpClient.post("api/auth/password-reset", { password });
     }
 
-    /**
-     * Check the authentication status
-     */
-    check(): Observable<boolean>
-    {
-        // Check if the user is logged in
-        if ( this.isAuthenticated() )
-        {
+    /** Utility: check if token already present and valid */
+    check(): Observable<boolean> {
+        if (this.isAuthenticated()) {
             return of(true);
         }
-
-        // Check the access token availability
-        if ( !this.accessToken )
-        {
+        if (!this.accessToken) {
             return of(false);
         }
-
-        // Check the access token expire date
-        if ( AuthUtils.isTokenExpired(this.accessToken) )
-        {
+        if (AuthUtils.isTokenExpired(this.accessToken)) {
             return of(false);
         }
-
-        // If the access token exists and it didn't expire, sign in using it
         return this.signInUsingToken();
     }
 
-    /**
-     * Sign in using the access token
-     */
-    signInUsingToken(): Observable<any>
-    {
-        // Renew token
-        return this._httpClient.post('api/auth/refresh-access-token', {
-            accessToken: this.accessToken
-        }).pipe(
-            catchError(() => of(false)),
-            switchMap((response: any) => {
-
-                // Store the access token in the local storage
-                if ( response && response.accessToken )
-                {
-                    this._authState.update(state => ({
-                        ...state,
-                        token: response.accessToken
-                    }));
-
-                    // Store the user on the user service
-                    this._userService.user = response.user;
-                }
-
-                // Return true
-                return of(true);
+    /** Refresh stored token using the backend refresh endpoint */
+    signInUsingToken(): Observable<any> {
+        return this._httpClient
+            .post("api/auth/refresh-access-token", {
+                accessToken: this.accessToken,
             })
-        );
+            .pipe(
+                catchError(() => of(false)),
+                switchMap((response: any) => {
+                    if (response && response.accessToken) {
+                        this._authState.update((state) => ({
+                            ...state,
+                            token: response.accessToken,
+                            containerId:
+                                response.data?.contenedorArchivo ??
+                                state.containerId,
+                        }));
+
+                        // Persist new container id if returned
+                        const newCid = response.data?.contenedorArchivo;
+                        if (newCid) {
+                            localStorage.setItem("containerId", newCid);
+                        }
+
+                        this._userService.user = response.user ?? null;
+                    }
+                    return of(true);
+                }),
+            );
     }
 
-    /**
-     * Check token expiration
-     */
-    checkTokenExpiration(): boolean
-    {
+    /** Simple expiration check */
+    checkTokenExpiration(): boolean {
         const token = this.token();
-        if ( !token )
-        {
+        if (!token) {
             return true;
         }
         return AuthUtils.isTokenExpired(token);

@@ -29,6 +29,10 @@ export interface Usuario {
     Estado: boolean;
     FechaCreacion: string;
     roles: Rol[];
+    avatar?: string;
+    avatarUrl?: string; // Base64 data URL for displaying the avatar
+    Nombres?: string;
+    ProveedorArchivos?: string;
 }
 
 export interface UsuariosResponse {
