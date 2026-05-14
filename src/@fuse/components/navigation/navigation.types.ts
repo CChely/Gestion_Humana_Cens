@@ -5,6 +5,7 @@ export interface FuseNavigationItem
     id?: string;
     title?: string;
     subtitle?: string;
+    group?: any;
     type:
         | 'aside'
         | 'basic'
