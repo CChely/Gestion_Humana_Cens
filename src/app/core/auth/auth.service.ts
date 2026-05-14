@@ -156,7 +156,7 @@ export class AuthService {
                             id: userData.id,
                             correo: userData.correo,
                             name: userData.name,
-                            avatar: "",
+                            avatar: response.data.avatar || "",
                             status: "online",
                         };
 
