@@ -1,5 +1,111 @@
-<div class="p-6 sm:py-12 md:px-8 border-l h-full min-w-72 w-72">
-    <h3 class="font-bold">Trazabilidad</h3>
+<!-- Panel Fijo de Trazabilidad -->
+<div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col h-full min-h-[500px] max-h-[600px] lg:max-h-[calc(100vh-8rem)] lg:sticky lg:top-8">
 
+  <!-- Cabecera -->
+  <div class="px-4 py-5 sm:px-6 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 flex items-start justify-between">
+    <div>
+      <h2 class="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        Historial de Cambios
+      </h2>
+      <!-- <p class="mt-1 text-xs font-semibold text-slate-500 bg-slate-200 dark:bg-slate-700 inline-block px-2 py-0.5 rounded" *ngIf="idRegistro">Tabla: {{ nombreTabla }} | ID: {{ idRegistro }}</p> -->
+    </div>
+  </div>
+
+  <!-- Cuerpo -->
+  <div class="flex-1 overflow-y-auto p-4 sm:p-6 bg-white dark:bg-slate-800 relative">
+
+      <!-- ESTADO VACÍO: Ningún registro seleccionado -->
+      <div *ngIf="!idRegistro" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 p-6 text-center">
+          <div class="w-20 h-20 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mb-4 ring-8 ring-slate-50/50 dark:ring-slate-800/20">
+              <svg class="h-10 w-10 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+          </div>
+          <span class="text-base font-bold text-slate-700 dark:text-slate-300">Seleccione un registro</span>
+          <p class="text-sm mt-2 text-slate-500">Haga clic en un elemento de la tabla a la izquierda para ver su trazabilidad detallada.</p>
+      </div>
+
+      <!-- Cargando -->
+      <div *ngIf="isLoading" class="absolute inset-0 flex justify-center items-center py-12 bg-white/80 dark:bg-slate-800/80 z-10 backdrop-blur-sm">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+      </div>
+
+      <!-- Sin Resultados para el registro -->
+      <div *ngIf="!isLoading && idRegistro && historial.length === 0" class="text-center py-12 text-slate-500">
+          <svg class="mx-auto h-12 w-12 text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          No hay registros de historial para este elemento.
+      </div>
+
+      <!-- Línea de Tiempo (Igual que antes) -->
+      <div class="flow-root" *ngIf="!isLoading && historial.length > 0">
+        <ul role="list" class="-mb-8">
+          <li *ngFor="let item of historial; let isLast = last">
+            <div class="relative pb-8">
+              <!-- Línea conectora -->
+              <span *ngIf="!isLast" class="absolute left-5 top-5 -ml-px h-full w-0.5 bg-slate-200 dark:bg-slate-700" aria-hidden="true"></span>
+              <div class="relative flex items-start space-x-3">
+
+                <!-- Icono de acción principal -->
+                <div class="relative">
+                  <span class="h-10 w-10 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-slate-800 text-white shadow-sm"
+                        [ngClass]="{'bg-emerald-500': item.TipoMovimiento === 'INSERT', 'bg-sky-500': item.TipoMovimiento === 'UPDATE', 'bg-rose-500': item.TipoMovimiento === 'DELETE'}">
+                    <svg *ngIf="item.TipoMovimiento === 'INSERT'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <svg *ngIf="item.TipoMovimiento === 'UPDATE'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    <svg *ngIf="item.TipoMovimiento === 'DELETE'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </span>
+                </div>
+
+                <!-- Contenido -->
+                <div class="min-w-0 flex-1 py-0.5">
+                  <div class="text-sm">
+                    <div class="flex items-center justify-between font-medium">
+                      <div class="flex items-center gap-2">
+                        <!-- Avatar Genérico SVG -->
+                        <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center text-slate-500 dark:text-slate-300">
+                          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                        </div>
+                        <span class="text-slate-900 dark:text-white">{{ item.UsuarioCorreo }}</span>
+                      </div>
+                      <span class="whitespace-nowrap text-xs text-slate-500">{{ item.Fecha | date:'dd/MM/yyyy hh:mm a' }}</span>
+                    </div>
+                    <p class="mt-1 text-slate-500 dark:text-slate-400">
+                      Realizó una <span class="font-bold text-slate-700 dark:text-slate-300">{{ item.AccionEs }}</span> en este registro.
+                    </p>
+                  </div>
+
+                  <!-- Detalle de Cambios Visibles -->
+                  <div class="mt-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-900/50 overflow-hidden shadow-inner" *ngIf="item.Cambios.length > 0 || item.TipoMovimiento === 'DELETE'">
+
+                    <!-- Vista: Creación (INSERT) -->
+                    <div *ngIf="item.TipoMovimiento === 'INSERT'" class="p-3 space-y-1">
+                      <div *ngFor="let c of item.Cambios" class="text-xs sm:text-sm">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ c.campo }}:</span>
+                        <span class="text-emerald-600 dark:text-emerald-400 ml-1">{{ c.valorNuevo }}</span>
+                      </div>
+                    </div>
+
+                    <!-- Vista: Edición (UPDATE) -->
+                    <div *ngIf="item.TipoMovimiento === 'UPDATE'" class="p-3 space-y-2">
+                      <div *ngFor="let c of item.Cambios" class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 bg-white dark:bg-slate-800 p-2 rounded border border-slate-100 dark:border-slate-700 shadow-sm">
+                        <span class="font-bold text-slate-700 dark:text-slate-300 w-1/3 truncate" [title]="c.campo">{{ c.campo }}:</span>
+                        <div class="flex items-center flex-1 min-w-0 text-xs sm:text-sm">
+                          <span class="text-rose-500 line-through truncate flex-1" [title]="c.valorAntiguo || 'N/A'">{{ c.valorAntiguo || 'N/A' }}</span>
+                          <svg class="w-4 h-4 mx-2 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                          <span class="text-emerald-600 font-semibold truncate flex-1" [title]="c.valorNuevo || 'N/A'">{{ c.valorNuevo || 'N/A' }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Vista: Eliminación (DELETE) -->
+                    <div *ngIf="item.TipoMovimiento === 'DELETE'" class="p-3">
+                      <span class="text-rose-500 font-medium">El registro fue eliminado lógicamente del sistema.</span>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+  </div>
 </div>
-

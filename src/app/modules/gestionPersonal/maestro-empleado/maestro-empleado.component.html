@@ -1,1 +1,679 @@
-<p>maestro-empleado works!</p>
+<div class="flex flex-col flex-auto min-w-0 bg-slate-100 dark:bg-slate-900 min-h-screen relative">
+  <div class="flex-auto p-4 sm:p-8 space-y-6 max-w-[1400px] mx-auto w-full">
+
+    <div class="flex flex-col mb-2">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{{ personalActual.Id ? 'Editar Empleado' : 'Agregar Empleado' }}</h1>
+      <p class="text-sm font-medium text-slate-500 mt-1">{{ personalActual.Id ? 'Modifique los datos y secciones del personal' : 'Complete los datos y secciones del nuevo personal' }}</p>
+    </div>
+
+    <!-- CABECERA -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div class="h-16 sm:h-20 bg-indigo-50 dark:bg-slate-700/50 relative overflow-hidden">
+        <svg class="absolute top-0 right-0 h-full text-indigo-100 dark:text-slate-700" viewBox="0 0 400 160" preserveAspectRatio="none" fill="currentColor"><path d="M0 0h400v160H0z"/><path fill="rgba(255,255,255,0.3)" d="M400 160c-100 0-150-160-400-160v160h400z"/></svg>
+      </div>
+
+      <div class="px-5 sm:px-8 pb-5 flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-8 relative z-10">
+        <div class="relative shrink-0 -mt-10 sm:-mt-12">
+          <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white dark:border-slate-800 bg-slate-200 flex items-center justify-center overflow-hidden shadow-sm">
+            <img *ngIf="fotoPerfilUrl" [src]="fotoPerfilUrl" class="w-full h-full object-cover">
+            <svg *ngIf="!fotoPerfilUrl" class="w-10 h-10 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </div>
+          <label class="absolute bottom-0 right-0 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center shadow border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+            <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+          </label>
+        </div>
+
+        <div class="flex-auto w-full grid grid-cols-1 md:grid-cols-2 gap-4 pb-1">
+          <div class="flex items-center border border-slate-200 rounded-lg overflow-hidden h-10 bg-slate-50">
+            <div class="bg-slate-400 text-white text-xs font-semibold px-4 flex items-center justify-center h-full w-32 shrink-0"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>Código interno</div>
+            <input type="text" class="w-full h-full px-4 text-sm font-bold text-slate-500 bg-transparent outline-none border-none cursor-not-allowed" [(ngModel)]="personalActual.codigoInterno" readonly>
+          </div>
+          <div class="flex items-center border border-slate-200 rounded-lg overflow-hidden h-10 bg-slate-50">
+            <div class="bg-slate-400 text-white text-xs font-semibold px-4 flex items-center justify-center h-full w-32 shrink-0"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>Código</div>
+            <input type="text" class="w-full h-full px-4 text-sm font-bold text-slate-500 bg-transparent outline-none border-none cursor-not-allowed" [(ngModel)]="personalActual.codigo" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUERPO CENTRAL -->
+    <div class="flex flex-col md:flex-row gap-6 items-start">
+      <!-- Menú Lateral -->
+      <div class="w-full md:w-64 shrink-0 flex flex-col space-y-1 min-h-[600px] sticky top-6">
+        <ul class="space-y-1">
+          <li *ngFor="let item of menuSecciones" (click)="cambiarSeccion(item.id)" class="sidebar-item" [class.active]="seccionActiva === item.id">
+            <svg class="w-5 h-5 flex-shrink-0 mr-3 text-current" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icono"></path></svg>
+            <span class="truncate">{{ item.titulo }}</span>
+          </li>
+        </ul>
+
+        <div class="mt-auto pt-4 flex flex-col space-y-1">
+          <hr class="mb-4 border-slate-200">
+        <!-- BOTÓN GUARDAR (Con lógica de desactivación) -->
+        <div class="sidebar-item font-medium transition-colors flex items-center"
+            [ngClass]="esFormularioValido ? 'hover:bg-slate-50 cursor-pointer text-slate-700' : 'opacity-50 cursor-not-allowed text-slate-400 bg-slate-50'"
+            (click)="esFormularioValido ? guardarCambios() : null"
+            [title]="!esFormularioValido ? 'Complete todos los campos obligatorios (*)' : ''">
+          <svg class="w-5 h-5 flex-shrink-0 mr-3" [ngClass]="esFormularioValido ? 'text-emerald-600' : 'text-slate-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+          </svg>
+          <span>Guardar cambios</span>
+        </div>
+
+        <!-- BOTÓN LIMPIAR TODO -->
+        <div class="sidebar-item hover:bg-rose-50 cursor-pointer text-rose-600 font-medium mt-2 border border-rose-100 flex items-center" (click)="limpiarTodo()">
+          <svg class="w-5 h-5 flex-shrink-0 mr-3 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          <span>Limpiar formulario</span>
+        </div>
+        </div>
+      </div>
+
+      <!-- Formularios -->
+      <div class="flex-auto bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 p-6 w-full min-h-[600px]">
+
+        <!-- 1. DATOS PERSONALES -->
+        <div *ngIf="seccionActiva === 'datos-personales'" class="animate-fade-in">
+          <h2 class="section-title">Datos Personales</h2>
+          <div class="space-y-5">
+            <div class="form-row"><label class="form-label">Tipo documento <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoDocumento" [(ngModel)]="personalActual.tipoDocumento"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Número documento <span class="text-rose-500">*</span></label><div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.numeroDocumento"></div></div>
+            <div class="form-row"><label class="form-label">País emisor <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.paises" [(ngModel)]="personalActual.paisEmisorDocumento"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">F. expiración</label><div class="form-input-container"><input type="date" class="form-control w-1/2" [(ngModel)]="personalActual.fechaExpiracionDocumento"></div></div>
+            <div class="form-row"><label class="form-label">Apellidos <span class="text-rose-500">*</span></label><div class="form-input-container grid grid-cols-2 gap-4"><input type="text" class="form-control" placeholder="Paterno" [(ngModel)]="personalActual.apellidoPaterno"><input type="text" class="form-control" placeholder="Materno" [(ngModel)]="personalActual.apellidoMaterno"></div></div>
+            <div class="form-row"><label class="form-label">Nombres <span class="text-rose-500">*</span></label><div class="form-input-container grid grid-cols-2 gap-4"><input type="text" class="form-control" placeholder="Primer Nombre" [(ngModel)]="personalActual.primerNombre"><input type="text" class="form-control" placeholder="Segundo Nombre" [(ngModel)]="personalActual.segundoNombre"></div></div>
+            <div class="form-row"><label class="form-label">Nacimiento <span class="text-rose-500">*</span></label><div class="form-input-container flex items-center space-x-4"><input type="date" class="form-control w-1/2" [(ngModel)]="personalActual.fechaNacimiento" (change)="calcularEdad($event)"><div class="flex items-center space-x-2 w-1/2"><span class="text-sm font-medium">Edad:</span><input type="text" class="form-control bg-slate-50 w-24 text-center text-indigo-600" readonly placeholder="-" [value]="edadCalculada !== null ? edadCalculada + ' años' : ''"></div></div></div>
+            <div class="form-row"><label class="form-label">Nacionalidad <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.nacionalidad" [(ngModel)]="personalActual.nacionalidad"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Ind. domiciliado <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.indicadorDomiciliado" [(ngModel)]="personalActual.indicadorDomiciliado"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Sexo <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.sexo" [(ngModel)]="personalActual.sexo"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Estado civil <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.estadoCivil" [(ngModel)]="personalActual.estadoCivil"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Grupo sanguíneo</label><div class="form-input-container"><app-search-select [opciones]="catalogos.grupoSanguineo" [(ngModel)]="personalActual.grupoSanguineo"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Donante</label><div class="form-input-container flex space-x-6"><label class="flex items-center"><input type="radio" name="don" [value]="true" [(ngModel)]="personalActual.esDonante" class="mr-2"> Sí</label><label class="flex items-center"><input type="radio" name="don" [value]="false" [(ngModel)]="personalActual.esDonante" class="mr-2"> No</label></div></div>
+            <div class="form-row"><label class="form-label">Discapacidad</label><div class="form-input-container flex space-x-6"><label class="flex items-center"><input type="radio" name="disc" [value]="true" [(ngModel)]="personalActual.tieneDiscapacidad" class="mr-2"> Sí</label><label class="flex items-center"><input type="radio" name="disc" [value]="false" [(ngModel)]="personalActual.tieneDiscapacidad" class="mr-2"> No</label></div></div>
+            <div class="form-row"><label class="form-label">Socio de Negocio</label><div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.socioNegocio"></div></div>
+          </div>
+        </div>
+
+        <!-- 2. CONTRATACION (Listas Dinámicas) -->
+        <div *ngIf="seccionActiva === 'contratacion'" class="animate-fade-in">
+          <div class="flex justify-between border-b pb-3 mb-6"><h2 class="text-lg font-bold">Contratos</h2><button class="btn-outline text-indigo-600" (click)="abrirModalContrato()">Agregar</button></div>
+          <div *ngIf="contratos.length > 0" class="grid grid-cols-2 gap-4">
+            <div *ngFor="let c of contratos; let i = index" class="bg-white rounded-xl p-5 border shadow-sm group relative">
+               <div class="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                 <button class="bg-white rounded-full p-1 border shadow-sm text-slate-400 hover:text-indigo-600" (click)="editarContrato(i)"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                 <button class="bg-white rounded-full p-1 border shadow-sm text-rose-500 hover:text-rose-700" (click)="eliminarContrato(i)"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+               </div>
+               <h4 class="font-bold text-sm text-indigo-700 pr-16">{{ getDescripcion('tipoContrato', c.tipoContrato) }}</h4>
+               <div class="text-xs text-slate-600 mt-3 space-y-1.5">
+                  <p><span class="font-semibold text-slate-500">Vigencia:</span> {{ c.fechaInicio | date:'dd/MM/yyyy' }} al {{ c.indeterminado ? 'Indeterminado' : (c.fechaFin | date:'dd/MM/yyyy') }}</p>
+                  <p><span class="font-semibold text-slate-500">Trabajador:</span> {{ getDescripcion('tipoTrabajador', c.tipoTrabajador) }}</p>
+                  <p><span class="font-semibold text-slate-500">Régimen:</span> {{ getDescripcion('regimenLaboral', c.regimenLaboral) }}</p>
+                  <p><span class="font-semibold text-slate-500">Motivo:</span> {{ getDescripcion('motivoContratacion', c.motivoContratacion) }}</p>
+                  <p><span class="font-semibold text-slate-500">Jornada (hrs):</span> {{ c.horasJornada }} diarias / {{ c.horasMensuales }} mensuales</p>
+               </div>
+            </div>
+          </div>
+          <div *ngIf="contratos.length === 0" class="empty-state"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" class="w-24 h-24 mb-3 opacity-50 grayscale"><p>Sin resultados</p></div>
+        </div>
+
+        <!-- 3. MODALIDAD -->
+        <div *ngIf="seccionActiva === 'modalidad-trabajo'" class="animate-fade-in">
+          <h2 class="section-title">Modalidad de trabajo</h2>
+          <div class="space-y-5">
+            <div class="form-row"><label class="form-label">Situación trabajador</label><div class="form-input-container"><app-search-select [opciones]="catalogos.situacionTrabajador" [(ngModel)]="personalActual.situacionTrabajador"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Tipo jornada <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoJornada" [(ngModel)]="personalActual.tipoJornada"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Jornada máxima</label><div class="form-input-container flex space-x-6"><label class="flex items-center"><input type="radio" name="rj" [value]="true" [(ngModel)]="personalActual.trabajaJornadaMaxima" class="mr-2"> Sí</label><label class="flex items-center"><input type="radio" name="rj" [value]="false" [(ngModel)]="personalActual.trabajaJornadaMaxima" class="mr-2"> No</label></div></div>
+            <div class="form-row"><label class="form-label">Trabajo atípico</label><div class="form-input-container flex space-x-6"><label class="flex items-center"><input type="radio" name="at" [value]="true" [(ngModel)]="personalActual.trabajoAtipico" class="mr-2"> Sí</label><label class="flex items-center"><input type="radio" name="at" [value]="false" [(ngModel)]="personalActual.trabajoAtipico" class="mr-2"> No</label></div></div>
+            <div class="form-row"><label class="form-label">Horario nocturno</label><div class="form-input-container flex space-x-6"><label class="flex items-center"><input type="radio" name="hn" [value]="true" [(ngModel)]="personalActual.horarioNocturno" class="mr-2"> Sí</label><label class="flex items-center"><input type="radio" name="hn" [value]="false" [(ngModel)]="personalActual.horarioNocturno" class="mr-2"> No</label></div></div>
+            <div class="form-row"><label class="form-label">Situación especial</label><div class="form-input-container"><app-search-select [opciones]="catalogos.situacionEspecial" [(ngModel)]="personalActual.situacionEspecial"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Modalidad</label><div class="form-input-container"><app-search-select [opciones]="catalogos.modalidadTrabajo" [(ngModel)]="personalActual.modalidadTrabajo"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Sindicalizado</label><div class="form-input-container flex space-x-6"><label class="flex items-center"><input type="radio" name="sin" [value]="true" [(ngModel)]="personalActual.esSindicalizado" class="mr-2"> Sí</label><label class="flex items-center"><input type="radio" name="sin" [value]="false" [(ngModel)]="personalActual.esSindicalizado" class="mr-2"> No</label></div></div>
+            <div class="form-row"><label class="form-label">Cuota Sindical</label><div class="form-input-container flex space-x-6"><label class="flex items-center"><input type="radio" name="acs" [value]="true" [(ngModel)]="personalActual.aplicaCuotaSindical" class="mr-2"> Sí</label><label class="flex items-center"><input type="radio" name="acs" [value]="false" [(ngModel)]="personalActual.aplicaCuotaSindical" class="mr-2"> No</label></div></div>
+          </div>
+        </div>
+
+        <!-- 4. AFILIACIÓN -->
+        <div *ngIf="seccionActiva === 'afiliacion'" class="animate-fade-in">
+          <h2 class="section-title">Afiliación</h2>
+          <div class="space-y-5">
+            <div class="form-row"><label class="form-label">Régimen ESSALUD <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.regimenEssalud" [(ngModel)]="personalActual.regimenEssalud"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Salud EPS <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.saludEps" [(ngModel)]="personalActual.saludEps"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">ESSALUD Vida</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="personalActual.tieneEssaludVida"><span class="slider"></span></label></div></div>
+            <div class="form-row"><label class="form-label">SCTR Salud</label><div class="form-input-container"><app-search-select [opciones]="sctrSaludBD" campoValor="id" campoDesc="descripcion" [(ngModel)]="personalActual.sctrSalud"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Aporte SCTR Salud</label><div class="form-input-container"><app-search-select [opciones]="catalogos.aporteSctrSalud" [(ngModel)]="personalActual.aporteSctrSalud"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">SCTR Pensión</label><div class="form-input-container"><app-search-select [opciones]="sctrPensionBD" campoValor="id" campoDesc="descripcion" [(ngModel)]="personalActual.sctrPension"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Aporte SCTR Pen.</label><div class="form-input-container"><app-search-select [opciones]="catalogos.aporteSctrPension" [(ngModel)]="personalActual.aporteSctrPension"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Desc. SENATI</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="personalActual.descuentaSenati"><span class="slider"></span></label></div></div>
+            <div class="form-row"><label class="form-label">Régimen pensión <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.regimenPensionario" [(ngModel)]="personalActual.regimenPensionario"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">AFP Ley 27252</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="personalActual.tieneAfpLey27252"><span class="slider"></span></label></div></div>
+            <div class="form-row"><label class="form-label">APT FCJMMS</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="personalActual.tieneAptFcjmms"><span class="slider"></span></label></div></div>
+            <div class="form-row"><label class="form-label">C.U.S.P.P.</label><div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.cuspp"></div></div>
+            <div class="form-row"><label class="form-label">Comisión AFP</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoComision" [(ngModel)]="personalActual.tipoComisionAfp"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Jubilado</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="personalActual.esJubilado"><span class="slider"></span></label></div></div>
+          </div>
+        </div>
+
+        <!-- 5. REMUNERACIÓN -->
+        <div *ngIf="seccionActiva === 'remuneracion'" class="animate-fade-in">
+          <h2 class="section-title">Remuneración</h2>
+          <div class="space-y-5">
+            <div class="form-row"><label class="form-label">Unidad salarial <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.unidadSalarial" [(ngModel)]="personalActual.unidadSalarial"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Sueldo <span class="text-rose-500">*</span></label><div class="form-input-container"><input type="number" class="form-control w-1/3" [(ngModel)]="personalActual.sueldo"></div></div>
+            <div class="form-row"><label class="form-label">Asignación familiar</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="personalActual.tieneAsignacionFamiliar"><span class="slider"></span></label></div></div>
+            <div class="form-row"><label class="form-label">Periodicidad de la remuneración</label><div class="form-input-container"><app-search-select [opciones]="catalogos.periodicidadRemuneracion" [(ngModel)]="personalActual.periodicidadRemuneracion"></app-search-select></div></div>
+
+            <div class="border-b pt-4 pb-2 mb-4"><h3 class="font-bold text-sm">Cuentas: Haberes</h3></div>
+            <div class="form-row"><label class="form-label">Moneda <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoMoneda" [(ngModel)]="personalActual.tipoMonedaHaberes"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Banco</label><div class="form-input-container"><app-search-select [opciones]="catalogos.entidadFinanciera" [(ngModel)]="personalActual.entidadFinancieraHaberes"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Tipo Cuenta</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoCuenta" [(ngModel)]="personalActual.tipoCuenta"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Numero Cuenta</label><div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.cuentaBancariaHaberes"></div></div>
+            <div class="form-row"><label class="form-label">Cuenta CCI</label><div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.cuentaInterbancariaHaberes"></div></div>
+
+            <div class="border-b pt-4 pb-2 mb-4"><h3 class="font-bold text-sm">Cuentas: CTS</h3></div>
+            <div class="form-row"><label class="form-label">Moneda</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoMoneda" [(ngModel)]="personalActual.tipoMonedaCts"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Banco</label><div class="form-input-container"><app-search-select [opciones]="catalogos.entidadFinanciera" [(ngModel)]="personalActual.entidadFinancieraCts"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Tipo Cuenta</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoCuenta" [(ngModel)]="personalActual.tipoCuentaCts"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Numero Cuenta</label><div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.cuentaBancariaCts"></div></div>
+            <div class="form-row"><label class="form-label">Cuenta CCI</label><div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.cuentaInterbancariaCts"></div></div>
+
+            <div class="border-b pt-4 pb-2 mb-4"><h3 class="font-bold text-sm">Tributación</h3></div>
+            <div class="form-row"><label class="form-label">Exoneración 5ta</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="personalActual.exoneracion5ta"><span class="slider"></span></label></div></div>
+            <div class="form-row"><label class="form-label">Certificado 5ta</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="personalActual.tieneCertificado5ta"><span class="slider"></span></label></div></div>
+
+            <div *ngIf="personalActual.tieneCertificado5ta" class="space-y-5 animate-fade-in">
+              <div class="form-row"><label class="form-label">Total rentas <span class="text-rose-500">*</span></label><div class="form-input-container"><input type="number" class="form-control w-1/3" [(ngModel)]="personalActual.totalRentas"></div></div>
+              <div class="form-row"><label class="form-label">Impuesto retenido</label><div class="form-input-container"><input type="number" class="form-control w-1/3" [(ngModel)]="personalActual.impuestoRetenido"></div></div>
+            </div>
+
+            <div class="form-row"><label class="form-label">Doble tributación</label><div class="form-input-container"><app-search-select [opciones]="catalogos.dobleTributacion" [(ngModel)]="personalActual.dobleTributacion"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Tipo RIA</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoNominaRia" [(ngModel)]="personalActual.tipoNominaRia"></app-search-select></div></div>
+          </div>
+        </div>
+
+        <!-- 6. ROL ORGANIZATIVO -->
+        <div *ngIf="seccionActiva === 'rol-organizativo'" class="animate-fade-in">
+          <h2 class="section-title">Rol Organizativo</h2>
+          <div class="space-y-5">
+            <div class="form-row"><label class="form-label">Grupo de nómina <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.grupoNomina" [(ngModel)]="personalActual.grupoNomina"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Categoria PLAME <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.categoriaPlame" [(ngModel)]="personalActual.categoriaPlame"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Categoria ocupacional <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.cargo" [(ngModel)]="personalActual.cargo"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Fecha de asignación del cargo <span class="text-rose-500">*</span></label><div class="form-input-container"><input type="date" class="form-control w-1/2" [(ngModel)]="personalActual.fechaAsignacionCargo"></div></div>
+            <div class="form-row"><label class="form-label">Ocupación</label><div class="form-input-container"><app-search-select [opciones]="catalogos.ocupacion" [(ngModel)]="personalActual.ocupacion"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Proyecto</label><div class="form-input-container relative cursor-pointer" (click)="abrirModalProyecto()"><input type="text" class="form-control bg-white" readonly [value]="proyectoSeleccionadoDesc"></div></div>
+            <div class="form-row"><label class="form-label">Lugar Trabajo</label><div class="form-input-container"><app-search-select [opciones]="catalogos.lugarTrabajo" [(ngModel)]="personalActual.lugarTrabajo"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Lugar Pago</label><div class="form-input-container"><app-search-select [opciones]="catalogos.lugarTrabajo" [(ngModel)]="personalActual.lugarPago"></app-search-select></div></div>
+
+            <div class="form-row"><label class="form-label">Área</label><div class="form-input-container"><app-search-select [opciones]="areasBD" campoValor="Id" campoDesc="Nombre" [(ngModel)]="personalActual.idArea" (ngModelChange)="onAreaOrgChange()"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Departamento</label><div class="form-input-container"><app-search-select [opciones]="departamentosFiltrados" campoValor="Id" campoDesc="Nombre" [(ngModel)]="personalActual.idDepartamento" (ngModelChange)="onDepartamentoOrgChange()"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Sección</label><div class="form-input-container"><app-search-select [opciones]="seccionesFiltradas" campoValor="Id" campoDesc="Nombre" [(ngModel)]="personalActual.idSeccion"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Jefe inmediato</label><div class="form-input-container relative cursor-pointer" (click)="abrirModalJefe()"><input type="text" class="form-control bg-white" readonly [value]="jefeInmediatoSeleccionado"></div></div>
+          </div>
+        </div>
+
+        <!-- 7. EDUCACIÓN -->
+        <div *ngIf="seccionActiva === 'educacion'" class="animate-fade-in">
+          <h2 class="section-title">Educación</h2>
+          <div class="space-y-5">
+            <div class="form-row">
+              <label class="form-label">Situación educativa</label>
+              <div class="form-input-container"><app-search-select [opciones]="catalogos.situacionEducativa" [(ngModel)]="personalActual.situacionEducativa"></app-search-select></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Formación superior completa</label>
+              <div class="form-input-container"><app-search-select [opciones]="catalogos.formacionSuperiorCompleta" [(ngModel)]="personalActual.formacionSuperiorCompleta"></app-search-select></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Indicador de educación completa (Perú)</label>
+              <div class="form-input-container flex space-x-6">
+                <label class="flex items-center"><input type="radio" name="eduComp" [value]="true" [(ngModel)]="personalActual.indicadorEducacionCompletaPeru" class="mr-2"> Sí</label>
+                <label class="flex items-center"><input type="radio" name="eduComp" [value]="false" [(ngModel)]="personalActual.indicadorEducacionCompletaPeru" class="mr-2"> No</label>
+              </div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Código de institución educativa</label>
+              <div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.codigoInstitucionEducativa"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Código de carrera</label>
+              <div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.codigoCarrera"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Año de egreso</label>
+              <div class="form-input-container"><input type="number" class="form-control" [(ngModel)]="personalActual.anioEgreso"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. DATOS ADICIONALES -->
+        <div *ngIf="seccionActiva === 'datos-adicionales'" class="animate-fade-in">
+          <h2 class="section-title">Datos Adicionales</h2>
+          <div class="space-y-5">
+            <div class="form-row">
+              <label class="form-label">Teléfono de casa</label>
+              <div class="form-input-container relative">
+                <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <input type="text" class="form-control pl-10" [(ngModel)]="personalActual.telefonoCasa">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label class="form-label">Teléfono móvil <span class="text-rose-500">*</span></label>
+              <div class="form-input-container relative">
+                <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                <input type="text" class="form-control pl-10" [(ngModel)]="personalActual.telefonoMovil">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label class="form-label">Teléfono de oficina</label>
+              <div class="form-input-container relative">
+                <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                <input type="text" class="form-control pl-10" [(ngModel)]="personalActual.telefonoOficina">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label class="form-label">Anexo</label>
+              <div class="form-input-container">
+                <input type="text" class="form-control w-1/3" [(ngModel)]="personalActual.anexo">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label class="form-label">E-mail personal <span class="text-rose-500">*</span></label>
+              <div class="form-input-container relative">
+                <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                <input type="email" class="form-control pl-10" placeholder="nombre@ejemplo.com" [(ngModel)]="personalActual.emailPersonal">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label class="form-label">E-mail del trabajo</label>
+              <div class="form-input-container relative">
+                <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                <input type="email" class="form-control pl-10" placeholder="trabajo@empresa.com" [(ngModel)]="personalActual.emailTrabajo">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 9. RESIDENCIA -->
+        <div *ngIf="seccionActiva === 'residencia'" class="animate-fade-in">
+          <h2 class="section-title">Residencia</h2>
+          <div class="space-y-5">
+            <div class="form-row">
+              <label class="form-label">Dirección completa</label>
+              <div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.direccionCompleta"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Tipo de vía</label>
+              <div class="form-input-container"><app-search-select [opciones]="catalogos.tipoVia" customClass="bg-slate-100" [(ngModel)]="personalActual.tipoVia"></app-search-select></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Nombre de vía</label>
+              <div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.nombreVia"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Número de vía</label>
+              <div class="form-input-container"><input type="text" class="form-control w-1/3" [(ngModel)]="personalActual.numeroVia"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Departamento (Dpto.)</label>
+              <div class="form-input-container"><input type="text" class="form-control w-1/3" [(ngModel)]="personalActual.departamentoInmueble"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Interior</label>
+              <div class="form-input-container"><input type="text" class="form-control w-1/3" [(ngModel)]="personalActual.interior"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Manzana</label>
+              <div class="form-input-container"><input type="text" class="form-control w-1/3" [(ngModel)]="personalActual.manzana"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Lote</label>
+              <div class="form-input-container"><input type="text" class="form-control w-1/3" [(ngModel)]="personalActual.lote"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Kilómetro</label>
+              <div class="form-input-container"><input type="text" class="form-control w-1/3" [(ngModel)]="personalActual.kilometro"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Block</label>
+              <div class="form-input-container"><input type="text" class="form-control w-1/3" [(ngModel)]="personalActual.block"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Etapa</label>
+              <div class="form-input-container"><input type="text" class="form-control w-1/3" [(ngModel)]="personalActual.etapa"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Tipo de zona</label>
+              <div class="form-input-container"><app-search-select [opciones]="catalogos.tipoZona" customClass="bg-slate-100" [(ngModel)]="personalActual.tipoZona"></app-search-select></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Nombre de zona</label>
+              <div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.nombreZona"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Referencia</label>
+              <div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.referencia"></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">País</label>
+              <div class="form-input-container"><app-search-select [opciones]="paisesResidencia" campoValor="ubigeo" campoDesc="nombre" customClass="bg-slate-100" [(ngModel)]="personalActual.paisResidencia" (ngModelChange)="onPaisChange()"></app-search-select></div>
+            </div>
+            <!-- CASCADA UBIGEO -->
+            <div class="form-row">
+              <label class="form-label">Departamento</label>
+              <div class="form-input-container"><app-search-select [opciones]="departamentosResidencia" campoValor="id" campoDesc="nombre" customClass="bg-indigo-50" [(ngModel)]="personalActual.departamentoInmueble" (ngModelChange)="onDepartamentoChange()" [disabled]="!departamentosResidencia.length"></app-search-select></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Provincia</label>
+              <div class="form-input-container"><app-search-select [opciones]="provinciasResidencia" campoValor="id" campoDesc="nombre" customClass="bg-indigo-50" [(ngModel)]="personalActual.provinciaInmueble" (ngModelChange)="onProvinciaChange()" [disabled]="!provinciasResidencia.length"></app-search-select></div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Distrito</label>
+              <!-- El ubigeo final es el que se guarda en la Base de Datos -->
+              <div class="form-input-container"><app-search-select [opciones]="distritosResidencia" campoValor="id" campoDesc="nombre" customClass="bg-indigo-50" [(ngModel)]="personalActual.ubigeo" [disabled]="!distritosResidencia.length"></app-search-select></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10. DATOS COMPLEMENTARIOS -->
+        <div *ngIf="seccionActiva === 'datos-complementarios'" class="animate-fade-in">
+          <h2 class="section-title">Complementarios</h2>
+          <div class="space-y-5 border-b pb-6 mb-6">
+            <div class="form-row"><label class="form-label">Cat. Construcción</label><div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.categoriaConstruccionCivil"></div></div>
+            <div class="form-row"><label class="form-label">Esp. Construcción</label><div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.especialidadConstruccionCivil"></div></div>
+            <div class="form-row"><label class="form-label">Movilidad</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="personalActual.tieneMovilidad"><span class="slider"></span></label></div></div>
+
+            <div class="form-row mt-4 pt-4 border-t border-slate-100">
+              <label class="form-label font-bold text-slate-800">Otro empleador</label>
+              <div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="tieneOtroEmpleador"><span class="slider"></span></label></div>
+            </div>
+          </div>
+
+          <div *ngIf="tieneOtroEmpleador" class="animate-fade-in">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-slate-800">Empresas Registradas</h3>
+              <button class="btn-outline text-indigo-600 border-indigo-200" (click)="abrirModalEmpresa()"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg> Agregar empresa</button>
+            </div>
+            <div *ngIf="empresas.length > 0" class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+              <div *ngFor="let e of empresas; let i = index" class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm relative group hover:shadow-md transition-shadow">
+                <div class="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button class="text-slate-400 hover:text-indigo-600 bg-white rounded-full p-1 shadow-sm border border-slate-200" (click)="editarEmpresa(i)"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                  <button class="text-slate-400 hover:text-rose-600 bg-white rounded-full p-1 shadow-sm border border-slate-200" (click)="eliminarEmpresa(i)"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                </div>
+                <div class="flex items-start space-x-3 mb-4 pr-16">
+                  <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 self-start mt-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></div>
+                  <div class="min-w-0 flex-1">
+                    <h4 class="text-sm font-bold text-indigo-700 truncate">{{ getDescripcion('empresasExternas', e.empresa) }}</h4>
+                    <div class="text-xs text-slate-600 mt-2 space-y-1.5">
+                      <p><span class="font-semibold text-slate-500">Periodo:</span> {{ e.fechaInicio | date:'dd/MM/yyyy' }} - {{ e.fechaFin ? (e.fechaFin | date:'dd/MM/yyyy') : 'Actualidad' }}</p>
+                      <p><span class="font-semibold text-slate-500">Sueldo:</span> {{ getDescripcion('tipoMoneda', e.moneda) }} {{ e.sueldo | number:'1.2-2' }}</p>
+                      <p><span class="font-semibold text-slate-500">Imp. 5ta:</span> {{ e.imp5ta ? 'Sí' : 'No' }}</p>
+                      <p *ngIf="e.comentario" class="truncate" [title]="e.comentario"><span class="font-semibold text-slate-500">Comentario:</span> {{ e.comentario }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="empresas.length === 0" class="empty-state"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" class="w-24 h-24 mb-3 opacity-50 grayscale"><p>Sin resultados</p></div>
+          </div>
+        </div>
+
+        <!-- 11. DERECHOHABIENTES -->
+        <div *ngIf="seccionActiva === 'derechohabientes'" class="animate-fade-in">
+          <div class="flex justify-between border-b pb-3 mb-6"><h2 class="text-lg font-bold">Derechohabientes</h2><button class="btn-primary" (click)="abrirModalDerechohabiente()"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg> Agregar</button></div>
+          <div *ngIf="derechohabientes.length > 0" class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <div *ngFor="let d of derechohabientes; let i = index" class="bg-white rounded-xl p-5 border shadow-sm group relative">
+              <div class="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100">
+                <button class="bg-white rounded-full p-1 border shadow text-slate-400" (click)="editarDerechohabiente(i)"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                <button class="bg-white rounded-full p-1 border shadow text-rose-500" (click)="eliminarDerechohabiente(i)"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+              </div>
+              <div class="flex items-start space-x-3 mb-2 pr-16">
+                <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 self-start mt-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></div>
+                <div class="min-w-0 flex-1">
+                  <h4 class="text-sm font-bold text-indigo-700 truncate">{{ d.nombres }} {{ d.apellidos }}</h4>
+                  <div class="text-xs text-slate-600 mt-2 space-y-1.5">
+                    <p><span class="font-semibold text-slate-500">Vínculo:</span> {{ getDescripcion('vinculosFamiliares', d.vinculoFamiliar) }}</p>
+                    <p><span class="font-semibold text-slate-500">Documento:</span> {{ getDescripcion('tipoDocumento', d.tipoDocumento) }} - {{ d.numeroDocumento }}</p>
+                    <p><span class="font-semibold text-slate-500">Nacimiento:</span> {{ d.fechaNacimiento | date:'dd/MM/yyyy' }}</p>
+                    <p><span class="font-semibold text-slate-500">Fecha Alta:</span> {{ d.fechaAlta | date:'dd/MM/yyyy' }}</p>
+                    <p *ngIf="d.estudiosActivos" class="text-emerald-600 font-semibold mt-1">Estudios Activos</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="derechohabientes.length === 0" class="empty-state"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" class="w-24 h-24 mb-3 opacity-50 grayscale"><p>Sin resultados</p></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODALES -->
+<!-- ========================================== -->
+
+<!-- MODAL JEFE INMEDIATO -->
+<div class="modal-overlay" *ngIf="modalJefeAbierto">
+  <div class="modal-content w-[600px]">
+    <div class="modal-header"><h3 class="font-bold">Seleccionar Jefe</h3><button class="text-slate-400" (click)="cerrarModalJefe()"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
+    <div class="p-6">
+      <div class="mb-4 relative"><svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><input type="text" class="w-full pl-10 pr-4 py-2 border rounded-md" placeholder="Buscar..." [(ngModel)]="busquedaJefe" (input)="paginaActualJefe = 1"></div>
+      <div class="overflow-x-auto border rounded-lg mb-4">
+        <table class="w-full text-left border-collapse">
+          <thead><tr class="bg-slate-50 border-b text-xs text-slate-500 uppercase"><th class="px-4 py-3 w-16">Foto</th><th class="px-4 py-3">Nombre</th></tr></thead>
+          <tbody class="divide-y"><tr *ngFor="let emp of empleadosJefeFiltrados" class="hover:bg-indigo-50 cursor-pointer" (click)="seleccionarJefe(emp)"><td class="px-4 py-3"><img [src]="emp.Avatar" class="w-8 h-8 rounded-full border border-slate-200 bg-white"></td><td class="px-4 py-3 text-sm font-medium">{{emp.Nombre}}</td></tr></tbody>
+        </table>
+      </div>
+      <div class="flex justify-between text-sm text-slate-500"><span>Página {{paginaActualJefe}} de {{totalPaginasJefe}}</span><div class="space-x-2"><button class="btn-outline px-3 py-1" (click)="paginaAnteriorJefe()">Ant</button><button class="btn-outline px-3 py-1" (click)="paginaSiguienteJefe()">Sig</button></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROYECTO -->
+<div class="modal-overlay" *ngIf="modalProyectoAbierto">
+  <div class="modal-content w-[600px]">
+    <div class="modal-header"><h3 class="font-bold">Seleccionar Proyecto</h3><button class="text-slate-400" (click)="cerrarModalProyecto()"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
+    <div class="p-6">
+      <div class="overflow-x-auto border rounded-lg">
+        <table class="w-full text-left border-collapse">
+          <thead><tr class="bg-slate-50 border-b text-xs text-slate-500 uppercase"><th class="px-4 py-3">Código</th><th class="px-4 py-3">Descripción</th></tr></thead>
+          <tbody class="divide-y"><tr *ngFor="let proy of catalogos.proyectoObra" class="hover:bg-indigo-50 cursor-pointer" (click)="seleccionarProyecto(proy)"><td class="px-4 py-3 text-sm">{{proy.codigo}}</td><td class="px-4 py-3 text-sm font-medium">{{proy.descripcion}}</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONTRATO -->
+<div class="modal-overlay" *ngIf="modalContratoAbierto">
+  <div class="modal-content w-[900px]">
+    <div class="modal-header"><h3 class="font-bold">Registrar contrato</h3><button class="text-slate-400" (click)="cerrarModalContrato()"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
+    <form #formContrato="ngForm">
+      <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div class="form-row"><label class="form-label">Tipo trabajador</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoTrabajador" name="tTrabajador" [(ngModel)]="contratoActual.tipoTrabajador"></app-search-select></div></div>
+        <div class="form-row"><label class="form-label">Régimen Laboral</label><div class="form-input-container"><app-search-select [opciones]="catalogos.regimenLaboral" name="rLaboral" [(ngModel)]="contratoActual.regimenLaboral"></app-search-select></div></div>
+        <div class="form-row"><label class="form-label">Tipo contrato</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoContrato" name="tContrato" [(ngModel)]="contratoActual.tipoContrato"></app-search-select></div></div>
+        <div class="form-row"><label class="form-label">Motivo</label><div class="form-input-container"><app-search-select [opciones]="catalogos.motivoContratacion" name="mContrato" [(ngModel)]="contratoActual.motivoContratacion"></app-search-select></div></div>
+        <div class="form-row"><label class="form-label">Fecha inicio</label><div class="form-input-container"><input type="date" class="form-control w-1/2" name="fInicio" [(ngModel)]="contratoActual.fechaInicio" (change)="calcularFechaFin()" required></div></div>
+        <div class="form-row"><label class="form-label">Indeterminado</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" name="indet" [(ngModel)]="contratoActual.indeterminado"><span class="slider"></span></label></div></div>
+        <div class="form-row" *ngIf="!contratoActual.indeterminado"><label class="form-label">Meses</label><div class="form-input-container"><input type="number" class="form-control w-24" name="meses" [(ngModel)]="contratoActual.meses" (input)="calcularFechaFin()" required></div></div>
+        <div class="form-row" *ngIf="!contratoActual.indeterminado"><label class="form-label">Fecha fin</label><div class="form-input-container"><input type="date" class="form-control w-1/2" name="fFin" [(ngModel)]="contratoActual.fechaFin" required></div></div>
+        <div class="form-row"><label class="form-label">Horas laborales</label><div class="form-input-container grid grid-cols-2 gap-4"><input type="number" class="form-control" placeholder="Jornada" name="hJor" [(ngModel)]="contratoActual.horasJornada" required><input type="number" class="form-control" placeholder="Mensuales" name="hMen" [(ngModel)]="contratoActual.horasMensuales" required></div></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn-outline" (click)="cerrarModalContrato()">Cerrar</button><button type="button" class="btn-primary" [disabled]="formContrato.invalid" (click)="registrarContrato()">Registrar</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL EMPRESA -->
+<div class="modal-overlay" *ngIf="modalEmpresaAbierta">
+  <div class="modal-content w-[600px]">
+    <div class="modal-header"><h3 class="font-bold">Registrar Empresa</h3><button class="text-slate-400" (click)="cerrarModalEmpresa()"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
+    <form #formEmpresa="ngForm">
+      <div class="p-6 space-y-4">
+        <div class="form-row"><label class="form-label">Empresa</label><div class="form-input-container"><app-search-select [opciones]="catalogos.empresasExternas" name="emp" [(ngModel)]="empresaActual.empresa"></app-search-select></div></div>
+        <div class="form-row"><label class="form-label">Fecha inicio</label><div class="form-input-container"><input type="date" class="form-control w-1/2" name="fIni" [(ngModel)]="empresaActual.fechaInicio" required></div></div>
+        <div class="form-row"><label class="form-label">Fecha fin</label><div class="form-input-container"><input type="date" class="form-control w-1/2" name="fFin" [(ngModel)]="empresaActual.fechaFin"></div></div>
+        <div class="form-row"><label class="form-label">Moneda</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoMoneda" name="mon" [(ngModel)]="empresaActual.moneda"></app-search-select></div></div>
+        <div class="form-row"><label class="form-label">Sueldo</label><div class="form-input-container"><input type="number" class="form-control w-1/2" name="suel" [(ngModel)]="empresaActual.sueldo" required></div></div>
+        <div class="form-row"><label class="form-label">Imp. 5ta</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" name="i5ta" [(ngModel)]="empresaActual.imp5ta"><span class="slider"></span></label></div></div>
+        <div class="form-row"><label class="form-label mb-1">Comentario</label><div class="form-input-container"><textarea class="form-control resize-none" rows="3" name="com" [(ngModel)]="empresaActual.comentario"></textarea></div></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn-outline" (click)="cerrarModalEmpresa()">Cerrar</button><button type="button" class="btn-primary" [disabled]="formEmpresa.invalid" (click)="registrarEmpresa()">Registrar</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL DERECHOHABIENTE -->
+<div class="modal-overlay" *ngIf="modalDerechohabienteAbierto">
+  <div class="modal-content w-[700px]">
+    <div class="modal-header"><h3 class="font-bold">Derechohabiente</h3><button class="text-slate-400" (click)="cerrarModalDerechohabiente()"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
+    <div class="flex border-b px-6 pt-4 space-x-6 text-sm font-medium">
+      <div class="pb-2 cursor-pointer border-b-2" [ngClass]="tabDerechohabienteActivo === 'personales' ? 'border-indigo-600 text-indigo-600' : 'border-transparent'" (click)="cambiarTabDerechohabiente('personales')">Personales</div>
+      <div class="pb-2 cursor-pointer border-b-2" [ngClass]="tabDerechohabienteActivo === 'afiliacion' ? 'border-indigo-600 text-indigo-600' : 'border-transparent'" (click)="cambiarTabDerechohabiente('afiliacion')">Afiliación</div>
+      <div class="pb-2 cursor-pointer border-b-2" [ngClass]="tabDerechohabienteActivo === 'ubicacion' ? 'border-indigo-600 text-indigo-600' : 'border-transparent'" (click)="cambiarTabDerechohabiente('ubicacion')">Ubicación</div>
+      <div class="pb-2 cursor-pointer border-b-2" [ngClass]="tabDerechohabienteActivo === 'contacto' ? 'border-indigo-600 text-indigo-600' : 'border-transparent'" (click)="cambiarTabDerechohabiente('contacto')">Contacto</div>
+    </div>
+    <form #formDerecho="ngForm">
+      <div class="p-6 max-h-[60vh] overflow-y-auto">
+        <div *ngIf="tabDerechohabienteActivo === 'personales'" class="space-y-4">
+          <div class="form-row"><label class="form-label">T. Documento</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoDocumento" name="tdoc" [(ngModel)]="derechohabienteActual.tipoDocumento"></app-search-select></div></div>
+          <div class="form-row"><label class="form-label">N. Documento</label><div class="form-input-container"><input type="text" class="form-control" name="ndoc" [(ngModel)]="derechohabienteActual.numeroDocumento"></div></div>
+          <div class="form-row"><label class="form-label">País emisor</label><div class="form-input-container"><app-search-select [opciones]="catalogos.paises" name="pemis" [(ngModel)]="derechohabienteActual.paisEmisor"></app-search-select></div></div>
+          <div class="form-row"><label class="form-label">Apellidos</label><div class="form-input-container"><input type="text" class="form-control" name="apell" [(ngModel)]="derechohabienteActual.apellidos" required></div></div>
+          <div class="form-row"><label class="form-label">Nombres</label><div class="form-input-container"><input type="text" class="form-control" name="nomb" [(ngModel)]="derechohabienteActual.nombres" required></div></div>
+          <div class="form-row"><label class="form-label">Nacimiento</label><div class="form-input-container"><input type="date" class="form-control" name="fnac" [(ngModel)]="derechohabienteActual.fechaNacimiento"></div></div>
+          <div class="form-row"><label class="form-label">Sexo</label><div class="form-input-container"><app-search-select [opciones]="catalogos.sexo" name="sexo" [(ngModel)]="derechohabienteActual.sexo"></app-search-select></div></div>
+        </div>
+        <div *ngIf="tabDerechohabienteActivo === 'afiliacion'" class="space-y-4">
+          <div class="form-row"><label class="form-label">Vínculo</label><div class="form-input-container"><app-search-select [opciones]="catalogos.vinculosFamiliares" name="vinc" [(ngModel)]="derechohabienteActual.vinculoFamiliar"></app-search-select></div></div>
+          <div class="form-row"><label class="form-label">T. Doc. Vínculo</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoDocumento" name="tdocv" [(ngModel)]="derechohabienteActual.tipoDocumentoVinculo"></app-search-select></div></div>
+          <div class="form-row"><label class="form-label">N. Doc. Vínculo</label><div class="form-input-container"><input type="text" class="form-control" name="ndocv" [(ngModel)]="derechohabienteActual.numeroDocumentoVinculo"></div></div>
+          <div class="form-row"><label class="form-label">Fecha alta</label><div class="form-input-container"><input type="date" class="form-control" name="falta" [(ngModel)]="derechohabienteActual.fechaAlta" required></div></div>
+          <div class="form-row"><label class="form-label">Estudios activos</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" name="estac" [(ngModel)]="derechohabienteActual.estudiosActivos"><span class="slider"></span></label></div></div>
+        </div>
+<!-- TAB 3: UBICACIÓN -->
+        <div *ngIf="tabDerechohabienteActivo === 'ubicacion'" class="space-y-4 animate-fade-in">
+          <div class="form-row">
+            <label class="form-label">Dirección completa</label>
+            <div class="form-input-container"><input type="text" class="form-control" name="dirCompletaDerecho" [(ngModel)]="derechohabienteActual.direccion"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Tipo de vía</label>
+            <div class="form-input-container"><app-search-select [opciones]="catalogos.tipoVia" customClass="bg-slate-100" name="tipoViaDerecho" [(ngModel)]="derechohabienteActual.tipoVia"></app-search-select></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Nombre de vía</label>
+            <div class="form-input-container"><input type="text" class="form-control" name="nomViaDerecho" [(ngModel)]="derechohabienteActual.nombreVia"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Número de vía</label>
+            <div class="form-input-container"><input type="text" class="form-control w-1/3" name="numViaDerecho" [(ngModel)]="derechohabienteActual.numeroVia"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Departamento (Dpto.)</label>
+            <div class="form-input-container"><input type="text" class="form-control w-1/3" name="dptoUbicDerecho" [(ngModel)]="derechohabienteActual.departamentoUbicacion"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Interior</label>
+            <div class="form-input-container"><input type="text" class="form-control bg-indigo-50 border-indigo-200 w-1/3" name="interiorDerecho" [(ngModel)]="derechohabienteActual.interior"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Manzana</label>
+            <div class="form-input-container"><input type="text" class="form-control w-1/3" name="manzanaDerecho" [(ngModel)]="derechohabienteActual.manzana"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Lote</label>
+            <div class="form-input-container"><input type="text" class="form-control w-1/3" name="loteDerecho" [(ngModel)]="derechohabienteActual.lote"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Kilómetro</label>
+            <div class="form-input-container"><input type="text" class="form-control w-1/3" name="kmDerecho" [(ngModel)]="derechohabienteActual.kilometro"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Block</label>
+            <div class="form-input-container"><input type="text" class="form-control w-1/3" name="blockDerecho" [(ngModel)]="derechohabienteActual.block"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Etapa</label>
+            <div class="form-input-container"><input type="text" class="form-control w-1/3" name="etapaDerecho" [(ngModel)]="derechohabienteActual.etapa"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Tipo de zona</label>
+            <div class="form-input-container"><app-search-select [opciones]="catalogos.tipoZona" customClass="bg-slate-100" name="tipoZonaDerecho" [(ngModel)]="derechohabienteActual.tipoZona"></app-search-select></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Nombre de zona</label>
+            <div class="form-input-container"><input type="text" class="form-control" name="nomZonaDerecho" [(ngModel)]="derechohabienteActual.nombreZona"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Referencia</label>
+            <div class="form-input-container"><input type="text" class="form-control" name="refDerecho" [(ngModel)]="derechohabienteActual.referencia"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">País</label>
+            <div class="form-input-container"><app-search-select [opciones]="paisesResidencia" campoValor="ubigeo" campoDesc="nombre" customClass="bg-slate-100" name="paisDerecho" [(ngModel)]="derechohabienteActual.pais" (ngModelChange)="onPaisDerechoChange()"></app-search-select></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Departamento</label>
+            <div class="form-input-container"><app-search-select [opciones]="departamentosDerecho" campoValor="id" campoDesc="nombre" customClass="bg-slate-100" name="depDerecho" [(ngModel)]="derechohabienteActual.departamento" (ngModelChange)="onDepartamentoDerechoChange()" [disabled]="!departamentosDerecho.length"></app-search-select></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Provincia</label>
+            <div class="form-input-container"><app-search-select [opciones]="provinciasDerecho" campoValor="id" campoDesc="nombre" customClass="bg-slate-100" name="provDerecho" [(ngModel)]="derechohabienteActual.provincia" (ngModelChange)="onProvinciaDerechoChange()" [disabled]="!provinciasDerecho.length"></app-search-select></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Distrito</label>
+            <div class="form-input-container"><app-search-select [opciones]="distritosDerecho" campoValor="id" campoDesc="nombre" name="distDerecho" [(ngModel)]="derechohabienteActual.distrito" [disabled]="!distritosDerecho.length"></app-search-select></div>
+          </div>
+        </div>
+        <div *ngIf="tabDerechohabienteActivo === 'contacto'" class="space-y-4">
+          <div class="form-row"><label class="form-label">Cód. ciudad</label><div class="form-input-container"><app-search-select [opciones]="catalogos.departamentosPeru" name="cciud" [(ngModel)]="derechohabienteActual.codigoCiudad"></app-search-select></div></div>
+          <div class="form-row"><label class="form-label">Teléfono</label><div class="form-input-container"><input type="text" class="form-control" name="teld" [(ngModel)]="derechohabienteActual.telefono"></div></div>
+          <div class="form-row"><label class="form-label">Email</label><div class="form-input-container"><input type="email" class="form-control" name="emad" [(ngModel)]="derechohabienteActual.email"></div></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn-outline" (click)="cerrarModalDerechohabiente()">Cerrar</button><button type="button" class="btn-primary" [disabled]="formDerecho.invalid" (click)="registrarDerechohabiente()">Registrar</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal de Éxito -->
+<div class="modal-overlay" *ngIf="isSuccessModalOpen">
+  <div class="modal-content animate-pop p-8 text-center max-w-sm">
+    <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+    </div>
+    <h3 class="text-xl font-bold text-slate-800 mb-2">{{ successTitle }}</h3>
+    <p class="text-slate-500 mb-6">{{ successMessage }}</p>
+    <button class="btn-primary w-full" (click)="closeSuccessModal()">Continuar</button>
+  </div>
+</div>
+
+<!-- Modal de Error -->
+<div class="modal-overlay" *ngIf="isErrorModalOpen">
+  <div class="modal-content animate-pop p-8 text-center max-w-sm">
+    <div class="w-16 h-16 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    </div>
+    <h3 class="text-xl font-bold text-slate-800 mb-2">{{ errorTitle }}</h3>
+    <p class="text-slate-500 mb-6">{{ errorMessage }}</p>
+    <button class="btn-outline w-full text-slate-700 border-slate-300 hover:bg-slate-50" (click)="closeErrorModal()">Entendido</button>
+  </div>
+</div>
+
+<!-- Modal Subiendo Archivo -->
+<div class="modal-overlay" *ngIf="isUploadingFile">
+  <div class="modal-content animate-pop p-8 text-center max-w-sm flex flex-col items-center justify-center">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+    <h3 class="text-xl font-bold text-slate-800 mb-2">Subiendo archivo...</h3>
+    <p class="text-slate-500">Por favor espere, estamos guardando su foto de perfil.</p>
+  </div>
+</div>

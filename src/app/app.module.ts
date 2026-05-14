@@ -12,7 +12,10 @@ import { mockApiServices } from 'app/mock-api';
 import { LayoutModule } from 'app/layout/layout.module';
 import { AppComponent } from 'app/app.component';
 import { appRoutes } from 'app/app.routing';
- 
+import { InterceptorData } from './shared/services/Interceptor-data';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { SearchSelectComponent } from './modules/components/search-select-component/search-select-component.component';
+
 const routerConfig: ExtraOptions = {
     preloadingStrategy       : PreloadAllModules,
     scrollPositionRestoration: 'enabled'
@@ -20,11 +23,12 @@ const routerConfig: ExtraOptions = {
 
 @NgModule({
     declarations: [
-        AppComponent
+        AppComponent,
     ],
     imports     : [
         BrowserModule,
         BrowserAnimationsModule,
+        SearchSelectComponent,
         RouterModule.forRoot(appRoutes, routerConfig),
 
         // Fuse, FuseConfig & FuseMockAPI
@@ -41,6 +45,14 @@ const routerConfig: ExtraOptions = {
         // 3rd party modules that require global configuration via forRoot
         MarkdownModule.forRoot({})
     ],
+    providers: [
+    // ... otros providers
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: InterceptorData,
+      multi: true
+    }
+  ],
     bootstrap   : [
         AppComponent
     ]
