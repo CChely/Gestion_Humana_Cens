@@ -8,10 +8,14 @@ import { environment } from "environments/environment";
 
 export interface LoginResponse {
     data: {
+        contenedorArchivo: string;
+        proveedorArchivo: string;
         correo: string;
         roles: string[];
+        avatar: string;
         usuarioId: number;
         token: string;
+        nombres: string;
     };
     errors: any[];
     message: string;
@@ -21,12 +25,9 @@ export interface LoginResponse {
 
 export interface AuthState {
     isAuthenticated: boolean;
-    user: {
-        id: string;
-        correo: string;
-        name: string;
-    } | null;
+    user: { id: string; correo: string; name: string } | null;
     token: string | null;
+    containerId: string | null;
 }
 
 @Injectable()
@@ -35,30 +36,30 @@ export class AuthService {
     private _userService = inject(UserService);
     private _router = inject(Router);
 
-    // Signals para el estado de autenticación
+    /** Signal holding the current authentication state */
     private _authState = signal<AuthState>({
         isAuthenticated: false,
         user: null,
         token: null,
+        containerId: null,
     });
 
-    // Computed signals para obtener datos derivados
+    /** Computed signals for easy consumption */
     public isAuthenticated = computed(() => this._authState().isAuthenticated);
     public user = computed(() => this._authState().user);
     public token = computed(() => this._authState().token);
+    public containerId = computed(() => this._authState().containerId);
 
-    /**
-     * Constructor
-     */
     constructor() {
-        // Sincronizar con localStorage al inicializar
+        // Initialise from localStorage on boot
         this._initializeAuthState();
 
-        // Effect para persistir cambios en localStorage
+        // Persist any changes to localStorage for later restores
         effect(() => {
             const state = this._authState();
             if (state.token) {
                 localStorage.setItem("accessToken", state.token);
+                localStorage.setItem("containerId", state.containerId ?? "");
                 if (state.user) {
                     localStorage.setItem("user", JSON.stringify(state.user));
                 }
@@ -66,12 +67,11 @@ export class AuthService {
         });
     }
 
-    /**
-     * Inicializar el estado de autenticación desde localStorage
-     */
+    /** Load state from localStorage if available and valid */
     private _initializeAuthState(): void {
         const token = localStorage.getItem("accessToken");
         const userData = localStorage.getItem("user");
+        const containerId = localStorage.getItem("containerId");
 
         if (token && !AuthUtils.isTokenExpired(token)) {
             let user = null;
@@ -90,9 +90,9 @@ export class AuthService {
                 isAuthenticated: true,
                 user: user,
                 token: token,
+                containerId: containerId,
             });
 
-            // Actualizar el usuario en el servicio
             if (user) {
                 this._userService.user = {
                     id: user.id,
@@ -105,27 +105,17 @@ export class AuthService {
         }
     }
 
-    // Getter para compatibilidad con código existente
+    /** Compatibility getter for existing code */
     get accessToken(): string {
         return this.token() ?? "";
     }
 
+    /** Compatibility setter for existing code */
     set accessToken(token: string) {
-        this._authState.update((state) => ({
-            ...state,
-            token: token,
-        }));
+        this._authState.update((state) => ({ ...state, token }));
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Sign in
-     *
-     * @param credentials
-     */
+    /** Sign‑in logic, mapping the response to our state */
     signIn(credentials: {
         correo: string;
         password: string;
@@ -137,7 +127,6 @@ export class AuthService {
             )
             .pipe(
                 switchMap((response: LoginResponse) => {
-                    // Validar que la respuesta sea exitosa
                     if (
                         response.status &&
                         response.data &&
@@ -146,110 +135,72 @@ export class AuthService {
                         const userData = {
                             id: response.data.usuarioId.toString(),
                             correo: response.data.correo,
-                            name: response.data.correo,
-                            status:
-                                response.data.roles &&
-                                response.data.roles.length > 0
-                                    ? response.data.roles[0]
-                                    : "online",
+                            name: response.data.nombres,
                         };
 
-                        // Actualizar el Signal de estado
+                        // Persist both the token and the container id
                         this._authState.set({
                             isAuthenticated: true,
                             user: userData,
                             token: response.data.token,
+                            containerId: response.data.contenedorArchivo,
                         });
 
-                        // Actualizar el usuario en el servicio
+                        // Persist container id outside the effect path for immediate usage
+                        localStorage.setItem(
+                            "containerId",
+                            response.data.contenedorArchivo ?? "",
+                        );
+
                         this._userService.user = {
                             id: userData.id,
                             correo: userData.correo,
                             name: userData.name,
                             avatar: "",
-                            status: userData.status,
+                            status: "online",
                         };
 
                         return of(response);
                     }
 
-                    // Si status es false o no existe token, retornar error
                     return throwError({
-                        error: {
-                            message:
-                                response.message ||
-                                "An error occurred during sign in",
-                        },
+                        error: { message: response.message || "Login failed" },
                     });
                 }),
                 catchError((error: HttpErrorResponse) => {
-                    // Manejo de errores HTTP
-                    if (error.status === 400 || error.status === 401) {
-                        const errorMessage =
-                            error.error?.message || "Invalid credentials";
-
-                        return throwError({
-                            error: {
-                                message: errorMessage,
-                            },
-                        });
-                    }
-
-                    return throwError({
-                        error: {
-                            message:
-                                error.error?.message || "An error occurred",
-                        },
-                    });
+                    const msg = error.error?.message || "Error logging in";
+                    return throwError({ error: { message: msg } });
                 }),
             );
     }
 
-    /**
-     * Sign out
-     */
+    /** Sign‑out: clear state and storage */
     signOut(): void {
-        // Limpiar localStorage
         localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
+        localStorage.removeItem("containerId");
 
-        // Resetear el estado
         this._authState.set({
             isAuthenticated: false,
             user: null,
             token: null,
+            containerId: null,
         });
 
-        // Limpiar el usuario del servicio
         this._userService.user = null;
-
-        // Redirigir al login
         this._router.navigate(["/sign-in"]);
     }
 
-    /**
-     * Forgot password
-     *
-     * @param email
-     */
+    // Additional auth helpers – minimal implementations
+
     forgotPassword(email: string): Observable<any> {
         return this._httpClient.post("api/auth/forgot-password", email);
     }
 
-    /**
-     * Reset password
-     *
-     * @param password
-     */
     resetPassword(password: string): Observable<any> {
         return this._httpClient.post("api/auth/reset-password", password);
     }
 
-    /**
-     * Sign up
-     *
-     * @param user
-     */
     signUp(user: {
         name: string;
         email: string;
@@ -259,11 +210,6 @@ export class AuthService {
         return this._httpClient.post("api/auth/sign-up", user);
     }
 
-    /**
-     * Unlock session
-     *
-     * @param credentials
-     */
     unlockSession(credentials: {
         email: string;
         password: string;
@@ -271,9 +217,6 @@ export class AuthService {
         return this._httpClient.post("api/auth/unlock-session", credentials);
     }
 
-    /**
-     * Log out or destroy session
-     */
     logOut(): Observable<any> {
         return this._httpClient.delete("api/auth/logout").pipe(
             switchMap(() => {
@@ -283,52 +226,30 @@ export class AuthService {
         );
     }
 
-    /**
-     * Confirmation required
-     *
-     * @param confirmationRequired
-     */
     confirmationRequired(confirmationRequired: boolean): void {
-        // Do something with the confirmation required parameter
+        // Optional: implement confirmation logic
     }
 
-    /**
-     * Password reset
-     *
-     * @param password
-     */
     passwordReset(password: string): Observable<any> {
         return this._httpClient.post("api/auth/password-reset", { password });
     }
 
-    /**
-     * Check the authentication status
-     */
+    /** Utility: check if token already present and valid */
     check(): Observable<boolean> {
-        // Check if the user is logged in
         if (this.isAuthenticated()) {
             return of(true);
         }
-
-        // Check the access token availability
         if (!this.accessToken) {
             return of(false);
         }
-
-        // Check the access token expire date
         if (AuthUtils.isTokenExpired(this.accessToken)) {
             return of(false);
         }
-
-        // If the access token exists and it didn't expire, sign in using it
         return this.signInUsingToken();
     }
 
-    /**
-     * Sign in using the access token
-     */
+    /** Refresh stored token using the backend refresh endpoint */
     signInUsingToken(): Observable<any> {
-        // Renew token
         return this._httpClient
             .post("api/auth/refresh-access-token", {
                 accessToken: this.accessToken,
@@ -336,26 +257,29 @@ export class AuthService {
             .pipe(
                 catchError(() => of(false)),
                 switchMap((response: any) => {
-                    // Store the access token in the local storage
                     if (response && response.accessToken) {
                         this._authState.update((state) => ({
                             ...state,
                             token: response.accessToken,
+                            containerId:
+                                response.data?.contenedorArchivo ??
+                                state.containerId,
                         }));
 
-                        // Store the user on the user service
-                        this._userService.user = response.user;
-                    }
+                        // Persist new container id if returned
+                        const newCid = response.data?.contenedorArchivo;
+                        if (newCid) {
+                            localStorage.setItem("containerId", newCid);
+                        }
 
-                    // Return true
+                        this._userService.user = response.user ?? null;
+                    }
                     return of(true);
                 }),
             );
     }
 
-    /**
-     * Check token expiration
-     */
+    /** Simple expiration check */
     checkTokenExpiration(): boolean {
         const token = this.token();
         if (!token) {
