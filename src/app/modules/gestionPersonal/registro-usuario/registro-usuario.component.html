@@ -33,10 +33,10 @@
                         <div class="flex items-end -mt-16 mb-6">
                             <!-- Avatar -->
                             <div class="flex items-center justify-center w-32 h-32 rounded-full overflow-hidden ring-4 ring-bg-card bg-gray-200 dark:bg-gray-700 flex-shrink-0">
-                                <ng-container *ngIf="selectedUsuario && selectedUsuario.avatar">
-                                    <img [src]="selectedUsuario.avatar" alt="Avatar" class="w-full h-full object-cover">
+                                <ng-container *ngIf="selectedUsuario && selectedUsuario.avatarUrl">
+                                    <img [src]="selectedUsuario.avatarUrl" alt="Avatar" class="w-full h-full object-cover">
                                 </ng-container>
-                                <ng-container *ngIf="selectedUsuario && !selectedUsuario.avatar">
+                                <ng-container *ngIf="selectedUsuario && !selectedUsuario.avatarUrl">
                                     <span class="text-6xl font-bold uppercase text-gray-600 dark:text-gray-200">
                                         {{ getInitial(selectedUsuario.Correo) }}
                                     </span>
@@ -137,10 +137,10 @@
                                             <ng-container *ngIf="avatarPreviewUrl">
                                                 <img [src]="avatarPreviewUrl" alt="Avatar preview" class="w-full h-full object-cover">
                                             </ng-container>
-                                            <ng-container *ngIf="!avatarPreviewUrl && selectedUsuario.avatar">
-                                                <img [src]="selectedUsuario.avatar" alt="Avatar" class="w-full h-full object-cover">
+                                            <ng-container *ngIf="!avatarPreviewUrl && selectedUsuario.avatarUrl">
+                                                <img [src]="selectedUsuario.avatarUrl" alt="Avatar" class="w-full h-full object-cover">
                                             </ng-container>
-                                            <ng-container *ngIf="!avatarPreviewUrl && !selectedUsuario.avatar">
+                                            <ng-container *ngIf="!avatarPreviewUrl && !selectedUsuario.avatarUrl">
                                                 <span class="text-4xl font-bold uppercase text-gray-600 dark:text-gray-200">
                                                     {{ getInitial(selectedUsuario.Correo) }}
                                                 </span>
@@ -174,7 +174,7 @@
                                                 type="button"
                                                 mat-button
                                                 class="text-warn"
-                                                [disabled]="isSaving || isUploadingAvatar || (!avatarPreviewUrl && !selectedUsuario.avatar)"
+                                                [disabled]="isSaving || isUploadingAvatar || (!avatarPreviewUrl && !selectedUsuario.avatarUrl)"
                                                 (click)="removeAvatar()">
                                                 <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                                                 <span class="ml-2">Eliminar</span>

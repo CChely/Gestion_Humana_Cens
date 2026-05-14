@@ -30,6 +30,7 @@ export interface Usuario {
     FechaCreacion: string;
     roles: Rol[];
     avatar?: string;
+    avatarUrl?: string; // Base64 data URL for displaying the avatar
     Nombres?: string;
     ProveedorArchivos?: string;
 }

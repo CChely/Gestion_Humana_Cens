@@ -102,15 +102,56 @@ export class RegistroUsuarioService {
         const formData = new FormData();
         formData.append("file", file, file.name);
         const baseCode = localStorage.getItem("containerId") ?? "";
-        debugger;
         formData.append("BaseCodeFolder", baseCode);
         formData.append("token", this._authService.accessToken ?? "");
 
         return this._httpClient.post<{
             status: boolean;
-            data: string;
+            data: any;
             message?: string;
-        }>(`${environment.apiUrl}/file/upload`, formData);
+        }>(`${environment.apiUrl}/file/upload`, formData).pipe(
+            map((response) => {
+                // Extract only the baseCodeFile from the response
+                if (response.status && response.data) {
+                    const baseCodeFile = typeof response.data === 'string'
+                        ? response.data
+                        : response.data.baseCodeFile || '';
+                    return {
+                        status: response.status,
+                        data: baseCodeFile,
+                        message: response.message
+                    };
+                }
+                return response as { status: boolean; data: string; message?: string };
+            })
+        );
+    }
+
+    /**
+     * Download avatar image — GET /file/download/:baseCode
+     */
+    downloadAvatar(baseCode: string): Observable<{
+        status: boolean;
+        data: {
+            extension: string;
+            fileName: string;
+            bytesFile: string;
+            contentType: string;
+        };
+        message?: string;
+    }> {
+        return this._httpClient.get<{
+            status: boolean;
+            data: {
+                extension: string;
+                fileName: string;
+                bytesFile: string;
+                contentType: string;
+            };
+            errors: any[];
+            message: string;
+            metadata: any[];
+        }>(`${environment.apiUrl}/file/download/${baseCode}`);
     }
 
     /**

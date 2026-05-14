@@ -214,9 +214,47 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy {
     }
 
     selectUsuario(usuario: Usuario): void {
+        console.log('🔍 Selecting usuario:', usuario);
+        console.log('📷 Usuario Avatar (mayúscula):', (usuario as any).Avatar);
+        console.log('📷 Usuario avatar (minúscula):', usuario.avatar);
+
         this.selectedUsuario = usuario;
         this.drawerAction = "view";
         this.isEditing = false;
+
+        // Load avatar if exists - check both Avatar and avatar
+        const avatarCode = (usuario as any).Avatar || usuario.avatar;
+
+        if (avatarCode) {
+            console.log('⬇️ Loading avatar from:', avatarCode);
+            this._registroUsuarioService
+                .downloadAvatar(avatarCode)
+                .pipe(takeUntil(this._unsubscribeAll))
+                .subscribe({
+                    next: (response) => {
+                        console.log('✅ Avatar download response:', response);
+                        if (response.status && response.data.bytesFile) {
+                            // Create data URL from base64
+                            const avatarUrl = `data:${response.data.contentType};base64,${response.data.bytesFile}`;
+                            console.log('🖼️ Created avatar URL, length:', avatarUrl.length);
+                            this.selectedUsuario = {
+                                ...this.selectedUsuario!,
+                                avatar: avatarCode,
+                                avatarUrl: avatarUrl
+                            };
+                            this._changeDetectorRef.markForCheck();
+                        } else {
+                            console.log('⚠️ Response missing data:', response);
+                        }
+                    },
+                    error: (err) => {
+                        console.error('❌ Error loading avatar:', err);
+                    }
+                });
+        } else {
+            console.log('ℹ️ No avatar to load for this user');
+        }
+
         this.matDrawer.open();
         this._changeDetectorRef.markForCheck();
     }
@@ -231,7 +269,7 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy {
         this.successMessage = null;
         this.errorMessage = null;
         this.selectedAvatarFile = null;
-        this.avatarPreviewUrl = this.selectedUsuario.avatar || null;
+        this.avatarPreviewUrl = this.selectedUsuario.avatarUrl || null;
         this.avatarReference = null;
         this._changeDetectorRef.markForCheck();
 
@@ -728,10 +766,11 @@ export class RegistroUsuarioComponent implements OnInit, OnDestroy {
         this.avatarReference = null;
 
         // If the user had an avatar, mark it for removal
-        if (this.selectedUsuario && this.selectedUsuario.avatar) {
+        if (this.selectedUsuario && (this.selectedUsuario.avatar || this.selectedUsuario.avatarUrl)) {
             this.selectedUsuario = {
                 ...this.selectedUsuario,
                 avatar: undefined,
+                avatarUrl: undefined,
             };
         }
 
