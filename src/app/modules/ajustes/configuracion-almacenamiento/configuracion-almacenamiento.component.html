@@ -1,0 +1,243 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+    <!-- Header -->
+    <div
+        class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-10 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="mt-2">
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                    Configuración de Almacenamiento
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+
+        <div class="w-full">
+
+            <form [formGroup]="storageForm" class="flex flex-col">
+
+                <!-- Provider selection -->
+                <div class="flex flex-col mb-10">
+                    <span
+                        class="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6 uppercase tracking-wider">Proveedor
+                        de Almacenamiento</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        <ng-container *ngFor="let provider of providers">
+                            <div class="flex flex-col items-center justify-center p-6 border-2 rounded-3xl cursor-pointer transition-all duration-300 group"
+                                [ngClass]="{'bg-sky-50 border-sky-500 shadow-lg shadow-sky-200 dark:shadow-none dark:bg-sky-900/20': storageForm.get('provider').value === provider.id,
+                                            'bg-card border-slate-200 dark:border-slate-700 hover:border-sky-300 hover:bg-slate-50 dark:hover:bg-slate-800': storageForm.get('provider').value !== provider.id}"
+                                (click)="storageForm.get('provider').setValue(provider.id)">
+                                <div class="p-4 rounded-2xl mb-4 transition-colors"
+                                    [ngClass]="{'bg-sky-500 text-white': storageForm.get('provider').value === provider.id,
+                                                 'bg-slate-100 dark:bg-slate-700 text-slate-500 group-hover:text-sky-500': storageForm.get('provider').value !== provider.id}">
+                                    <mat-icon class="icon-size-8" [svgIcon]="provider.icon"></mat-icon>
+                                </div>
+                                <span class="text-sm font-black text-center uppercase tracking-tight"
+                                    [ngClass]="{'text-sky-700 dark:text-sky-400': storageForm.get('provider').value === provider.id,
+                                                  'text-slate-600 dark:text-slate-400': storageForm.get('provider').value !== provider.id}">
+                                    {{provider.name}}
+                                </span>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-8">
+
+                    <!-- Local Path -->
+                    <div *ngIf="storageForm.get('provider').value === 'local'" class="flex flex-col col-span-full">
+                        <label
+                            class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-4 uppercase tracking-wide">Ruta
+                            Local de Almacenamiento <span class="text-rose-500">*</span></label>
+                        <div class="relative flex items-center group">
+                            <mat-icon
+                                class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors"
+                                [svgIcon]="'heroicons_outline:folder-open'"></mat-icon>
+                            <input [formControlName]="'localPath'"
+                                class="w-full pl-12 pr-4 h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
+                                placeholder="/var/www/uploads">
+                        </div>
+                        <span class="mt-2 ml-4 text-xs text-slate-400 font-medium italic">Ruta absoluta en el servidor
+                            para guardar archivos</span>
+                    </div>
+
+                    <!-- Cens Drive Settings -->
+                    <ng-container *ngIf="storageForm.get('provider').value === 'cens-drive'">
+
+                        <!-- API URL -->
+                        <div class="flex flex-col">
+                            <label
+                                class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-4 uppercase tracking-wide">URL
+                                del Servicio Cens Drive <span class="text-rose-500">*</span></label>
+                            <div class="relative flex items-center group">
+                                <mat-icon
+                                    class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors"
+                                    [svgIcon]="'heroicons_outline:globe-alt'"></mat-icon>
+                                <input [formControlName]="'apiUrl'"
+                                    class="w-full pl-12 pr-4 h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
+                                    placeholder="https://drive.cens.com/api/v1">
+                            </div>
+                        </div>
+
+                        <!-- API Key -->
+                        <div class="flex flex-col">
+                            <label
+                                class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-4 uppercase tracking-wide">API
+                                Key <span class="text-rose-500">*</span></label>
+                            <div class="relative flex items-center group">
+                                <mat-icon
+                                    class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors"
+                                    [svgIcon]="'heroicons_outline:key'"></mat-icon>
+                                <input [formControlName]="'apiKey'" type="password"
+                                    class="w-full pl-12 pr-4 h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
+                                    placeholder="••••••••••••••••••••••••••••">
+                            </div>
+                        </div>
+
+                    </ng-container>
+
+                    <!-- Google Drive / OneDrive Settings -->
+                    <ng-container
+                        *ngIf="storageForm.get('provider').value === 'google-drive' || storageForm.get('provider').value === 'onedrive'">
+
+                        <!-- Client ID -->
+                        <div class="flex flex-col">
+                            <label
+                                class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-4 uppercase tracking-wide">Client
+                                ID <span class="text-rose-500">*</span></label>
+                            <div class="relative flex items-center group">
+                                <mat-icon
+                                    class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors"
+                                    [svgIcon]="'heroicons_outline:identification'"></mat-icon>
+                                <input [formControlName]="'clientId'"
+                                    class="w-full pl-12 pr-4 h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
+                                    placeholder="client-id-123456789.apps.googleusercontent.com">
+                            </div>
+                        </div>
+
+                        <!-- Client Secret -->
+                        <div class="flex flex-col">
+                            <label
+                                class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-4 uppercase tracking-wide">Client
+                                Secret <span class="text-rose-500">*</span></label>
+                            <div class="relative flex items-center group">
+                                <mat-icon
+                                    class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors"
+                                    [svgIcon]="'heroicons_outline:lock-closed'"></mat-icon>
+                                <input [formControlName]="'clientSecret'" type="password"
+                                    class="w-full pl-12 pr-4 h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
+                                    placeholder="••••••••••••••••••••••••••••">
+                            </div>
+                        </div>
+
+                    </ng-container>
+
+                    <!-- Cloud Settings (S3, Azure, GCP) -->
+                    <ng-container
+                        *ngIf="storageForm.get('provider').value === 's3' || storageForm.get('provider').value === 'azure' || storageForm.get('provider').value === 'gcp'">
+
+                        <!-- Bucket Name -->
+                        <div class="flex flex-col">
+                            <label
+                                class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-4 uppercase tracking-wide">Nombre
+                                del Contenedor / Bucket <span class="text-rose-500">*</span></label>
+                            <div class="relative flex items-center group">
+                                <mat-icon
+                                    class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors"
+                                    [svgIcon]="'heroicons_outline:archive'"></mat-icon>
+                                <input [formControlName]="'bucketName'"
+                                    class="w-full pl-12 pr-4 h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
+                                    placeholder="my-storage-bucket">
+                            </div>
+                        </div>
+
+                        <!-- Region -->
+                        <div class="flex flex-col">
+                            <label
+                                class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-4 uppercase tracking-wide">Región</label>
+                            <div class="relative flex items-center group">
+                                <mat-icon
+                                    class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors"
+                                    [svgIcon]="'heroicons_outline:location-marker'"></mat-icon>
+                                <input [formControlName]="'region'"
+                                    class="w-full pl-12 pr-4 h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
+                                    placeholder="us-east-1">
+                            </div>
+                        </div>
+
+                        <!-- Access Key -->
+                        <div class="flex flex-col">
+                            <label
+                                class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-4 uppercase tracking-wide">Access
+                                Key / Client ID</label>
+                            <div class="relative flex items-center group">
+                                <mat-icon
+                                    class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors"
+                                    [svgIcon]="'heroicons_outline:key'"></mat-icon>
+                                <input [formControlName]="'accessKey'"
+                                    class="w-full pl-12 pr-4 h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
+                                    placeholder="AKIA...">
+                            </div>
+                        </div>
+
+                        <!-- Secret Key -->
+                        <div class="flex flex-col">
+                            <label
+                                class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-4 uppercase tracking-wide">Secret
+                                Key / Client Secret</label>
+                            <div class="relative flex items-center group">
+                                <mat-icon
+                                    class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors"
+                                    [svgIcon]="'heroicons_outline:lock-closed'"></mat-icon>
+                                <input [formControlName]="'secretKey'" type="password"
+                                    class="w-full pl-12 pr-4 h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
+                                    placeholder="••••••••••••••••">
+                            </div>
+                        </div>
+
+                        <!-- Custom Endpoint -->
+                        <div class="flex flex-col">
+                            <label
+                                class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-4 uppercase tracking-wide">Endpoint
+                                Personalizado</label>
+                            <div class="relative flex items-center group">
+                                <mat-icon
+                                    class="absolute left-4 icon-size-5 text-slate-400 group-focus-within:text-sky-500 transition-colors"
+                                    [svgIcon]="'heroicons_outline:globe-alt'"></mat-icon>
+                                <input [formControlName]="'endpoint'"
+                                    class="w-full pl-12 pr-4 h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-800 text-sm focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
+                                    placeholder="https://s3.custom-provider.com">
+                            </div>
+                        </div>
+
+                    </ng-container>
+
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center justify-end mt-12 border-t border-slate-200 dark:border-slate-700 pt-10">
+                    <button mat-button
+                        class="px-8 h-12 rounded-full font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        type="button" (click)="testConnection()">
+                        <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:bolt'"></mat-icon>
+                        Probar Conexión
+                    </button>
+                    <button
+                        class="ml-4 px-10 h-12 rounded-full font-bold bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-200 dark:shadow-none transition-all active:scale-95"
+                        mat-flat-button [color]="'primary'" (click)="save()">
+                        <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:save'"></mat-icon>
+                        Guardar Configuración
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
