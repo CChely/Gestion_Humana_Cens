@@ -114,36 +114,66 @@
             </form>
         </div>
     </div>
-    <div class="relative hidden md:flex flex-auto items-center justify-center w-1/2 h-full p-16 lg:px-28 overflow-hidden bg-gray-800 dark:border-l">
-        <!-- Background - @formatter:off -->
-        <!-- Rings -->
-        <svg class="absolute inset-0 pointer-events-none"
+    <div class="relative hidden md:flex flex-auto items-center justify-center w-1/2 h-full p-16 lg:px-28 overflow-hidden bg-[#0a0f1d] dark:border-l">
+        
+        <!-- Decorative Shapes -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl"></div>
+            <div class="absolute top-1/2 -right-48 w-80 h-80 bg-blue-500/15 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-24 left-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <!-- Background Pattern -->
+        <svg class="absolute inset-0 pointer-events-none opacity-[0.05]"
              viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
-            <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
+            <g fill="none" stroke="#ffffff" stroke-width="1">
                 <circle r="234" cx="196" cy="23"></circle>
-                <circle r="234" cx="790" cy="491"></circle>
+                <circle r="400" cx="790" cy="491"></circle>
             </g>
         </svg>
-        <!-- Dots -->
-        <svg class="absolute -top-16 -right-16 text-gray-700"
-             viewBox="0 0 220 192" width="220" height="192" fill="none">
+
+        <!-- Dots Pattern -->
+        <svg class="absolute top-12 right-12 text-white opacity-[0.1]"
+             viewBox="0 0 220 192" width="120" height="110" fill="none">
             <defs>
-                <pattern id="837c3e70-6c3a-44e6-8854-cc48c737b659" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <rect x="0" y="0" width="4" height="4" fill="currentColor"></rect>
+                <pattern id="hr-dots-v2" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <rect x="0" y="0" width="3" height="3" fill="currentColor" rx="1"></rect>
                 </pattern>
             </defs>
-            <rect width="220" height="192" fill="url(#837c3e70-6c3a-44e6-8854-cc48c737b659)"></rect>
+            <rect width="220" height="192" fill="url(#hr-dots-v2)"></rect>
         </svg>
-        <!-- @formatter:on -->
+
         <!-- Content -->
         <div class="z-10 relative w-full max-w-2xl">
-            <div class="text-7xl font-bold leading-none text-gray-100">
-                <div>Bienvenido a</div>
-                <div>nuestra plataforma</div>
+            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-400/20 mb-8">
+                <span class="flex w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="text-xs font-black text-emerald-400 uppercase tracking-widest">SISTEMA INTEGRAL DE GESTIÓN HUMANA</span>
             </div>
-            <div class="mt-6 text-lg tracking-tight leading-6 text-gray-400">
-                Gestiona el talento humano de tu organización de forma eficiente, organizada y segura.
-                Inicia sesión para acceder a todas las funcionalidades del sistema.
+
+            <div class="text-6xl lg:text-7xl font-black leading-[1.1] text-white tracking-tighter">
+                <div class="text-white">Potenciando el</div>
+                <div class="text-indigo-200">Talento Humano</div>
+            </div>
+
+            <div class="mt-8 text-xl tracking-tight leading-relaxed text-slate-300 max-w-lg font-semibold">
+                Tu plataforma centralizada para la gestión estratégica, el crecimiento organizacional y el bienestar de tus colaboradores.
+            </div>
+
+            <div class="flex items-center gap-8 mt-12">
+                <div class="flex flex-col">
+                    <span class="text-2xl font-bold text-white tracking-tight">Seguro</span>
+                    <span class="text-[10px] uppercase font-black tracking-widest text-indigo-400">Encriptación SSL</span>
+                </div>
+                <div class="w-px h-8 bg-slate-700"></div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-bold text-white tracking-tight">Eficiente</span>
+                    <span class="text-[10px] uppercase font-black tracking-widest text-indigo-400">Automatizado</span>
+                </div>
+                <div class="w-px h-8 bg-slate-700"></div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-bold text-white tracking-tight">Escalable</span>
+                    <span class="text-[10px] uppercase font-black tracking-widest text-indigo-400">Multi-módulo</span>
+                </div>
             </div>
         </div>
     </div>
