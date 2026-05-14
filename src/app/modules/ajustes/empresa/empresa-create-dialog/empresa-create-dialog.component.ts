@@ -45,12 +45,13 @@ export class EmpresaCreateDialogComponent implements OnInit {
         private _authService: AuthService,
     ) {
         this.form = this._fb.group({
-            nombre:    ['', [Validators.required]],
-            ruc:       ['', [Validators.required]],
-            direccion: [''],
-            correo:    ['', [Validators.email]],
-            movil:     ['', [Validators.pattern(/^9\d{8}$/)]],
-            sitioWeb:  [''],
+            nombre:               ['', [Validators.required]],
+            ruc:                  ['', [Validators.required]],
+            nombreRepresentante:  [''],
+            direccion:            [''],
+            correo:               ['', [Validators.email]],
+            movil:                ['', [Validators.pattern(/^9\d{8}$/)]],
+            sitioWeb:             [''],
         });
     }
 
@@ -61,12 +62,13 @@ export class EmpresaCreateDialogComponent implements OnInit {
             this.empresaId = empresa.EmpresaId;
 
             this.form.patchValue({
-                nombre:    empresa.NombreEmpresa,
-                ruc:       empresa.RucEmpresa,
-                direccion: empresa.DireccionEmpresa,
-                correo:    empresa.CorreoEmpresa,
-                movil:     empresa.MovilEmpresa,
-                sitioWeb:  empresa.SitioWebEmpresa,
+                nombre:              empresa.NombreEmpresa,
+                ruc:                 empresa.RucEmpresa,
+                nombreRepresentante: empresa.NombreRepresentanteEmpresa,
+                direccion:           empresa.DireccionEmpresa,
+                correo:              empresa.CorreoEmpresa,
+                movil:               empresa.MovilEmpresa,
+                sitioWeb:            empresa.SitioWebEmpresa,
             });
             this.uploadedFileCode  = empresa.ImagenEmpresa;
             this.uploadedFirmaCode = empresa.FirmaEmpresa;
@@ -218,7 +220,7 @@ export class EmpresaCreateDialogComponent implements OnInit {
             return;
         }
 
-        const { nombre, ruc, direccion, correo, movil, sitioWeb } = this.form.value;
+        const { nombre, ruc, nombreRepresentante, direccion, correo, movil, sitioWeb } = this.form.value;
 
         this.isSaving = true;
 
@@ -226,16 +228,17 @@ export class EmpresaCreateDialogComponent implements OnInit {
             // Actualizar empresa existente
             const updateRequest: any = {
                 data: {
-                    p_IdEmpresa:         this.empresaId,
-                    p_Nombre:            nombre ?? '',
-                    p_Ruc:               ruc ?? '',
-                    p_Imagen:            this.uploadedFileCode ?? '',
-                    p_Firma:             this.uploadedFirmaCode ?? '',
-                    p_Direccion:         direccion ?? '',
-                    p_Movil:             movil ?? '',
-                    p_CorreoElectronico: correo ?? '',
-                    p_SitioWeb:          sitioWeb ?? '',
-                    p_IdUsuarioActual:   this._authService.user()?.id ?? '',
+                    p_IdEmpresa:            this.empresaId,
+                    p_Nombre:               nombre ?? '',
+                    p_NombreRepresentante:  nombreRepresentante ?? '',
+                    p_Ruc:                  ruc ?? '',
+                    p_Imagen:               this.uploadedFileCode ?? '',
+                    p_Firma:                this.uploadedFirmaCode ?? '',
+                    p_Direccion:            direccion ?? '',
+                    p_Movil:                movil ?? '',
+                    p_CorreoElectronico:    correo ?? '',
+                    p_SitioWeb:             sitioWeb ?? '',
+                    p_IdUsuarioActual:      this._authService.user()?.id ?? '',
                 },
                 params: null,
             };
@@ -254,15 +257,16 @@ export class EmpresaCreateDialogComponent implements OnInit {
             // Insertar nueva empresa
             const insertRequest: any = {
                 data: {
-                    p_Nombre:            nombre ?? '',
-                    p_Ruc:               ruc ?? '',
-                    p_Imagen:            this.uploadedFileCode ?? '',
-                    p_Firma:             this.uploadedFirmaCode ?? '',
-                    p_Direccion:         direccion ?? '',
-                    p_CorreoElectronico: correo ?? '',
-                    p_Movil:             movil ?? '',
-                    p_SitioWeb:          sitioWeb ?? '',
-                    p_IdUsuarioActual:   this._authService.user()?.id ?? '',
+                    p_Nombre:               nombre ?? '',
+                    p_NombreRepresentante:  nombreRepresentante ?? '',
+                    p_Ruc:                  ruc ?? '',
+                    p_Imagen:               this.uploadedFileCode ?? '',
+                    p_Firma:                this.uploadedFirmaCode ?? '',
+                    p_Direccion:            direccion ?? '',
+                    p_Movil:                movil ?? '',
+                    p_CorreoElectronico:    correo ?? '',
+                    p_SitioWeb:             sitioWeb ?? '',
+                    p_IdUsuarioActual:      this._authService.user()?.id ?? '',
                 },
                 params: null,
             };

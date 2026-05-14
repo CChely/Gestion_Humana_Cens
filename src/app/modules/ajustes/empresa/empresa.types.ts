@@ -4,6 +4,7 @@ export interface Empresa {
     RucEmpresa: string;
     ImagenEmpresa?: string;
     FirmaEmpresa?: string;
+    NombreRepresentanteEmpresa?: string;
     DireccionEmpresa?: string;
     MovilEmpresa?: string;
     CorreoEmpresa?: string;
@@ -31,6 +32,7 @@ export interface EmpresaInsertRequest {
         p_Ruc: string;
         p_Imagen?: string;
         p_Firma?: string;
+        p_NombreRepresentante?: string;
         p_Direccion?: string;
         p_CorreoElectronico?: string;
         p_Movil?: string;
@@ -47,6 +49,7 @@ export interface EmpresaUpdateRequest {
         p_Ruc: string;
         p_Imagen?: string;
         p_Firma?: string;
+        p_NombreRepresentante?: string;
         p_Direccion?: string;
         p_Movil?: string;
         p_CorreoElectronico?: string;
