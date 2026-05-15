@@ -1,0 +1,15 @@
+/* Forzar que el componente de trazabilidad use todo el ancho de nuestro panel */
+::ng-deep .trazabilidad-stretch {
+  width: 100%;
+  display: block;
+
+  /* Forzamos a las tarjetas/burbujas internas a estirarse */
+  .max-w-sm,
+  .max-w-md,
+  .w-80,
+  .w-96,
+  .w-auto {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}

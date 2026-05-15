@@ -2,6 +2,8 @@ import { Component, OnInit, Input } from '@angular/core';
 import { UntypedFormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { DataService } from '../../../shared/services/data.service';
+import * as XLSX from 'xlsx';
+
 
 @Component({
   selector: 'app-main',
@@ -322,5 +324,40 @@ export class MainComponent implements OnInit {
 
     this.titulo = `${formatoOrigen}`;
   }
+
+    exportarExcel(): void {
+    // Verificamos que haya datos en la lista procesada (con o sin filtros)
+    if (!this.processedItems || this.processedItems.length === 0) {
+      alert('No hay registros para exportar.');
+      return;
+    }
+
+    // Mapeamos los datos para tener títulos legibles en las cabeceras del Excel
+    const dataToExport = this.processedItems.map(item => ({
+      'Código': item.Codigo || item.codigo,
+      'Descripción': item.Descripcion || item.descripcion
+    }));
+
+    // Creamos una nueva hoja a partir del JSON mapeado
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
+
+    // Ajustar el ancho de las columnas (opcional para mejor presentación)
+    ws['!cols'] = [
+      { wch: 15 }, // Ancho para la columna 'Código'
+      { wch: 50 }  // Ancho para la columna 'Descripción'
+    ];
+
+    // Creamos el libro de trabajo y adjuntamos la hoja
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Registros');
+
+    // Construimos el nombre del archivo en base al título dinámico de la página
+    const safeTitle = this.titulo ? this.titulo.replace(/\s+/g, '_') : 'Mantenimiento';
+    const fileName = `${safeTitle}_Export.xlsx`;
+
+    // Desencadena la descarga en el navegador
+    XLSX.writeFile(wb, fileName);
+  }
+
 
 }

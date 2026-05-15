@@ -1,38 +1,12 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { DataService } from '../../../shared/services/data.service';
 
-interface Empleado {
-  Id: number;
-  Nombre: string;
-  Avatar: string;
-}
-
-interface Area {
-  Id: number;
-  Codigo: string;
-  Nombre: string;
-  Descripcion: string;
-  ResponsableId: number | null;
-}
-
-interface Departamento {
-  Id: number;
-  IdArea: number;
-  Codigo: string;
-  Nombre: string;
-  Descripcion: string;
-  ResponsableId: number | null;
-}
-
-interface Seccion {
-  Id: number;
-  IdDepartamento: number;
-  Codigo: string;
-  Nombre: string;
-  Descripcion: string;
-  ResponsableId: number | null;
+interface Empleado { Id: number; Nombre: string; Avatar: string; }
+interface NivelOrganizacional { Id: number; Nivel: number; Nombre: string; }
+interface NodoOrganizacional {
+  Id: number; IdNivelOrganizacional: number; IdPadre: number | null;
+  Codigo: string; Nombre: string; Descripcion: string;
+  ResponsableId: number | null; ResponsableNombre?: string; ResponsableAvatar?: string;
 }
 
 @Component({
@@ -41,247 +15,231 @@ interface Seccion {
   styleUrls: ['./maestro-areas.component.scss']
 })
 export class MaestroAreasComponent implements OnInit {
-
   empleados: Empleado[] = [];
+  niveles: NivelOrganizacional[] = [];
+  nodos: NodoOrganizacional[] = [];
 
-  areas: Area[] = [];
-  departamentos: Departamento[] = [];
-  secciones: Seccion[] = [];
-
-  selectedArea: Area | null = null;
-  selectedDepartamento: Departamento | null = null;
-  selectedSeccion: Seccion | null = null;
+  selecciones: { [key: number]: NodoOrganizacional | null } = {};
 
   showFormModal = false;
   showDeleteModal = false;
-  modalMode: 'crear' | 'editar' = 'crear';
-  modalType: 'area' | 'departamento' | 'seccion' = 'area';
+  showNivelModal = false;
+  showDeleteNivelModal = false; // <-- Nuevo modal
 
-  formData: any = { Id: null, Codigo: '', Nombre: '', Descripcion: '', ResponsableId: null };
+  modalMode: 'crear' | 'editar' = 'crear';
+  currentNivelIdInsert: number = 0;
+
+  // Variables para Nivel Estructural
+  modalNivelMode: 'crear' | 'editar' = 'crear';
+  currentNivelEditId: number | null = null;
+  nuevoNivelNombre: string = '';
+  nuevoNivelPosicion: number = 1;
+  nivelToDelete: NivelOrganizacional | null = null; // <-- Nivel a eliminar
+  deleteNivelErrorMsg: string = ''; // <-- Mensaje de error para nivel
+
+  // Variables para Nodo
+  formData: any = { Id: null, IdPadre: null, Codigo: '', Nombre: '', Descripcion: '', ResponsableId: null };
+  padresDisponibles: NodoOrganizacional[] = [];
   itemToDelete: any = null;
   deleteErrorMsg: string = '';
 
   showSuccessModal = false;
   successMessage = '';
-
   searchTerm: string = '';
 
   itemToTrace: any = null;
-  tablaToTrace: string = '';
-
   @ViewChild('trazabilidadComp') trazabilidadComp: any;
 
   constructor(private _dataService: DataService) {}
 
-  ngOnInit(): void {
-    this.cargarDatos();
-  }
+  ngOnInit(): void { this.cargarDatos(); }
 
   cargarDatos(): void {
-    // Cargar Personal (Responsables)
     this._dataService.doRequestPost('uspPersonalObtenerTodo', { data: {} }).subscribe((res: any) => {
       this.empleados = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
     });
-    // Cargar Áreas
-    this._dataService.doRequestPost('uspAreaObtenerTodo', { data: {} }).subscribe((res: any) => {
-      this.areas = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-      if (this.selectedArea) this.selectedArea = this.areas.find(a => a.Id === this.selectedArea!.Id) || null;
+
+    this._dataService.doRequestPost('uspNivelOrganizacionalObtenerTodo', { data: {} }).subscribe((res: any) => {
+      this.niveles = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      this.niveles.sort((a, b) => a.Nivel - b.Nivel);
+      this.niveles.forEach(n => { if (this.selecciones[n.Id] === undefined) this.selecciones[n.Id] = null; });
     });
-    // Cargar Departamentos
-    this._dataService.doRequestPost('uspDepartamentoObtenerTodo', { data: {} }).subscribe((res: any) => {
-      this.departamentos = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-      if (this.selectedDepartamento) this.selectedDepartamento = this.departamentos.find(d => d.Id === this.selectedDepartamento!.Id) || null;
-    });
-    // Cargar Secciones
-    this._dataService.doRequestPost('uspSeccionObtenerTodo', { data: {} }).subscribe((res: any) => {
-      this.secciones = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+
+    this._dataService.doRequestPost('uspNodoOrganizacionalObtenerTodo', { data: {} }).subscribe((res: any) => {
+      this.nodos = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      this.restaurarSelecciones();
     });
   }
 
-  get totalAreas(): number { return this.areas.length; }
-  get totalDepartamentos(): number { return this.departamentos.length; }
-  get totalSecciones(): number { return this.secciones.length; }
-
-  get areasFiltradas(): Area[] {
-    if (!this.searchTerm) return this.areas;
-    const term = this.searchTerm.toLowerCase();
-    return this.areas.filter(a =>
-      a.Nombre.toLowerCase().includes(term) ||
-      a.Codigo.toLowerCase().includes(term) ||
-      (this.getResponsable(a.ResponsableId)?.Nombre?.toLowerCase() || '').includes(term)
-    );
-  }
-
-  get departamentosVisibles(): Departamento[] {
-    if (!this.selectedArea) return [];
-    let result = this.departamentos.filter(d => d.IdArea === this.selectedArea!.Id);
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      result = result.filter(d =>
-        d.Nombre.toLowerCase().includes(term) ||
-        d.Codigo.toLowerCase().includes(term) ||
-        (this.getResponsable(d.ResponsableId)?.Nombre?.toLowerCase() || '').includes(term)
-      );
+  restaurarSelecciones() {
+    for (let key in this.selecciones) {
+      if (this.selecciones[key]) {
+        const found = this.nodos.find(n => n.Id === this.selecciones[key]!.Id);
+        this.selecciones[key] = found || null;
+      }
     }
-    return result;
   }
 
-  get seccionesVisibles(): Seccion[] {
-    if (!this.selectedDepartamento) return [];
-    let result = this.secciones.filter(s => s.IdDepartamento === this.selectedDepartamento!.Id);
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      result = result.filter(s =>
-        s.Nombre.toLowerCase().includes(term) ||
-        s.Codigo.toLowerCase().includes(term) ||
-        (this.getResponsable(s.ResponsableId)?.Nombre?.toLowerCase() || '').includes(term)
-      );
-    }
-    return result;
-  }
-
-  abrirModalForm(mode: 'crear' | 'editar', type: 'area' | 'departamento' | 'seccion', item?: any) {
-    this.modalMode = mode;
-    this.modalType = type;
-
-    if (mode === 'editar' && item) {
-      this.formData = { ...item };
+  getNodosVisibles(nivel: NivelOrganizacional, index: number): NodoOrganizacional[] {
+    let result = this.nodos.filter(n => n.IdNivelOrganizacional === nivel.Id);
+    if (index > 0) {
+      const nivelAnterior = this.niveles[index - 1];
+      const nodoPadreSeleccionado = this.selecciones[nivelAnterior.Id];
+      if (!nodoPadreSeleccionado) return [];
+      result = result.filter(n => n.IdPadre === nodoPadreSeleccionado.Id);
     } else {
-      this.formData = { Id: null, Codigo: '', Nombre: '', Descripcion: '', ResponsableId: null };
+      result = result.filter(n => n.IdPadre === null);
+    }
+
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      result = result.filter(n =>
+        n.Nombre.toLowerCase().includes(term) ||
+        n.Codigo.toLowerCase().includes(term) ||
+        (this.getResponsable(n.ResponsableId)?.Nombre?.toLowerCase() || '').includes(term)
+      );
+    }
+    return result;
+  }
+
+  seleccionarNodo(nivelId: number, nodo: NodoOrganizacional, nivelIndex: number) {
+    this.selecciones[nivelId] = nodo;
+    this.itemToTrace = nodo;
+    for (let i = nivelIndex + 1; i < this.niveles.length; i++) {
+      this.selecciones[this.niveles[i].Id] = null;
+    }
+  }
+
+  puedeCrearEnNivel(index: number): boolean {
+    if (index === 0) return true;
+    return !!this.selecciones[this.niveles[index - 1].Id];
+  }
+
+  // ==========================================
+  // MODAL: NIVEL ESTRUCTURAL (Crear / Editar / Eliminar)
+  // ==========================================
+  abrirModalNivel(mode: 'crear' | 'editar', nivel?: NivelOrganizacional) {
+    this.modalNivelMode = mode;
+    if (mode === 'crear') {
+      this.nuevoNivelNombre = '';
+      this.nuevoNivelPosicion = this.niveles.length > 0 ? this.niveles.length + 1 : 1;
+      this.currentNivelEditId = null;
+    } else if (nivel) {
+      this.nuevoNivelNombre = nivel.Nombre;
+      this.currentNivelEditId = nivel.Id;
+    }
+    this.showNivelModal = true;
+  }
+
+  cerrarModalNivel() { this.showNivelModal = false; }
+
+  guardarNivel() {
+    if (!this.nuevoNivelNombre.trim()) return;
+
+    if (this.modalNivelMode === 'crear') {
+      const payload = { data: { p_Nivel: Number(this.nuevoNivelPosicion), p_Nombre: this.nuevoNivelNombre.trim(), p_IdUsuarioActual: 1 } };
+      this._dataService.doRequestPost('uspNivelOrganizacionalInsertar', payload).subscribe({
+        next: () => { this.cargarDatos(); this.cerrarModalNivel(); this.mostrarMensajeExito('Nivel estructural agregado'); },
+        error: (err) => console.error('Error al crear nivel:', err)
+      });
+    } else {
+      const payload = { data: { p_Id: this.currentNivelEditId, p_Nombre: this.nuevoNivelNombre.trim(), p_IdUsuarioActual: 1 } };
+      this._dataService.doRequestPost('uspNivelOrganizacionalActualizar', payload).subscribe({
+        next: () => { this.cargarDatos(); this.cerrarModalNivel(); this.mostrarMensajeExito('Nombre del nivel actualizado'); },
+        error: (err) => console.error('Error al actualizar nivel:', err)
+      });
+    }
+  }
+
+  abrirModalEliminarNivel(nivel: NivelOrganizacional) {
+    this.nivelToDelete = nivel;
+    this.deleteNivelErrorMsg = '';
+    this.showDeleteNivelModal = true;
+  }
+
+  cerrarModalEliminarNivel() {
+    this.showDeleteNivelModal = false;
+    this.nivelToDelete = null;
+  }
+
+  confirmarEliminarNivel() {
+    this._dataService.doRequestPost('uspNivelOrganizacionalEliminar', { data: { p_Id: this.nivelToDelete!.Id, p_IdUsuarioActual: 1 } }).subscribe({
+      next: () => {
+        this.cargarDatos();
+        this.cerrarModalEliminarNivel();
+        this.mostrarMensajeExito('Columna estructural eliminada exitosamente');
+      },
+      error: (err) => {
+        // Capturar el mensaje del RAISERROR de SQL si viene en la respuesta, sino mensaje genérico
+        this.deleteNivelErrorMsg = err?.error?.message || 'No se puede eliminar la estructura. Verifique dependencias.';
+      }
+    });
+  }
+
+  // ==========================================
+  // MODAL: FORMULARIO NODO
+  // ==========================================
+  abrirModalForm(mode: 'crear' | 'editar', nivel: NivelOrganizacional, nivelIndex: number, item?: NodoOrganizacional) {
+    this.modalMode = mode;
+    this.currentNivelIdInsert = nivel.Id;
+    if (nivelIndex > 0) {
+      const idNivelAnterior = this.niveles[nivelIndex - 1].Id;
+      this.padresDisponibles = this.nodos.filter(n => n.IdNivelOrganizacional === idNivelAnterior);
+    } else {
+      this.padresDisponibles = [];
+    }
+    if (mode === 'crear') {
+      const nodoAnterior = nivelIndex === 0 ? null : this.selecciones[this.niveles[nivelIndex - 1].Id];
+      this.formData = { Id: null, IdPadre: nodoAnterior ? nodoAnterior.Id : null, Codigo: '', Nombre: '', Descripcion: '', ResponsableId: null };
+    } else if (item) {
+      this.formData = { ...item };
     }
     this.showFormModal = true;
   }
 
   guardarForm() {
     if (!this.formData.Codigo || !this.formData.Nombre || !this.formData.Descripcion) return;
+    const payloadData: any = { p_Codigo: this.formData.Codigo, p_Nombre: this.formData.Nombre, p_Descripcion: this.formData.Descripcion, p_ResponsableId: this.formData.ResponsableId || null, p_IdPadre: this.formData.IdPadre || null, p_IdUsuarioActual: 1 };
+    let endpoint = this.modalMode === 'crear' ? 'uspNodoOrganizacionalInsertar' : 'uspNodoOrganizacionalActualizar';
+    if (this.modalMode === 'crear') payloadData.p_IdNivelOrganizacional = this.currentNivelIdInsert;
+    else payloadData.p_Id = this.formData.Id;
 
-    const payloadData: any = {
-      p_Codigo: this.formData.Codigo,
-      p_Nombre: this.formData.Nombre,
-      p_Descripcion: this.formData.Descripcion,
-      p_ResponsableId: this.formData.ResponsableId || null,
-      p_IdUsuarioActual: 1 // Reemplazar con Auth Service real
-    };
-
-    if (this.modalMode === 'editar') {
-      payloadData.p_Id = this.formData.Id;
-    }
-
-    let endpoint = '';
-    if (this.modalType === 'area') {
-      endpoint = this.modalMode === 'crear' ? 'uspAreaInsertar' : 'uspAreaActualizar';
-    } else if (this.modalType === 'departamento') {
-      endpoint = this.modalMode === 'crear' ? 'uspDepartamentoInsertar' : 'uspDepartamentoActualizar';
-      payloadData.p_IdArea = this.selectedArea!.Id;
-    } else if (this.modalType === 'seccion') {
-      endpoint = this.modalMode === 'crear' ? 'uspSeccionInsertar' : 'uspSeccionActualizar';
-      payloadData.p_IdDepartamento = this.selectedDepartamento!.Id;
-    }
-
-    const payload = { data: payloadData };
-
-    this._dataService.doRequestPost(endpoint, payload).subscribe({
+    this._dataService.doRequestPost(endpoint, { data: payloadData }).subscribe({
       next: () => {
-        this.cargarDatos();
-        this.cerrarModalForm();
-        this.mostrarMensajeExito(`Registro ${this.modalMode === 'crear' ? 'creado' : 'actualizado'} con éxito`);
-
-        // Refrescar trazabilidad si se editó el registro actualmente seleccionado
-        if (this.modalMode === 'editar' && this.itemToTrace?.Id === this.formData.Id) {
-          if (this.trazabilidadComp) this.trazabilidadComp.cargarHistorial();
-        }
+        this.cargarDatos(); this.cerrarModalForm(); this.mostrarMensajeExito(`Registro ${this.modalMode === 'crear' ? 'creado' : 'actualizado'} con éxito`);
+        if (this.modalMode === 'editar' && this.itemToTrace?.Id === this.formData.Id && this.trazabilidadComp) this.trazabilidadComp.cargarHistorial();
       },
       error: (err) => console.error('Error al guardar:', err)
     });
   }
 
-  confirmarEliminar() {
-    let endpoint = '';
-
-    if (this.modalType === 'area') {
-      const tieneDepartamentos = this.departamentos.some(d => d.IdArea === this.itemToDelete.Id);
-      if (tieneDepartamentos) {
-        this.deleteErrorMsg = 'No puedes eliminar un Área que tiene departamentos asignados.';
-        return;
-      }
-      endpoint = 'uspAreaEliminar';
-    } else if (this.modalType === 'departamento') {
-      const tieneSecciones = this.secciones.some(s => s.IdDepartamento === this.itemToDelete.Id);
-      if (tieneSecciones) {
-        this.deleteErrorMsg = 'No puedes eliminar un Departamento que tiene secciones asignadas.';
-        return;
-      }
-      endpoint = 'uspDepartamentoEliminar';
-    } else if (this.modalType === 'seccion') {
-      endpoint = 'uspSeccionEliminar';
-    }
-
-    const payload = { data: { p_Id: this.itemToDelete.Id, p_IdUsuarioActual: 1 } };
-    this._dataService.doRequestPost(endpoint, payload).subscribe({
-      next: () => {
-        this.cargarDatos();
-        if (this.modalType === 'area' && this.selectedArea?.Id === this.itemToDelete.Id) this.selectedArea = null;
-        if (this.modalType === 'departamento' && this.selectedDepartamento?.Id === this.itemToDelete.Id) this.selectedDepartamento = null;
-        if (this.modalType === 'seccion' && this.selectedSeccion?.Id === this.itemToDelete.Id) this.selectedSeccion = null;
-        if (this.itemToTrace?.Id === this.itemToDelete.Id) {
-          this.itemToTrace = null;
-          this.tablaToTrace = '';
-        }
-        this.cerrarModalEliminar();
-        this.mostrarMensajeExito('Registro eliminado con éxito');
-      },
-      error: (err) => console.error('Error al eliminar:', err)
-    });
-  }
-
-  mostrarMensajeExito(mensaje: string) {
-    this.successMessage = mensaje;
-    this.showSuccessModal = true;
-    setTimeout(() => {
-      this.showSuccessModal = false;
-    }, 2000);
-  }
-
-  seleccionarArea(area: Area) {
-    this.selectedArea = area;
-    this.selectedDepartamento = null;
-    this.selectedSeccion = null;
-    this.itemToTrace = area;
-    this.tablaToTrace = 'Area';
-  }
-
-  seleccionarDepartamento(depto: Departamento) {
-    this.selectedDepartamento = depto;
-    this.selectedSeccion = null;
-    this.itemToTrace = depto;
-    this.tablaToTrace = 'Departamento';
-  }
-
-  seleccionarSeccion(seccion: Seccion) {
-    this.selectedSeccion = seccion;
-    this.itemToTrace = seccion;
-    this.tablaToTrace = 'Seccion';
-  }
-
-  abrirModalEliminar(type: 'area' | 'departamento' | 'seccion', item: any) {
-    this.modalType = type;
+  // ==========================================
+  // MODAL: ELIMINAR NODO
+  // ==========================================
+  abrirModalEliminar(item: NodoOrganizacional) {
     this.itemToDelete = item;
     this.deleteErrorMsg = '';
+    if (this.nodos.some(n => n.IdPadre === item.Id)) {
+      this.deleteErrorMsg = 'No puedes eliminar este registro porque tiene elementos internos asignados.';
+      return;
+    }
     this.showDeleteModal = true;
   }
 
-  cerrarModalForm() {
-    this.showFormModal = false;
+  confirmarEliminar() {
+    if (this.deleteErrorMsg) return;
+    this._dataService.doRequestPost('uspNodoOrganizacionalEliminar', { data: { p_Id: this.itemToDelete.Id, p_IdUsuarioActual: 1 } }).subscribe({
+      next: () => {
+        for (let key in this.selecciones) if (this.selecciones[key]?.Id === this.itemToDelete.Id) this.selecciones[key] = null;
+        if (this.itemToTrace?.Id === this.itemToDelete.Id) this.itemToTrace = null;
+        this.cargarDatos(); this.cerrarModalEliminar(); this.mostrarMensajeExito('Registro eliminado');
+      },
+      error: (err) => this.deleteErrorMsg = 'Error al eliminar. Verifique dependencias.'
+    });
   }
 
-  cerrarModalEliminar() {
-    this.showDeleteModal = false;
-    this.itemToDelete = null;
-    this.deleteErrorMsg = '';
-  }
-
-  getResponsable(id: number | null): Empleado | undefined {
-    if (!id) return undefined;
-    return this.empleados.find(e => e.Id === id);
-  }
+  getResponsable(id: number | null): Empleado | undefined { return id ? this.empleados.find(e => e.Id === id) : undefined; }
+  mostrarMensajeExito(mensaje: string) { this.successMessage = mensaje; this.showSuccessModal = true; setTimeout(() => this.showSuccessModal = false, 2000); }
+  cerrarModalForm() { this.showFormModal = false; }
+  cerrarModalEliminar() { this.showDeleteModal = false; this.itemToDelete = null; this.deleteErrorMsg = ''; }
 }

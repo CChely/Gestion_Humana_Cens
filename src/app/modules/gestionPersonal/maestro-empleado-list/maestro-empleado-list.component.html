@@ -193,7 +193,7 @@
                   <img *ngIf="emp.FotoPerfilUrl" [src]="emp.FotoPerfilUrl" class="w-10 h-10 rounded-full mr-4 shrink-0 object-cover border border-slate-200">
                   <div class="flex flex-col min-w-0">
                     <span class="font-semibold text-sm text-slate-900 dark:text-white truncate">{{ emp.NombreCompleto }}</span>
-                    <span class="text-sm text-slate-500 truncate">{{ emp.EmailPersonal }}</span>
+                    <span class="text-sm text-slate-500 truncate">{{ emp.EmailTrabajo }}</span>
                   </div>
                 </div>
               </td>
@@ -214,11 +214,14 @@
                 </div>
               </td>
 
-              <!-- Cargo y Área (AHORA USA LA DESCRIPCIÓN CargoDesc) -->
+            <!-- Estructura Organizacional (Desde JSON) -->
               <td class="px-6 py-4">
-                <div class="flex flex-col">
-                  <span class="text-sm font-medium text-slate-900 dark:text-white truncate max-w-[200px]" [title]="emp.CargoDesc">{{ emp.CargoDesc }}</span>
-                  <span class="text-sm text-slate-500">{{ emp.Departamento }}</span>
+              <div class="flex flex-col space-y-1">
+                <div *ngFor="let org of emp.EstructuraOrg" class="flex items-baseline space-x-1.5 truncate max-w-[250px]" [title]="org.Nivel + ': ' + org.Valor">
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ org.Nivel }}:</span>
+                  <span class="text-sm font-medium text-slate-900 dark:text-white">{{ org.Valor }}</span>
+                </div>
+                <span *ngIf="!emp.EstructuraOrg || emp.EstructuraOrg.length === 0" class="text-sm text-slate-400 italic">Sin estructura asignada</span>
                 </div>
               </td>
 

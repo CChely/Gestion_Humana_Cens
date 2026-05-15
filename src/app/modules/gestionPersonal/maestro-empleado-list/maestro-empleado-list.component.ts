@@ -13,10 +13,13 @@ export interface Empleado {
   ApellidoPaterno: string;
   NombreCompleto: string;
   EmailPersonal: string;
+  EmailTrabajo: string;
   FechaIngreso: string;
   Cargo: string;                // El código
   CargoDesc: string;            // La descripción (ej. "Asistente de RRHH")
-  Departamento: string;
+  Departamento: string;         // Usaremos UbicacionNombre ("Testing", "Sistemas", etc.)
+  EstructuraJerarquica?: string;
+  EstructuraOrg?: any[];        // Para almacenar el JSON parseado
   Estado: 'Activo' | 'Inactivo';
   SincErp: 'Pendiente' | 'Migrado';
   Completado: number;
@@ -85,6 +88,13 @@ export class MaestroEmpleadoListComponent implements OnInit {
           const nombreAmostrar = e.Nombre || `${e.PrimerNombre || ''} ${e.ApellidoPaterno || ''}`.trim() || `Empleado ${e.IdPersonal || e.Id}`;
           const iniciales = nombreAmostrar.substring(0, 2).toUpperCase();
 
+          let estructuraOrg = [];
+          if (e.EstructuraJSON) {
+            try {
+              estructuraOrg = JSON.parse(e.EstructuraJSON);
+            } catch (err) {}
+          }
+
           const emp: Empleado = {
             IdPersonal: e.IdPersonal || e.Id,
             Codigo: e.Codigo || 'Sin Código',
@@ -96,10 +106,13 @@ export class MaestroEmpleadoListComponent implements OnInit {
             ApellidoPaterno: e.ApellidoPaterno,
             NombreCompleto: nombreAmostrar,
             EmailPersonal: e.EmailPersonal || 'Sin Correo',
+            EmailTrabajo: e.EmailTrabajo || 'Sin Correo',
             FechaIngreso: this.formatearFecha(e.FechaCreacion || e.FechaAsignacionCargo),
             Cargo: e.Cargo || 'Sin Cargo',
             CargoDesc: e.CargoDesc || 'Sin Cargo',           // AQUI RECIBIMOS LA DESCRIPCIÓN DEL SP
-            Departamento: e.IdDepartamento || 'Administración',
+            Departamento: e.UbicacionNombre || 'Sin Área',
+            EstructuraJerarquica: e.EstructuraJerarquica || '',
+            EstructuraOrg: estructuraOrg,
             Estado: e.EstaEliminado ? 'Inactivo' : 'Activo',
             SincErp: 'Pendiente',
             Completado: this.calcularPorcentajeCompletado(e),

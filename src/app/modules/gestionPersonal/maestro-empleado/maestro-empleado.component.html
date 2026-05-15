@@ -2,8 +2,8 @@
   <div class="flex-auto p-4 sm:p-8 space-y-6 max-w-[1400px] mx-auto w-full">
 
     <div class="flex flex-col mb-2">
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{{ personalActual.Id ? 'Editar Empleado' : 'Agregar Empleado' }}</h1>
-      <p class="text-sm font-medium text-slate-500 mt-1">{{ personalActual.Id ? 'Modifique los datos y secciones del personal' : 'Complete los datos y secciones del nuevo personal' }}</p>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{{ isEdicion ? 'Editar Empleado' : 'Agregar Empleado' }}</h1>
+      <p class="text-sm font-medium text-slate-500 mt-1">{{ isEdicion ? 'Modifique los datos y secciones del personal' : 'Complete los datos y secciones del nuevo personal' }}</p>
     </div>
 
     <!-- CABECERA -->
@@ -62,7 +62,7 @@
         </div>
 
         <!-- BOTÓN LIMPIAR TODO -->
-        <div class="sidebar-item hover:bg-rose-50 cursor-pointer text-rose-600 font-medium mt-2 border border-rose-100 flex items-center" (click)="limpiarTodo()">
+        <div *ngIf="!isEdicion" class="sidebar-item hover:bg-rose-50 cursor-pointer text-rose-600 font-medium mt-2 border border-rose-100 flex items-center" (click)="limpiarTodo()">
           <svg class="w-5 h-5 flex-shrink-0 mr-3 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
@@ -141,9 +141,9 @@
             <div class="form-row"><label class="form-label">Régimen ESSALUD <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.regimenEssalud" [(ngModel)]="personalActual.regimenEssalud"></app-search-select></div></div>
             <div class="form-row"><label class="form-label">Salud EPS <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.saludEps" [(ngModel)]="personalActual.saludEps"></app-search-select></div></div>
             <div class="form-row"><label class="form-label">ESSALUD Vida</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="personalActual.tieneEssaludVida"><span class="slider"></span></label></div></div>
-            <div class="form-row"><label class="form-label">SCTR Salud</label><div class="form-input-container"><app-search-select [opciones]="sctrSaludBD" campoValor="id" campoDesc="descripcion" [(ngModel)]="personalActual.sctrSalud"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">SCTR Salud</label><div class="form-input-container"><app-search-select [opciones]="catalogos.sctrSalud" [(ngModel)]="personalActual.sctrSalud"></app-search-select></div></div>
             <div class="form-row"><label class="form-label">Aporte SCTR Salud</label><div class="form-input-container"><app-search-select [opciones]="catalogos.aporteSctrSalud" [(ngModel)]="personalActual.aporteSctrSalud"></app-search-select></div></div>
-            <div class="form-row"><label class="form-label">SCTR Pensión</label><div class="form-input-container"><app-search-select [opciones]="sctrPensionBD" campoValor="id" campoDesc="descripcion" [(ngModel)]="personalActual.sctrPension"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">SCTR Pensión</label><div class="form-input-container"><app-search-select [opciones]="catalogos.sctrPension" [(ngModel)]="personalActual.sctrPension"></app-search-select></div></div>
             <div class="form-row"><label class="form-label">Aporte SCTR Pen.</label><div class="form-input-container"><app-search-select [opciones]="catalogos.aporteSctrPension" [(ngModel)]="personalActual.aporteSctrPension"></app-search-select></div></div>
             <div class="form-row"><label class="form-label">Desc. SENATI</label><div class="form-input-container"><label class="toggle-switch"><input type="checkbox" [(ngModel)]="personalActual.descuentaSenati"><span class="slider"></span></label></div></div>
             <div class="form-row"><label class="form-label">Régimen pensión <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.regimenPensionario" [(ngModel)]="personalActual.regimenPensionario"></app-search-select></div></div>
@@ -167,7 +167,7 @@
             <div class="border-b pt-4 pb-2 mb-4"><h3 class="font-bold text-sm">Cuentas: Haberes</h3></div>
             <div class="form-row"><label class="form-label">Moneda <span class="text-rose-500">*</span></label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoMoneda" [(ngModel)]="personalActual.tipoMonedaHaberes"></app-search-select></div></div>
             <div class="form-row"><label class="form-label">Banco</label><div class="form-input-container"><app-search-select [opciones]="catalogos.entidadFinanciera" [(ngModel)]="personalActual.entidadFinancieraHaberes"></app-search-select></div></div>
-            <div class="form-row"><label class="form-label">Tipo Cuenta</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoCuenta" [(ngModel)]="personalActual.tipoCuenta"></app-search-select></div></div>
+            <div class="form-row"><label class="form-label">Tipo Cuenta</label><div class="form-input-container"><app-search-select [opciones]="catalogos.tipoCuenta" [(ngModel)]="personalActual.tipoCuentaHaberes"></app-search-select></div></div>
             <div class="form-row"><label class="form-label">Numero Cuenta</label><div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.cuentaBancariaHaberes"></div></div>
             <div class="form-row"><label class="form-label">Cuenta CCI</label><div class="form-input-container"><input type="text" class="form-control" [(ngModel)]="personalActual.cuentaInterbancariaHaberes"></div></div>
 
@@ -205,10 +205,27 @@
             <div class="form-row"><label class="form-label">Lugar Trabajo</label><div class="form-input-container"><app-search-select [opciones]="catalogos.lugarTrabajo" [(ngModel)]="personalActual.lugarTrabajo"></app-search-select></div></div>
             <div class="form-row"><label class="form-label">Lugar Pago</label><div class="form-input-container"><app-search-select [opciones]="catalogos.lugarTrabajo" [(ngModel)]="personalActual.lugarPago"></app-search-select></div></div>
 
-            <div class="form-row"><label class="form-label">Área</label><div class="form-input-container"><app-search-select [opciones]="areasBD" campoValor="Id" campoDesc="Nombre" [(ngModel)]="personalActual.idArea" (ngModelChange)="onAreaOrgChange()"></app-search-select></div></div>
-            <div class="form-row"><label class="form-label">Departamento</label><div class="form-input-container"><app-search-select [opciones]="departamentosFiltrados" campoValor="Id" campoDesc="Nombre" [(ngModel)]="personalActual.idDepartamento" (ngModelChange)="onDepartamentoOrgChange()"></app-search-select></div></div>
-            <div class="form-row"><label class="form-label">Sección</label><div class="form-input-container"><app-search-select [opciones]="seccionesFiltradas" campoValor="Id" campoDesc="Nombre" [(ngModel)]="personalActual.idSeccion"></app-search-select></div></div>
-            <div class="form-row"><label class="form-label">Jefe inmediato</label><div class="form-input-container relative cursor-pointer" (click)="abrirModalJefe()"><input type="text" class="form-control bg-white" readonly [value]="jefeInmediatoSeleccionado"></div></div>
+            <!-- INICIO: SELECTORES DINÁMICOS ESTRUCTURA ORGANIZACIONAL -->
+            <div class="border-t border-slate-100 pt-5 mt-5">
+              <h3 class="text-sm font-bold text-slate-800 mb-4">Ubicación en el Organigrama</h3>
+
+              <div class="form-row mb-4" *ngFor="let nivel of nivelesOrg; let i = index">
+                <label class="form-label">{{ nivel.Nombre }}</label>
+                <div class="form-input-container">
+                  <app-search-select
+                    [opciones]="getOpcionesNivel(nivel, i)"
+                    campoValor="Id"
+                    campoDesc="Nombre"
+                    [(ngModel)]="seleccionesOrg[nivel.Id]"
+                    (ngModelChange)="onNivelOrgChange(nivel, i)"
+                    [disabled]="i > 0 && !seleccionesOrg[nivelesOrg[i-1].Id]">
+                  </app-search-select>
+                </div>
+              </div>
+            </div>
+            <!-- FIN: SELECTORES DINÁMICOS -->
+
+            <div class="form-row mt-4"><label class="form-label">Jefe inmediato</label><div class="form-input-container relative cursor-pointer" (click)="abrirModalJefe()"><input type="text" class="form-control bg-white" readonly [value]="jefeInmediatoSeleccionado"></div></div>
           </div>
         </div>
 
