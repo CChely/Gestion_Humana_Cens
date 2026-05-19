@@ -94,11 +94,14 @@ export class AuthService {
             });
 
             if (user) {
+                // Load persisted avatar URL if available (set during sign‑in)
+                const persistedAvatar =
+                    localStorage.getItem("userAvatarUrl") ?? "";
                 this._userService.user = {
                     id: user.id,
                     correo: user.correo || user.email,
                     name: user.name,
-                    avatar: "",
+                    avatar: persistedAvatar,
                     status: user.status || "online",
                 };
             }

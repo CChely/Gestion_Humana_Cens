@@ -1,22 +1,27 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { map, Observable, ReplaySubject, tap } from 'rxjs';
-import { User, Usuario, UsuariosResponse, RolCatalogo, RolesResponse, RegistroUsuarioRequest, RegistroUsuarioResponse } from 'app/core/user/user.types';
-import { environment } from 'environments/environment';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { map, Observable, ReplaySubject, tap } from "rxjs";
+import {
+    User,
+    Usuario,
+    UsuariosResponse,
+    RolCatalogo,
+    RolesResponse,
+    RegistroUsuarioRequest,
+    RegistroUsuarioResponse,
+} from "app/core/user/user.types";
+import { environment } from "environments/environment";
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: "root",
 })
-export class UserService
-{
+export class UserService {
     private _user: ReplaySubject<User> = new ReplaySubject<User>(1);
 
     /**
      * Constructor
      */
-    constructor(private _httpClient: HttpClient)
-    {
-    }
+    constructor(private _httpClient: HttpClient) {}
 
     // -----------------------------------------------------------------------------------------------------
     // @ Accessors
@@ -27,14 +32,12 @@ export class UserService
      *
      * @param value
      */
-    set user(value: User)
-    {
+    set user(value: User) {
         // Store the value
         this._user.next(value);
     }
 
-    get user$(): Observable<User>
-    {
+    get user$(): Observable<User> {
         return this._user.asObservable();
     }
 
@@ -45,12 +48,16 @@ export class UserService
     /**
      * Get the current logged in user data
      */
-    get(): Observable<User>
-    {
-        return this._httpClient.get<User>('api/common/user').pipe(
+    get(): Observable<User> {
+        return this._httpClient.get<User>("api/common/user").pipe(
             tap((user) => {
+                // Attach persisted avatar if available
+                const storedAvatar = localStorage.getItem("userAvatarUrl");
+                if (storedAvatar) {
+                    user.avatar = storedAvatar;
+                }
                 this._user.next(user);
-            })
+            }),
         );
     }
 
@@ -59,55 +66,55 @@ export class UserService
      *
      * @param user
      */
-    update(user: User): Observable<any>
-    {
-        return this._httpClient.patch<User>('api/common/user', {user}).pipe(
+    update(user: User): Observable<any> {
+        return this._httpClient.patch<User>("api/common/user", { user }).pipe(
             map((response) => {
                 this._user.next(response);
-            })
+            }),
         );
     }
 
     /**
      * Get all usuarios from API
      */
-    getUsuarios(): Observable<Usuario[]>
-    {
-        return this._httpClient.get<UsuariosResponse>(`${environment.apiUrl}/usuarios`).pipe(
-            map((response) => response.data)
-        );
+    getUsuarios(): Observable<Usuario[]> {
+        return this._httpClient
+            .get<UsuariosResponse>(`${environment.apiUrl}/usuarios`)
+            .pipe(map((response) => response.data));
     }
 
     /**
      * Get all roles from API
      */
-    getRoles(): Observable<RolCatalogo[]>
-    {
-        return this._httpClient.get<RolesResponse>(`${environment.apiUrl}/roles`).pipe(
-            map((response) => response.data)
-        );
+    getRoles(): Observable<RolCatalogo[]> {
+        return this._httpClient
+            .get<RolesResponse>(`${environment.apiUrl}/roles`)
+            .pipe(map((response) => response.data));
     }
 
     /**
      * Register a new user
      */
-    registrarUsuario(data: RegistroUsuarioRequest): Observable<RegistroUsuarioResponse>
-    {
-        return this._httpClient.post<RegistroUsuarioResponse>(`${environment.apiUrl}/usuarios/registrar`, data);
+    registrarUsuario(
+        data: RegistroUsuarioRequest,
+    ): Observable<RegistroUsuarioResponse> {
+        return this._httpClient.post<RegistroUsuarioResponse>(
+            `${environment.apiUrl}/usuarios/registrar`,
+            data,
+        );
     }
 
     /**
      * Generate a random secure password
      */
-    generatePassword(length: number = 12): string
-    {
-        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-        const numbers = '0123456789';
-        const symbols = '!@#$%^&*';
+    generatePassword(length: number = 12): string {
+        const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const lowercase = "abcdefghijklmnopqrstuvwxyz";
+        const numbers = "0123456789";
+        const symbols = "!@#$%^&*";
         const allChars = uppercase + lowercase + numbers + symbols;
 
-        let password = '';
+        let password = "";
 
         // Ensure at least one character from each category
         password += uppercase[Math.floor(Math.random() * uppercase.length)];
@@ -121,6 +128,9 @@ export class UserService
         }
 
         // Shuffle the password
-        return password.split('').sort(() => Math.random() - 0.5).join('');
+        return password
+            .split("")
+            .sort(() => Math.random() - 0.5)
+            .join("");
     }
 }
