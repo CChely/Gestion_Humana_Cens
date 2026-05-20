@@ -72,7 +72,6 @@
                                         <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                                             <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Nombre del Rol</th>
                                             <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Descripción</th>
-                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Estado</th>
                                             <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-right">Acciones</th>
                                         </tr>
                                     </thead>
@@ -87,12 +86,6 @@
                                             </td>
                                             <td class="py-4 px-6">
                                                 <span class="text-sm text-slate-600 dark:text-slate-400 line-clamp-1">{{ rol.DescripcionRol }}</span>
-                                            </td>
-                                            <td class="py-4 px-6 text-center">
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
-                                                      [ngClass]="rol.activo ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600'">
-                                                    {{ rol.activo ? 'Activo' : 'Inactivo' }}
-                                                </span>
                                             </td>
                                             <td class="py-4 px-6 text-right whitespace-nowrap">
                                                 <div class="flex items-center justify-end space-x-1">
@@ -268,9 +261,6 @@
                                         <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                                             <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Nombre</th>
                                             <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Descripción</th>
-                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Público</th>
-                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Estado</th>
-                                            <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-center">Creado</th>
                                             <th class="py-4 px-6 font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider text-right">Acciones</th>
                                         </tr>
                                     </thead>
@@ -282,19 +272,6 @@
                                             </td>
                                             <td class="py-4 px-6">
                                                 <span class="text-sm text-slate-600 dark:text-slate-400 line-clamp-1">{{ proc.Descripcion }}</span>
-                                            </td>
-                                            <td class="py-4 px-6 text-center">
-                                                <mat-icon *ngIf="proc.EsPublico" class="text-emerald-500 icon-size-5" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
-                                                <mat-icon *ngIf="!proc.EsPublico" class="text-slate-300 icon-size-5" [svgIcon]="'heroicons_outline:minus-circle'"></mat-icon>
-                                            </td>
-                                            <td class="py-4 px-6 text-center">
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
-                                                      [ngClass]="proc.EsActivo ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600'">
-                                                    {{ proc.EsActivo ? 'Activo' : 'Inactivo' }}
-                                                </span>
-                                            </td>
-                                            <td class="py-4 px-6 text-center whitespace-nowrap">
-                                                <span class="text-xs text-slate-500 font-medium">{{ proc.FechaCreacion | date:'dd/MM/yyyy' }}</span>
                                             </td>
                                             <td class="py-4 px-6 text-right whitespace-nowrap">
                                                 <div class="flex items-center justify-end space-x-1">

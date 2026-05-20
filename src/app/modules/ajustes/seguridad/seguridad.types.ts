@@ -22,6 +22,11 @@ export interface Modulo {
     EsActivo: number;
 }
 
+/** Nodo del árbol de módulos con soporte a N niveles de profundidad */
+export interface ModuloNode extends Modulo {
+    children: ModuloNode[];
+}
+
 export interface Rol {
     RolId: number;
     NombreRol: string;

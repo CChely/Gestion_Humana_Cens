@@ -27,8 +27,8 @@ export class SeguridadDialogComponent implements OnInit {
 
     ngOnInit(): void {
         this.form = this._fb.group({
-            NombreRol     : [this.rol?.NombreRol || '', [Validators.required]],
-            DescripcionRol: [this.rol?.DescripcionRol || '', [Validators.required]]
+            NombreRol     : [this.rol?.NombreRol || '', [Validators.required, Validators.maxLength(100)]],
+            DescripcionRol: [this.rol?.DescripcionRol || '', [Validators.maxLength(255)]]
         });
     }
 
@@ -42,9 +42,11 @@ export class SeguridadDialogComponent implements OnInit {
         };
 
         this._seguridadService.saveRol(payload).subscribe({
-            next: () => {
+            next: (res) => {
                 this.isSaving = false;
-                this._dialogRef.close(true);
+                if (res?.status) {
+                    this._dialogRef.close(true);
+                }
             },
             error: () => {
                 this.isSaving = false;
