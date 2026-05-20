@@ -103,6 +103,9 @@
                                                         <div cdkDragHandle class="cursor-move text-slate-500 hover:text-sky-600 transition-colors">
                                                             <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:arrows-expand'"></mat-icon>
                                                         </div>
+                                                        <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-white dark:bg-slate-800 text-sky-500 shadow-sm border border-slate-100 dark:border-slate-700">
+                                                            <mat-icon class="icon-size-5" [svgIcon]="child.IconoModulo || 'heroicons_outline:document'"></mat-icon>
+                                                        </div>
                                                         <span class="font-black text-slate-700 dark:text-slate-200 text-lg tracking-tight">
                                                             {{ child.NombreModulo }}
                                                         </span>

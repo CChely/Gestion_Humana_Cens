@@ -30,7 +30,7 @@ export class SeguridadProcedimientoDialogComponent implements OnInit {
             p_IdProcedimiento: [this.procedimiento?.ProcedimientoId || null],
             p_Nombre: [this.procedimiento?.NombreProcedimiento || '', [Validators.required, Validators.maxLength(300)]],
             p_Descripcion: [this.procedimiento?.Descripcion || '', [Validators.maxLength(500)]],
-            p_EsPublico: [this.procedimiento ? (this.procedimiento.EsPublico === 1) : false],
+            p_EsPublico: [this.procedimiento ? (this.procedimiento.EsPublico === 1) : true],
             p_EsActivo: [this.procedimiento ? (this.procedimiento.EsActivo === 1) : true]
         });
     }

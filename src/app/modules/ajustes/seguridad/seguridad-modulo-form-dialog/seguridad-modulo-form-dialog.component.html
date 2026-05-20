@@ -61,14 +61,38 @@
                 <label class="text-sm font-bold text-slate-700 dark:text-slate-300 ml-5">
                     Icono
                 </label>
-                <mat-form-field appearance="outline" class="w-full">
-                    <mat-select [formControlName]="'p_Icono'" placeholder="Selecciona un icono">
-                        <mat-option *ngFor="let icon of iconOptions" [value]="icon">
-                            <mat-icon class="icon-size-5 mr-2" [svgIcon]="icon"></mat-icon>
-                            {{ icon }}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
+                <mat-select [formControlName]="'p_Icono'" 
+                            placeholder="Selecciona un icono"
+                            class="rounded-full-select"
+                            panelClass="custom-select-panel"
+                            (openedChange)="onIconSelectOpened($event)">
+                    <mat-select-trigger *ngIf="form.get('p_Icono').value" class="flex items-center gap-3">
+                        <mat-icon class="icon-size-5 text-indigo-500" [svgIcon]="form.get('p_Icono').value"></mat-icon>
+                        <span class="text-sm font-medium text-slate-800 dark:text-slate-100">
+                            {{ form.get('p_Icono').value.split(':')[1] || form.get('p_Icono').value }}
+                        </span>
+                    </mat-select-trigger>
+                    <!-- Search input sticky -->
+                    <div class="icon-search-wrapper" (keydown)="$event.stopPropagation()">
+                        <mat-icon class="icon-size-4 icon-search-icon" [svgIcon]="'heroicons_outline:search'"></mat-icon>
+                        <input #iconSearch
+                               type="text"
+                               class="icon-search-input"
+                               placeholder="Buscar icono..."
+                               autocomplete="off"
+                               (input)="filterIcons(iconSearch.value)">
+                    </div>
+                    <mat-option *ngFor="let icon of filteredIconOptions" [value]="icon">
+                        <div class="flex items-center w-full gap-3 py-1">
+                            <mat-icon class="icon-size-5 text-slate-500" [svgIcon]="icon"></mat-icon>
+                            <span class="text-sm font-medium">{{ icon.split(':')[1] || icon }}</span>
+                        </div>
+                    </mat-option>
+                    <div *ngIf="filteredIconOptions.length === 0" class="icon-search-empty">
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:face-frown'"></mat-icon>
+                        <span>No se encontraron iconos</span>
+                    </div>
+                </mat-select>
             </div>
 
             <div class="flex flex-col gap-3">
@@ -80,17 +104,6 @@
                        placeholder="ej: /ajustes/seguridad">
             </div>
 
-            <!-- Switches -->
-            <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8 p-8 bg-slate-50/50 dark:bg-slate-800/30 rounded-[2.5rem] mt-2">
-                <div class="flex items-center justify-between px-4">
-                    <span class="text-sm font-bold text-slate-600 dark:text-slate-300">Visible en Menú</span>
-                    <mat-slide-toggle [color]="'primary'" formControlName="p_EsVisibleMenu"></mat-slide-toggle>
-                </div>
-                <div class="flex items-center justify-between px-4">
-                    <span class="text-sm font-bold text-slate-600 dark:text-slate-300">Módulo Activo</span>
-                    <mat-slide-toggle [color]="'primary'" formControlName="p_EsActivo"></mat-slide-toggle>
-                </div>
-            </div>
 
         </div>
     </form>
