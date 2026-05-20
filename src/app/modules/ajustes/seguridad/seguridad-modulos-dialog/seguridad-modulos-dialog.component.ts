@@ -3,7 +3,7 @@ import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDia
 import { moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { forkJoin } from 'rxjs';
 import { finalize, take } from 'rxjs/operators';
-import { Rol, Modulo, Permiso } from '../seguridad.types';
+import { Rol, Modulo, ModuloNode, Permiso } from '../seguridad.types';
 import { SeguridadService } from '../seguridad.service';
 import { UserService } from 'app/core/user/user.service';
 import { SeguridadModuloFormDialogComponent } from '../seguridad-modulo-form-dialog/seguridad-modulo-form-dialog.component';
@@ -26,12 +26,12 @@ export class SeguridadModulosDialogComponent implements OnInit {
     rol: Rol;
     modulos: Modulo[] = [];
     allModulos: Modulo[] = [];
-    parentModulos: Modulo[] = [];
-    childrenMap: Map<number, Modulo[]> = new Map();
+    /** Nodos raíz del árbol (ModuloPadreId === null) */
+    rootNodes: ModuloNode[] = [];
     allPermisos: Permiso[] = [];
     selectedPermisosIds: number[] = [];
     isSaving: boolean = false;
-    expandedParentIds: Set<number> = new Set();
+    expandedNodeIds: Set<number> = new Set();
 
     constructor(
         @Inject(MAT_DIALOG_DATA) private _data: any,
@@ -65,21 +65,21 @@ export class SeguridadModulosDialogComponent implements OnInit {
     }
 
     /**
-     * Alternar estado de expansión de un módulo padre
+     * Alternar estado de expansión de cualquier nodo del árbol
      */
-    onParentExpansionChange(parentId: number, expanded: boolean): void {
+    onExpansionChange(nodeId: number, expanded: boolean): void {
         if (expanded) {
-            this.expandedParentIds.add(parentId);
+            this.expandedNodeIds.add(nodeId);
         } else {
-            this.expandedParentIds.delete(parentId);
+            this.expandedNodeIds.delete(nodeId);
         }
     }
 
     /**
-     * Verificar si un módulo padre debe estar expandido
+     * Verificar si un nodo debe estar expandido
      */
-    isParentExpanded(parentId: number): boolean {
-        return this.expandedParentIds.has(parentId);
+    isNodeExpanded(nodeId: number): boolean {
+        return this.expandedNodeIds.has(nodeId);
     }
 
     loadModulos(): void {
@@ -101,18 +101,27 @@ export class SeguridadModulosDialogComponent implements OnInit {
     }
 
     private _organizeModulos(): void {
-        this.parentModulos = this.modulos.filter(m => m.ModuloPadreId === null);
-        this.childrenMap.clear();
-        this.parentModulos.forEach(parent => {
-            const children = this.modulos.filter(m => m.ModuloPadreId === parent.ModuloId);
-            this.childrenMap.set(parent.ModuloId, children);
-        });
+        // Construir árbol recursivo de N niveles
+        this.rootNodes = this._buildTree(null);
+    }
+
+    /**
+     * Construye recursivamente los nodos hijos para un padre dado.
+     * @param parentId null para obtener los nodos raíz
+     */
+    private _buildTree(parentId: number | null): ModuloNode[] {
+        return this.modulos
+            .filter(m => m.ModuloPadreId === parentId)
+            .map(m => ({
+                ...m,
+                children: this._buildTree(m.ModuloId)
+            }));
     }
 
     openNuevoModuloDialog(parentId: number = null): void {
         const dialogRef = this._dialog.open(SeguridadModuloFormDialogComponent, {
             data: {
-                parentModulos: this.parentModulos,
+                parentModulos: this.rootNodes,
                 selectedParentId: parentId
             },
             width: '100%',
@@ -133,7 +142,7 @@ export class SeguridadModulosDialogComponent implements OnInit {
     openEditarModuloDialog(modulo: Modulo): void {
         const dialogRef = this._dialog.open(SeguridadModuloFormDialogComponent, {
             data: {
-                parentModulos: this.parentModulos,
+                parentModulos: this.rootNodes,
                 modulo: modulo
             },
             width: '100%',
@@ -148,8 +157,16 @@ export class SeguridadModulosDialogComponent implements OnInit {
         });
     }
 
-    getChildren(parentId: number): Modulo[] {
-        return this.childrenMap.get(parentId) || [];
+    /** Devuelve los hijos directos de un nodo buscándolo en el árbol */
+    getChildren(node: ModuloNode): ModuloNode[] {
+        return node.children || [];
+    }
+
+    /** Cuenta todos los permisos en el subárbol de un nodo (recursivo) */
+    countSubtreePermisos(node: ModuloNode): number {
+        const own = this.getPermisosByModulo(node.ModuloId).length;
+        const fromChildren = node.children.reduce((sum, child) => sum + this.countSubtreePermisos(child), 0);
+        return own + fromChildren;
     }
 
     getPermisosByModulo(moduloId: number): Permiso[] {
@@ -157,22 +174,32 @@ export class SeguridadModulosDialogComponent implements OnInit {
     }
 
     /**
-     * Reordenar módulos padres
+     * Reordenar módulos raíz
      */
-    dropParent(event: CdkDragDrop<Modulo[]>): void {
-        moveItemInArray(this.parentModulos, event.previousIndex, event.currentIndex);
-        console.log('Nuevo orden de padres:', this.parentModulos);
+    dropParent(event: CdkDragDrop<ModuloNode[]>): void {
+        moveItemInArray(this.rootNodes, event.previousIndex, event.currentIndex);
     }
 
     /**
-     * Reordenar módulos hijos
+     * Reordenar hijos de cualquier nodo del árbol
      */
-    dropChild(event: CdkDragDrop<Modulo[]>, parentId: number): void {
-        const children = this.childrenMap.get(parentId);
-        if (children) {
-            moveItemInArray(children, event.previousIndex, event.currentIndex);
-            console.log(`Nuevo orden de hijos para el padre ${parentId}:`, children);
+    dropChild(event: CdkDragDrop<ModuloNode[]>, parentId: number): void {
+        const parentNode = this._findNode(this.rootNodes, parentId);
+        if (parentNode) {
+            moveItemInArray(parentNode.children, event.previousIndex, event.currentIndex);
         }
+    }
+
+    /**
+     * Busca un nodo por ID en el árbol de forma recursiva
+     */
+    private _findNode(nodes: ModuloNode[], id: number): ModuloNode | null {
+        for (const node of nodes) {
+            if (node.ModuloId === id) return node;
+            const found = this._findNode(node.children, id);
+            if (found) return found;
+        }
+        return null;
     }
 
     /**
