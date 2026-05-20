@@ -195,26 +195,27 @@ export class SeguridadModulosDialogComponent implements OnInit {
     }
 
     /**
-     * Guardar los cambios de permisos
+     * Guardar los cambios de permisos (altas y bajas)
      */
     saveChanges(): void {
         this.isSaving = true;
 
-        // Identificar los permisos que son nuevos para este rol
         const currentIds = this.rol.permisos ? this.rol.permisos.map(p => p.PermisoId) : [];
         const newIds = this.selectedPermisosIds.filter(id => !currentIds.includes(id));
+        const removedIds = currentIds.filter(id => !this.selectedPermisosIds.includes(id));
 
-        // Si no hay nuevos permisos, cerramos directamente
-        if (newIds.length === 0) {
+        if (newIds.length === 0 && removedIds.length === 0) {
             this.isSaving = false;
             this._dialogRef.close(true);
             return;
         }
 
-        // Obtener el usuario actual y ejecutar las peticiones
         this._userService.user$.pipe(take(1)).subscribe(user => {
-            const userId = parseInt(user.id) || 1;
-            const observables = newIds.map(id => this._seguridadService.assignPermisoToRol(this.rol.RolId, id, userId));
+            const userId = parseInt(user.id, 10) || 1;
+            const observables = [
+                ...newIds.map(id => this._seguridadService.assignPermisoToRol(this.rol.RolId, id, userId)),
+                ...removedIds.map(id => this._seguridadService.removePermisoFromRol(this.rol.RolId, id))
+            ];
 
             forkJoin(observables)
                 .pipe(
@@ -223,8 +224,11 @@ export class SeguridadModulosDialogComponent implements OnInit {
                     })
                 )
                 .subscribe({
-                    next: () => {
-                        this._dialogRef.close(true);
+                    next: (results) => {
+                        const allOk = results.every((res: { status?: boolean }) => res?.status !== false);
+                        if (allOk) {
+                            this._dialogRef.close(true);
+                        }
                     },
                     error: (error) => {
                         console.error('Error al guardar permisos:', error);

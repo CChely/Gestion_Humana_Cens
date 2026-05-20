@@ -95,7 +95,25 @@ export class SeguridadService {
      * Guardar o actualizar Rol
      */
     saveRol(rol: Partial<Rol>): Observable<any> {
-        console.log('Guardando rol:', rol);
+        if (rol.RolId) {
+            return this.updateRol(rol);
+        }
+
+        return this._httpClient.post(`${environment.apiUrl}/collection/doit/dbo.uspRolInsertar`, {
+            "data": {
+                "p_Nombre": rol.NombreRol,
+                "p_Descripcion": rol.DescripcionRol || '',
+                "p_IdUsuarioActual": 1 // TODO: Obtener del servicio de autenticación
+            },
+            "params": null
+        });
+    }
+
+    /**
+     * Actualizar rol existente (pendiente de SP en backend)
+     */
+    private updateRol(rol: Partial<Rol>): Observable<any> {
+        console.log('Actualizando rol:', rol);
         return of({ status: true, message: 'Rol guardado correctamente' });
     }
 
@@ -255,6 +273,19 @@ export class SeguridadService {
                 "p_IdRol": rolId,
                 "p_IdPermiso": permisoId,
                 "p_IdUsuarioActual": userId
+            },
+            "params": null
+        });
+    }
+
+    /**
+     * Quitar un permiso asignado a un rol
+     */
+    removePermisoFromRol(rolId: number, permisoId: number): Observable<any> {
+        return this._httpClient.post(`${environment.apiUrl}/collection/doit/dbo.uspRolPermisoEliminar`, {
+            "data": {
+                "p_IdRol": rolId,
+                "p_IdPermiso": permisoId
             },
             "params": null
         });
