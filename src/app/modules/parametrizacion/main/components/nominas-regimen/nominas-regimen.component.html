@@ -1,0 +1,779 @@
+<!-- TOAST NOTIFICATION -->
+<div
+  *ngIf="toastMessage"
+  [ngClass]="{
+    'translate-y-0 opacity-100': toastMessage,
+    'translate-y-[-20px] opacity-0': !toastMessage
+  }"
+  class="fixed top-6 right-6 z-[9999] max-w-md bg-white border border-slate-100 rounded-2xl shadow-xl flex items-center gap-3.5 p-4.5 transition-all duration-300 transform">
+  
+  <!-- Success Icon -->
+  <div *ngIf="toastType === 'success'" class="bg-emerald-50 text-emerald-600 p-2 rounded-xl border border-emerald-100/50 shrink-0">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+  </div>
+  
+  <!-- Error Icon -->
+  <div *ngIf="toastType === 'error'" class="bg-rose-50 text-rose-600 p-2 rounded-xl border border-rose-100/50 shrink-0">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+  </div>
+
+  <!-- Content Text -->
+  <div class="flex-1 min-w-[200px]">
+    <p class="text-xs font-bold text-slate-900">
+      {{ toastType === 'success' ? 'Operación Exitosa' : 'Aviso del Sistema' }}
+    </p>
+    <p class="text-[11px] font-medium text-slate-500 mt-0.5 leading-snug">
+      {{ toastMessage }}
+    </p>
+  </div>
+  
+  <!-- Close Button -->
+  <button
+    (click)="toastMessage = null"
+    class="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-50 rounded-lg transition-all shrink-0">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
+</div>
+
+<div class="space-y-6 font-sans">
+  
+  <!-- Breadcrumbs and Header -->
+  <div class="flex flex-col gap-1">
+    <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+      <span>Parametrización</span>
+      <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      <span>Parámetros de nómina</span>
+      <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      <span class="text-blue-600 font-semibold">Nóminas por régimen</span>
+    </div>
+    <h2 class="text-xl font-bold text-slate-900 tracking-tight mt-1">Nóminas por régimen</h2>
+    <p class="text-slate-500 text-[11px] mt-1 leading-relaxed max-w-4xl">
+      Configuración de nóminas asociadas a regímenes laborales de forma automatizada. Permite agrupar las planillas obligatorias
+      según el tipo de contrato, régimen general y categorías de PLAME registradas en el catálogo de maestros de base de datos.
+    </p>
+  </div>
+
+  <!-- Main Table Card -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    
+    <!-- Filters and Action Buttons -->
+    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+      <div class="flex items-center gap-3 flex-1 max-w-lg">
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <span class="absolute left-3.5 top-2.5 text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </span>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Buscar por alias, régimen, PLAME..."
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+        </div>
+        
+        <!-- Filter Button -->
+        <button class="bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 flex items-center gap-2 transition-all">
+          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+          <span>Filtrar</span>
+          <span class="bg-slate-200 text-slate-700 text-[11px] px-1.5 py-0.5 rounded-full font-bold">{{ searchTerm ? 1 : 0 }}</span>
+        </button>
+      </div>
+      
+      <!-- View Toggle & Add Button Group -->
+      <div class="flex items-center gap-3 shrink-0">
+        <!-- View Toggle Segmented Control -->
+        <div class="bg-slate-100 p-0.5 rounded-xl border border-slate-200 flex items-center shrink-0">
+          <button
+            (click)="showJsonView = false"
+            [class]="!showJsonView ? 'bg-white text-slate-800 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span>Tabla</span>
+          </button>
+          <button
+            (click)="showJsonView = true"
+            [class]="showJsonView ? 'bg-white text-slate-800 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            <span>JSON</span>
+          </button>
+        </div>
+
+        <!-- Add Button -->
+        <button
+          *ngIf="!showJsonView"
+          (click)="openAddModal()"
+          class="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-2.5 text-xs font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+          <span>Agregar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table View Content -->
+    <div *ngIf="!showJsonView">
+      <div class="overflow-x-auto border border-slate-100 rounded-xl bg-white m-6">
+        <table class="min-w-full divide-y divide-slate-200 text-left text-xs font-medium text-slate-700">
+          <thead class="bg-slate-50 text-slate-400 uppercase tracking-widest text-[9px] font-bold">
+            <tr>
+              <th class="px-6 py-5 w-12 text-center select-none">
+                <label class="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [checked]="isAllSelected()"
+                    (change)="toggleSelectAll($event)"
+                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-4.5 w-4.5 transition-all">
+                </label>
+              </th>
+              
+              <!-- Alias -->
+              <th (click)="setSort('ALIAS')" class="px-6 py-5 font-semibold cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1">
+                  <span>Alias</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="sortField === 'ALIAS' && sortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="sortField === 'ALIAS' && sortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+
+              <!-- Régimen Laboral -->
+              <th (click)="setSort('REGIMENLABORAL.DESCRIPCION')" class="px-6 py-5 font-semibold cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1">
+                  <span>Régimen Laboral</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="sortField === 'REGIMENLABORAL.DESCRIPCION' && sortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="sortField === 'REGIMENLABORAL.DESCRIPCION' && sortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+
+              <!-- Categoría PLAME -->
+              <th (click)="setSort('PLAME.DESCRIPCION')" class="px-6 py-5 font-semibold cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1">
+                  <span>Categoría PLAME</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="sortField === 'PLAME.DESCRIPCION' && sortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="sortField === 'PLAME.DESCRIPCION' && sortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+
+              <!-- Tipo Empleado -->
+              <th (click)="setSort('TIPOTRABAJADOR.DESCRIPCION')" class="px-6 py-5 font-semibold cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1">
+                  <span>Tipo Empleado</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="sortField === 'TIPOTRABAJADOR.DESCRIPCION' && sortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="sortField === 'TIPOTRABAJADOR.DESCRIPCION' && sortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+
+              <!-- Registro -->
+              <th (click)="setSort('FECHA_REG')" class="px-6 py-5 font-semibold cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1">
+                  <span>Registro</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="sortField === 'FECHA_REG' && sortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="sortField === 'FECHA_REG' && sortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+
+              <!-- Estado -->
+              <th (click)="setSort('FLG_ESTADO')" class="px-6 py-5 font-semibold text-center cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1 justify-center">
+                  <span>Estado</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="sortField === 'FLG_ESTADO' && sortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="sortField === 'FLG_ESTADO' && sortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              
+              <th class="px-6 py-5 font-semibold text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+            <tr
+              *ngFor="let item of paginatedNominas"
+              [ngClass]="{'bg-blue-50/20': isSelected(item.SerialKey)}"
+              class="hover:bg-slate-50/70 transition-all border-b border-slate-100">
+              
+              <!-- Checkbox -->
+              <td class="px-6 py-5 text-center">
+                <label class="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(item.SerialKey)"
+                    (change)="toggleSelectItem(item.SerialKey)"
+                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-4.5 w-4.5 transition-all">
+                </label>
+              </td>
+
+              <!-- Alias -->
+              <td class="px-6 py-5 text-slate-900 font-bold text-xs uppercase tracking-wide">
+                {{ item.ALIAS }}
+              </td>
+
+              <!-- Régimen Laboral -->
+              <td class="px-6 py-5 text-slate-950 font-semibold text-xs leading-relaxed max-w-[200px]">
+                {{ item.REGIMENLABORAL.DESCRIPCION }}
+              </td>
+
+              <!-- Categoría PLAME -->
+              <td class="px-6 py-5 text-slate-600 text-xs">
+                {{ item.PLAME.DESCRIPCION }}
+              </td>
+
+              <!-- Tipo Empleado -->
+              <td class="px-6 py-5 text-slate-600 text-xs">
+                {{ item.TIPOTRABAJADOR.DESCRIPCION }}
+              </td>
+
+              <!-- Registro -->
+              <td class="px-6 py-5 text-slate-500 text-xs font-sans">
+                {{ parseJsonDate(item.FECHA_REG) }}
+              </td>
+
+              <!-- Estado -->
+              <td class="px-6 py-5 text-center">
+                <span
+                  [class]="item.FLG_ESTADO ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'"
+                  class="px-2.5 py-0.5 text-[10px] font-bold rounded-full border inline-block tracking-wide uppercase">
+                  {{ item.FLG_ESTADO_DESC }}
+                </span>
+              </td>
+
+              <!-- Acciones -->
+              <td class="px-6 py-5 text-right">
+                <div class="flex items-center justify-end gap-1.5">
+                  <button
+                    (click)="openEditModal(item)"
+                    class="bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 font-semibold flex items-center gap-1 transition-all"
+                    title="Editar">
+                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    <span>Editar</span>
+                  </button>
+                  <button
+                    (click)="confirmDelete(item.SerialKey)"
+                    class="hover:bg-red-50 text-slate-400 hover:text-red-600 p-1.5 rounded-lg border border-transparent hover:border-red-150 transition-all"
+                    title="Eliminar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="paginatedNominas.length === 0">
+              <td colspan="8" class="px-6 py-12 text-center text-slate-400 font-semibold bg-slate-50/30">
+                <svg class="w-10 h-10 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>No se encontraron nóminas asociadas a ningún régimen.</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold text-slate-500 bg-slate-50/40">
+        <div>
+          Mostrando del <span class="text-slate-900 font-bold">{{ filteredNominas.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }}</span> al
+          <span class="text-slate-900 font-bold">{{ (currentPage * pageSize) > filteredNominas.length ? filteredNominas.length : (currentPage * pageSize) }}</span> de
+          <span class="text-slate-900 font-bold">{{ filteredNominas.length }}</span> registros
+        </div>
+        
+        <div class="flex items-center gap-1">
+          <button
+            (click)="changePage(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white transition-all">
+            Anterior
+          </button>
+          
+          <button
+            *ngFor="let page of totalPagesArray"
+            (click)="changePage(page)"
+            [class]="page === currentPage ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'"
+            class="w-8 h-8 rounded-lg font-bold flex items-center justify-center transition-all">
+            {{ page }}
+          </button>
+          
+          <button
+            (click)="changePage(currentPage + 1)"
+            [disabled]="currentPage === totalPages || totalPages === 0"
+            class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white transition-all">
+            Siguiente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JSON Console Panel (Obsidian Dark Theme) -->
+    <div *ngIf="showJsonView" class="bg-slate-900 border-t border-slate-800 p-6 flex flex-col gap-4">
+      
+      <!-- Code Header & Segmented Selectors -->
+      <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center bg-slate-800 px-4 py-3 rounded-xl border border-slate-700/50 gap-4">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <!-- MacOS Style Buttons -->
+          <div class="flex items-center gap-1.5 select-none shrink-0">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-xs"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-xs"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs"></span>
+          </div>
+          
+          <!-- Segmented Console Tabs -->
+          <div class="bg-slate-900 p-0.5 rounded-lg border border-slate-750 flex items-center shrink-0 ml-3">
+            <button
+              (click)="activeConsoleTab = 'listarPaginado'"
+              [class]="activeConsoleTab === 'listarPaginado' ? 'bg-slate-700 text-white font-bold' : 'text-slate-400 hover:text-slate-200'"
+              class="px-2.5 py-1 rounded text-[10px] font-sans tracking-wide transition-all uppercase">
+              Listar Paginado
+            </button>
+            <button
+              (click)="activeConsoleTab = 'registrar'"
+              [class]="activeConsoleTab === 'registrar' ? 'bg-slate-700 text-white font-bold' : 'text-slate-400 hover:text-slate-200'"
+              class="px-2.5 py-1 rounded text-[10px] font-sans tracking-wide transition-all uppercase">
+              Registro Nóminas
+            </button>
+            <button
+              (click)="activeConsoleTab = 'masterData'"
+              [class]="activeConsoleTab === 'masterData' ? 'bg-slate-700 text-white font-bold' : 'text-slate-400 hover:text-slate-200'"
+              class="px-2.5 py-1 rounded text-[10px] font-sans tracking-wide transition-all uppercase">
+              Master Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Raw URLs displayed as clean links directly inside text -->
+        <div class="flex flex-col text-center xl:text-left text-[11px] font-sans text-slate-400 flex-1 justify-center px-4 leading-normal">
+          <div *ngIf="activeConsoleTab === 'listarPaginado'">
+            <span class="text-slate-500 block text-[9px] uppercase tracking-wider font-semibold mb-0.5">Listar Paginado Endpoint URL:</span>
+            <span class="text-sky-400 select-all font-sans font-semibold">https://payroll.pipolfy.com/TiposPlanilla/ListarPaginado</span>
+          </div>
+          <div *ngIf="activeConsoleTab === 'registrar'">
+            <span class="text-slate-500 block text-[9px] uppercase tracking-wider font-semibold mb-0.5">Guardar Registro Endpoint URL:</span>
+            <span class="text-sky-400 select-all font-sans font-semibold">https://payroll.pipolfy.com/TiposPlanilla/RegistroNominasRegimen</span>
+          </div>
+          <div *ngIf="activeConsoleTab === 'masterData'">
+            <span class="text-slate-500 block text-[9px] uppercase tracking-wider font-semibold mb-0.5">Master Catalogs Obtener General Endpoint URL:</span>
+            <span class="text-sky-400 select-all font-sans font-semibold">https://dev.recursoshumanos.cens.cloud/api/v1/collection/doit/uspMainDataObtenerGeneral</span>
+          </div>
+        </div>
+        
+        <button
+          (click)="copyJsonToClipboard()"
+          class="bg-slate-700 hover:bg-slate-650 text-slate-200 border border-slate-600 rounded-lg px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-xs shrink-0 self-end lg:self-auto uppercase">
+          <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2H5a2 2 0 01-2-2v-3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+          <span>Copiar JSON</span>
+        </button>
+      </div>
+
+      <!-- JSON content container -->
+      <div class="bg-slate-950 rounded-xl border border-slate-800 p-5 shadow-inner overflow-hidden relative">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 select-none">
+          <div class="flex items-center gap-2">
+            <button 
+              (click)="expandAllJson()" 
+              class="bg-slate-800 hover:bg-slate-750 text-slate-300 px-3 py-1 rounded-lg text-[10px] font-bold transition-all border border-slate-700/50 uppercase">
+              Expandir todo
+            </button>
+            <button 
+              (click)="collapseAllJson()" 
+              class="bg-slate-800 hover:bg-slate-750 text-slate-300 px-3 py-1 rounded-lg text-[10px] font-bold transition-all border border-slate-700/50 uppercase">
+              Colapsar todo
+            </button>
+          </div>
+          <span class="text-[9px] text-slate-600 font-sans font-bold select-none uppercase tracking-widest">
+            Obsidian code console
+          </span>
+        </div>
+
+        <!-- Render Listar Paginado JSON tree -->
+        <div *ngIf="activeConsoleTab === 'listarPaginado'" class="font-sans text-[12px] overflow-auto max-h-[500px] leading-relaxed pr-8 select-all text-slate-300">
+          <div class="flex items-center gap-1 select-none">
+            <button (click)="toggleConsoleCollapse()" class="text-slate-500 hover:text-slate-300 p-0.5 rounded focus:outline-none transition-colors shrink-0">
+              <svg [ngClass]="{'transform -rotate-90': isConsoleCollapsed}" class="w-3.5 h-3.5 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path>
+              </svg>
+            </button>
+            <span class="text-teal-400 font-bold">&#123;</span>
+          </div>
+
+          <div *ngIf="!isConsoleCollapsed" class="pl-5 space-y-0.5">
+            <div>
+              <span class="text-sky-400 font-medium">"lista"</span>: <span class="text-yellow-400 font-bold">[</span>
+            </div>
+
+            <!-- List items -->
+            <div class="pl-5 border-l border-slate-800/40 ml-1.5 space-y-1">
+              <div *ngFor="let item of nominas; let i = index; let isLast = last">
+                <div class="flex items-center gap-1 select-none">
+                  <button (click)="toggleItemCollapse(i)" class="text-slate-500 hover:text-slate-300 p-0.5 rounded focus:outline-none transition-colors shrink-0">
+                    <svg [ngClass]="{'transform -rotate-90': isItemCollapsed(i)}" class="w-3 h-3 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path>
+                    </svg>
+                  </button>
+                  <span class="text-teal-400 font-bold">&#123;</span>
+                  <span *ngIf="isItemCollapsed(i)" class="text-slate-500 font-sans text-xs"> ... <span class="text-teal-400 font-bold">&#125;</span>{{ isLast ? '' : ',' }}</span>
+                </div>
+
+                <div *ngIf="!isItemCollapsed(i)" class="pl-5 border-l border-slate-800/40 ml-1.5 space-y-0.5">
+                  <div><span class="text-sky-400 font-medium">"TIPOSPLANILLA_ID"</span>: <span class="text-emerald-400 font-bold">{{ item.TIPOSPLANILLA_ID }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"ALIAS"</span>: <span class="text-amber-300">"{{ item.ALIAS }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"FLG_TRABAJADOR"</span>: <span class="text-emerald-400 font-bold">{{ item.FLG_TRABAJADOR }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"FLG_ESTADO"</span>: <span class="text-purple-400 font-bold">{{ item.FLG_ESTADO }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"FLG_ESTADO_DESC"</span>: <span class="text-amber-300">"{{ item.FLG_ESTADO_DESC }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"REGIMENLABORALKey"</span>: <span class="text-amber-300">"{{ item.REGIMENLABORALKey }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"PLAMEKey"</span>: <span class="text-amber-300">"{{ item.PLAMEKey }}"</span>,</div>
+                  
+                  <!-- Regimen Laboral Object -->
+                  <div>
+                    <span class="text-sky-400 font-medium">"REGIMENLABORAL"</span>: <span class="text-purple-400">&#123;</span>
+                    <div class="pl-5 border-l border-slate-800/40 ml-1.5">
+                      <div><span class="text-sky-400 font-medium">"CODIGO"</span>: <span class="text-amber-300">"{{ item.REGIMENLABORAL.CODIGO }}"</span>,</div>
+                      <div><span class="text-sky-400 font-medium">"DESCRIPCION"</span>: <span class="text-amber-300">"{{ item.REGIMENLABORAL.DESCRIPCION }}"</span></div>
+                    </div>
+                    <span class="text-purple-400">&#125;</span>,
+                  </div>
+
+                  <!-- PLAME Object -->
+                  <div>
+                    <span class="text-sky-400 font-medium">"PLAME"</span>: <span class="text-purple-400">&#123;</span>
+                    <div class="pl-5 border-l border-slate-800/40 ml-1.5">
+                      <div><span class="text-sky-400 font-medium">"CODIGO"</span>: <span class="text-amber-300">"{{ item.PLAME.CODIGO }}"</span>,</div>
+                      <div><span class="text-sky-400 font-medium">"DESCRIPCION"</span>: <span class="text-amber-300">"{{ item.PLAME.DESCRIPCION }}"</span></div>
+                    </div>
+                    <span class="text-purple-400">&#125;</span>,
+                  </div>
+
+                  <!-- Tipo Trabajador Object -->
+                  <div>
+                    <span class="text-sky-400 font-medium">"TIPOTRABAJADOR"</span>: <span class="text-purple-400">&#123;</span>
+                    <div class="pl-5 border-l border-slate-800/40 ml-1.5">
+                      <div><span class="text-sky-400 font-medium">"DESCRIPCION"</span>: <span class="text-amber-300">"{{ item.TIPOTRABAJADOR.DESCRIPCION }}"</span></div>
+                    </div>
+                    <span class="text-purple-400">&#125;</span>,
+                  </div>
+
+                  <div><span class="text-sky-400 font-medium">"SerialKey"</span>: <span class="text-amber-300">"{{ item.SerialKey }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"FECHA_REG"</span>: <span class="text-amber-300">"{{ item.FECHA_REG }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"FECHA_ACT"</span>: <span class="text-amber-300">"{{ item.FECHA_ACT }}"</span></div>
+                </div>
+                <div *ngIf="!isItemCollapsed(i)" class="text-teal-400 font-bold pl-3 select-none">&#125;{{ isLast ? '' : ',' }}</div>
+              </div>
+            </div>
+
+            <div>
+              <span class="text-yellow-400 font-bold">]</span>,
+            </div>
+            <div>
+              <span class="text-sky-400 font-medium">"pageSize"</span>: <span class="text-emerald-400 font-bold">{{ nominas.length }}</span>,
+            </div>
+            <div>
+              <span class="text-sky-400 font-medium">"error"</span>: <span class="text-purple-400 font-bold">false</span>,
+            </div>
+            <div>
+              <span class="text-sky-400 font-medium">"msj"</span>: <span class="text-purple-400 font-bold">null</span>
+            </div>
+          </div>
+          <div class="text-teal-400 font-bold select-none">&#125;</div>
+        </div>
+
+        <!-- Render submit/register JSON payload schema -->
+        <div *ngIf="activeConsoleTab === 'registrar'" class="font-sans text-[12px] overflow-auto max-h-[500px] leading-relaxed pr-8 select-all text-slate-300">
+          <div class="text-teal-400 font-bold">&#123;</div>
+          <div class="pl-5 space-y-0.5">
+            <div><span class="text-sky-400 font-medium">"TIPOSPLANILLA_ID"</span>: <span class="text-emerald-400 font-bold">0</span>,</div>
+            <div><span class="text-sky-400 font-medium">"REGIMENLABORAL_ID"</span>: <span class="text-purple-400 font-bold">null</span>,</div>
+            <div><span class="text-sky-400 font-medium">"PLAME_ID"</span>: <span class="text-purple-400 font-bold">null</span>,</div>
+            <div><span class="text-sky-400 font-medium">"ALIAS"</span>: <span class="text-amber-300">"CONST_CIVIL"</span>,</div>
+            <div><span class="text-sky-400 font-medium">"FLG_TRABAJADOR"</span>: <span class="text-emerald-400 font-bold">0</span>,</div>
+            <div><span class="text-sky-400 font-medium">"FLG_ESTADO"</span>: <span class="text-purple-400 font-bold">true</span>,</div>
+            <div><span class="text-sky-400 font-medium">"ESTADO"</span>: <span class="text-amber-300">"A"</span>,</div>
+            <div>
+              <span class="text-sky-400 font-medium">"subNominas"</span>: <span class="text-yellow-400 font-bold">[</span>
+              <div class="pl-5">
+                <div class="text-teal-400 font-bold">&#123;</div>
+                <div class="pl-5">
+                  <div><span class="text-sky-400 font-medium">"id"</span>: <span class="text-emerald-400 font-bold">1</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"descripcion"</span>: <span class="text-amber-300">"Construcción Civil"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"checked"</span>: <span class="text-purple-400 font-bold">true</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"activo"</span>: <span class="text-purple-400 font-bold">true</span></div>
+                </div>
+                <div class="text-teal-400 font-bold">&#125;,</div>
+                <div class="text-teal-400 font-bold">&#123;</div>
+                <div class="pl-5">
+                  <div><span class="text-sky-400 font-medium">"id"</span>: <span class="text-emerald-400 font-bold">2</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"descripcion"</span>: <span class="text-amber-300">"Construcción Civil LBS"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"checked"</span>: <span class="text-purple-400 font-bold">true</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"activo"</span>: <span class="text-purple-400 font-bold">false</span></div>
+                </div>
+                <div class="text-teal-400 font-bold">&#125;</div>
+              </div>
+              <span class="text-yellow-400 font-bold">]</span>
+            </div>
+          </div>
+          <div class="text-teal-400 font-bold">&#125;</div>
+        </div>
+
+        <!-- Render Master Catalogs JSON -->
+        <div *ngIf="activeConsoleTab === 'masterData'" class="font-sans text-[12px] overflow-auto max-h-[500px] leading-relaxed pr-8 select-all text-slate-300">
+          <div class="text-teal-400 font-bold">&#123;</div>
+          <div class="pl-5 space-y-0.5">
+            <div>
+              <span class="text-sky-400 font-medium">"data"</span>: <span class="text-yellow-400 font-bold">[</span>
+              <div class="pl-5 space-y-1">
+                <div *ngFor="let item of masterData; let isLast = last">
+                  <div class="text-teal-400 font-bold">&#123;</div>
+                  <div class="pl-5">
+                    <div><span class="text-sky-400 font-medium">"Id"</span>: <span class="text-emerald-400 font-bold">{{ item.Id }}</span>,</div>
+                    <div><span class="text-sky-400 font-medium">"Tipo"</span>: <span class="text-amber-300">"{{ item.Tipo }}"</span>,</div>
+                    <div><span class="text-sky-400 font-medium">"Codigo"</span>: <span class="text-amber-300">{{ item.Codigo ? '"' + item.Codigo + '"' : 'null' }}</span>,</div>
+                    <div><span class="text-sky-400 font-medium">"Descripcion"</span>: <span class="text-amber-300">"{{ item.Descripcion }}"</span></div>
+                  </div>
+                  <div class="text-teal-400 font-bold">&#125;{{ isLast ? '' : ',' }}</div>
+                </div>
+              </div>
+              <span class="text-yellow-400 font-bold">]</span>
+            </div>
+          </div>
+          <div class="text-teal-400 font-bold">&#125;</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- REGISTRAR / EDITAR MODAL (WITH PREMIUM 2-TABS FOR COMPLEX SETUP) -->
+<div *ngIf="isModalOpen" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+    
+    <!-- Modal Header -->
+    <div class="bg-slate-50 px-6 py-4 flex justify-between items-center border-b border-slate-200 select-none">
+      <h3 class="text-base font-bold text-slate-900">
+        {{ isEditing ? 'Modificar Nóminas por régimen' : 'Registrar Nóminas por régimen' }}
+      </h3>
+      <button (click)="closeModal()" class="text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1.5 rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <!-- Double Tabs Navigation (for beautiful layout segmentation) -->
+    <div class="flex border-b border-slate-200 bg-slate-50 select-none">
+      <button
+        (click)="activeModalTab = 'regimen'"
+        [class]="activeModalTab === 'regimen' ? 'border-b-2 border-blue-600 text-blue-700 bg-white font-bold shadow-xs' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50 font-semibold'"
+        class="flex-1 py-3 text-xs tracking-wider uppercase flex items-center justify-center gap-2 border-r border-slate-200/40">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+        <span>Régimen</span>
+      </button>
+      <button
+        (click)="activeModalTab = 'nominas'"
+        [class]="activeModalTab === 'nominas' ? 'border-b-2 border-blue-600 text-blue-700 bg-white font-bold shadow-xs' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50 font-semibold'"
+        class="flex-1 py-3 text-xs tracking-wider uppercase flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 002-2M9 14l2 2 4-4"></path></svg>
+        <span>Nóminas ({{ formSubNominas.length }})</span>
+      </button>
+    </div>
+
+    <!-- Modal Content Body -->
+    <div class="p-6 space-y-4 max-h-[450px] overflow-y-auto">
+
+      <!-- TAB 1: REGIMEN DETAILS -->
+      <div *ngIf="activeModalTab === 'regimen'" class="space-y-4">
+        
+        <!-- Alias -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Alias <span class="text-rose-500">*</span></label>
+          <input
+            type="text"
+            [(ngModel)]="formAlias"
+            placeholder="Ej: CONST_CIVIL"
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+        </div>
+
+        <!-- Régimen Laboral Select (Loaded dynamically via Master Data) -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Régimen laboral <span class="text-rose-500">*</span></label>
+          <select
+            [(ngModel)]="selectedRegimenId"
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+            <option [value]="null">[SELECCIONE]</option>
+            <option *ngFor="let item of getMasterItems('Regimen Laboral')" [value]="item.Id">
+              {{ item.Descripcion }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Categoría PLAME Select (Loaded dynamically via Master Data) -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Categoría PLAME <span class="text-rose-500">*</span></label>
+          <select
+            [(ngModel)]="selectedPlameId"
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+            <option [value]="null">[SELECCIONE]</option>
+            <option *ngFor="let item of getMasterItems('Categoria Plame')" [value]="item.Id">
+              {{ item.Descripcion }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Tipo de empleado Select (Loaded dynamically via Master Data) -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Tipo de empleado <span class="text-rose-500">*</span></label>
+          <select
+            [(ngModel)]="selectedTipoTrabajadorId"
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+            <option [value]="null">[SELECCIONE]</option>
+            <option *ngFor="let item of getMasterItems('Tipo Trabajador')" [value]="item.Id">
+              {{ item.Descripcion }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Activo Toggle Switch -->
+        <div class="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200 mt-2">
+          <div>
+            <span class="text-xs font-bold text-slate-900 block uppercase">Estado del Régimen</span>
+            <span class="text-[10px] text-slate-500 block">Determina si estará disponible en las boletas.</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              [(ngModel)]="formActivo"
+              class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- TAB 2: NOMINAS CHECKLIST & DEFINITIONS -->
+      <div *ngIf="activeModalTab === 'nominas'" class="space-y-4">
+        
+        <div>
+          <span class="text-[11px] text-slate-500 leading-normal block mb-3 font-semibold uppercase">
+            Activar planillas por defecto al dar de alta al trabajador
+          </span>
+        </div>
+
+        <!-- Checklist List -->
+        <div class="border border-slate-250 rounded-2xl overflow-hidden divide-y divide-slate-100 shadow-xs max-h-[220px] overflow-y-auto">
+          <div *ngFor="let sub of formSubNominas" 
+               [ngClass]="{'bg-slate-50/40': !sub.checked, 'bg-white': sub.checked}"
+               class="flex items-center justify-between p-3.5 hover:bg-slate-50/70 transition-all">
+            
+            <div class="flex items-center gap-3.5 flex-1 min-w-0">
+              <label class="inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="sub.checked"
+                  class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 transition-all"
+                  style="height: 18px; width: 18px;">
+              </label>
+              <span [class.line-through]="!sub.checked" [class.text-slate-400]="!sub.checked" class="text-[13px] font-semibold text-slate-700 leading-snug truncate">
+                {{ sub.descripcion }}
+              </span>
+            </div>
+
+            <!-- Active / Toggle switch of each default sub-payroll -->
+            <div class="flex items-center gap-3 select-none shrink-0 pl-4">
+              <span class="text-[10px] font-bold tracking-wider uppercase" [ngClass]="(sub.checked && sub.activo) ? 'text-teal-600 font-bold' : 'text-slate-400 font-medium'">
+                {{ sub.activo ? 'Activa' : 'Inactiva' }}
+              </span>
+              <label class="relative inline-flex items-center" [class.cursor-pointer]="sub.checked" [class.opacity-50]="!sub.checked">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="sub.activo"
+                  [disabled]="!sub.checked"
+                  class="sr-only peer">
+                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:bg-teal-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+              </label>
+              
+              <!-- Delete Sub Item -->
+              <button (click)="removeSubNominaItem(sub.id)" class="text-slate-300 hover:text-red-500 p-1.5 rounded-lg transition-colors ml-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+
+          </div>
+
+          <div *ngIf="formSubNominas.length === 0" class="p-6 text-center text-slate-400 flex flex-col items-center">
+            <svg class="w-8 h-8 text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="text-xs">No hay planillas agregadas por defecto.</span>
+          </div>
+        </div>
+
+        <!-- Add Custom Payroll Option to checklist -->
+        <div class="pt-4 border-t border-slate-200/60 space-y-2 mt-3 select-none">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Agregar Planilla Adicional</label>
+          <div class="flex gap-2.5">
+            <input
+              type="text"
+              [(ngModel)]="formTipoNominas"
+              placeholder="Ej: Construcción Civil Retroactiva"
+              class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all h-[42px]">
+            <button
+              (click)="addSubNominaItem()"
+              class="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-5 text-xs font-bold transition-all shrink-0 h-[42px] flex items-center justify-center shadow-sm hover:shadow-md">
+              Añadir
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div class="bg-slate-50 border-t border-slate-200 px-6 flex justify-end gap-3 select-none" style="padding-top: 18px; padding-bottom: 22px;">
+      <button
+        (click)="closeModal()"
+        class="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold transition-all shadow-xs">
+        Cerrar
+      </button>
+      <button
+        (click)="save()"
+        class="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-5 py-2.5 text-xs font-bold shadow-md hover:shadow-lg transition-all">
+        {{ isEditing ? 'Modificar' : 'Registrar' }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ELIMINAR CONFIRMATION MODAL -->
+<div *ngIf="isDeleteModalOpen" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div class="p-6 text-center">
+      <div class="w-12 h-12 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 flex items-center justify-center mx-auto mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900 leading-tight">¿Desea eliminar la configuración?</h3>
+      <p class="text-slate-500 text-xs mt-2 leading-relaxed">
+        Esta acción desvinculará este régimen y sus planillas del catálogo de cálculo local en memoria.
+      </p>
+    </div>
+    <div class="bg-slate-50 border-t border-slate-150 px-6 py-4 flex justify-end gap-3">
+      <button
+        (click)="closeDeleteModal()"
+        class="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold transition-all shadow-xs">
+        Cancelar
+      </button>
+      <button
+        (click)="executeDelete()"
+        class="bg-rose-600 hover:bg-rose-700 text-white rounded-xl px-4 py-2.5 text-xs font-bold shadow-md hover:shadow-lg transition-all">
+        Eliminar
+      </button>
+    </div>
+  </div>
+</div>

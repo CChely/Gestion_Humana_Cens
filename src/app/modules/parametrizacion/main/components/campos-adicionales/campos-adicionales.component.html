@@ -1,0 +1,645 @@
+<!-- LOCAL TOAST NOTIFICATION -->
+<div
+  *ngIf="toastMessage"
+  [ngClass]="{
+    'translate-y-0 opacity-100': toastMessage,
+    'translate-y-[-20px] opacity-0': !toastMessage
+  }"
+  class="fixed top-6 right-6 z-[9999] max-w-md bg-white border border-slate-100 rounded-2xl shadow-xl flex items-center gap-3.5 p-4.5 transition-all duration-300 transform">
+  
+  <!-- Success Icon -->
+  <div *ngIf="toastType === 'success'" class="bg-emerald-50 text-emerald-600 p-2 rounded-xl border border-emerald-100/50 shrink-0">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+  </div>
+  
+  <!-- Error Icon -->
+  <div *ngIf="toastType === 'error'" class="bg-rose-50 text-rose-600 p-2 rounded-xl border border-rose-100/50 shrink-0">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+  </div>
+
+  <!-- Content Text -->
+  <div class="flex-1 min-w-[200px]">
+    <p class="text-xs font-bold text-slate-900">
+      {{ toastType === 'success' ? 'Operación Exitosa' : 'Aviso del Sistema' }}
+    </p>
+    <p class="text-[11px] font-medium text-slate-500 mt-0.5 leading-snug">
+      {{ toastMessage }}
+    </p>
+  </div>
+  
+  <!-- Close Button -->
+  <button
+    (click)="toastMessage = null"
+    class="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-50 rounded-lg transition-all shrink-0">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
+</div>
+
+<!-- MAIN VIEWPORT CONTAINER -->
+<div class="space-y-6">
+  <!-- Breadcrumbs and Header -->
+  <div class="flex flex-col gap-1">
+    <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+      <span>Parametrización</span>
+      <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      <span>Parámetros de nómina</span>
+      <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      <span class="text-blue-600 font-semibold">Campos adicionales</span>
+    </div>
+     <h2 class="text-xl font-bold text-slate-900 tracking-tight mt-1">Campos adicionales</h2>
+     <p class="text-slate-500 text-[11px] mt-1 leading-relaxed max-w-4xl">
+       Defina y ordene campos suplementarios del perfil de los trabajadores para el cálculo de provisiones y cargas masivas.
+     </p>
+  </div>
+
+  <!-- Main Card Container -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <!-- Top Action Panel: Search and View Toggles -->
+    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/50">
+      
+      <!-- Search Box -->
+      <div class="relative w-full sm:max-w-md">
+        <span class="absolute left-3 top-2.5 text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </span>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Buscar..."
+          class="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-semibold placeholder-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+      </div>
+
+      <!-- Right Control buttons: Segmented Toggle -->
+      <div class="flex items-center gap-3 shrink-0">
+        <!-- View Toggle Segmented Control -->
+        <div class="bg-slate-100 p-0.5 rounded-xl border border-slate-200 flex items-center shrink-0">
+          <button
+            (click)="showJsonView = false"
+            [class]="!showJsonView ? 'bg-white text-slate-800 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span>Tabla</span>
+          </button>
+          <button
+            (click)="showJsonView = true"
+            [class]="showJsonView ? 'bg-white text-slate-800 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            <span>JSON</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 1: DATA TABLE VIEW -->
+    <div *ngIf="!showJsonView" class="p-6">
+      
+      <!-- No right-side add buttons for campos adicionales since it is read-only schema! -->
+      <div class="hidden sm:block text-slate-400 text-[10px] font-bold uppercase tracking-wider select-none">
+        Esquema de campos estructurados
+      </div>
+
+    </div>
+
+    <!-- Responsive Data Table Grid - Matches screenshot exact column names! -->
+    <div class="overflow-x-auto border border-slate-100 rounded-xl bg-white">
+      <table class="min-w-full divide-y divide-slate-200 text-left text-xs font-medium text-slate-700">
+        
+        <!-- Table Header -->
+        <thead class="bg-slate-50 text-slate-400 uppercase tracking-widest text-[9px] font-bold">
+          <tr>
+            <th (click)="setSort('CODIGO')" class="px-6 py-5 cursor-pointer hover:bg-slate-100/50 transition-all select-none w-28">
+              <div class="flex items-center gap-1.5">
+                <span>CÓDIGO</span>
+                <span class="text-slate-400 shrink-0">
+                  <svg *ngIf="sortField !== 'CODIGO'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                  <svg *ngIf="sortField === 'CODIGO' && sortDirection === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                  <svg *ngIf="sortField === 'CODIGO' && sortDirection === 'desc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </div>
+            </th>
+
+            <th (click)="setSort('TABLA')" class="px-6 py-5 cursor-pointer hover:bg-slate-100/50 transition-all select-none">
+              <div class="flex items-center gap-1.5">
+                <span>TABLA</span>
+                <span class="text-slate-400 shrink-0">
+                  <svg *ngIf="sortField !== 'TABLA'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                  <svg *ngIf="sortField === 'TABLA' && sortDirection === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                  <svg *ngIf="sortField === 'TABLA' && sortDirection === 'desc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </div>
+            </th>
+
+            <th (click)="setSort('COLUMNA')" class="px-6 py-5 cursor-pointer hover:bg-slate-100/50 transition-all select-none">
+              <div class="flex items-center gap-1.5">
+                <span>COLUMNA</span>
+                <span class="text-slate-400 shrink-0">
+                  <svg *ngIf="sortField !== 'COLUMNA'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                  <svg *ngIf="sortField === 'COLUMNA' && sortDirection === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                  <svg *ngIf="sortField === 'COLUMNA' && sortDirection === 'desc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </div>
+            </th>
+
+            <th (click)="setSort('FLG_OBLIGATORIO')" class="px-6 py-5 cursor-pointer hover:bg-slate-100/50 transition-all select-none text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <span>OBLIGATORIO</span>
+                <span class="text-slate-400 shrink-0">
+                  <svg *ngIf="sortField !== 'FLG_OBLIGATORIO'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                  <svg *ngIf="sortField === 'FLG_OBLIGATORIO' && sortDirection === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                  <svg *ngIf="sortField === 'FLG_OBLIGATORIO' && sortDirection === 'desc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </div>
+            </th>
+
+            <th (click)="setSort('FLG_MANTENIMIENTO')" class="px-6 py-5 cursor-pointer hover:bg-slate-100/50 transition-all select-none text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <span>MANTENIMIENTO</span>
+                <span class="text-slate-400 shrink-0">
+                  <svg *ngIf="sortField !== 'FLG_MANTENIMIENTO'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                  <svg *ngIf="sortField === 'FLG_MANTENIMIENTO' && sortDirection === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                  <svg *ngIf="sortField === 'FLG_MANTENIMIENTO' && sortDirection === 'desc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </div>
+            </th>
+
+            <th (click)="setSort('FLG_CARGAMASIVA')" class="px-6 py-5 cursor-pointer hover:bg-slate-100/50 transition-all select-none text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <span>CARGA MASIVA</span>
+                <span class="text-slate-400 shrink-0">
+                  <svg *ngIf="sortField !== 'FLG_CARGAMASIVA'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                  <svg *ngIf="sortField === 'FLG_CARGAMASIVA' && sortDirection === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                  <svg *ngIf="sortField === 'FLG_CARGAMASIVA' && sortDirection === 'desc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </div>
+            </th>
+
+            <th (click)="setSort('NUM_ORDEN')" class="px-6 py-5 cursor-pointer hover:bg-slate-100/50 transition-all select-none text-center w-24">
+              <div class="flex items-center justify-center gap-1.5">
+                <span>N° ORDEN</span>
+                <span class="text-slate-400 shrink-0">
+                  <svg *ngIf="sortField !== 'NUM_ORDEN'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                  <svg *ngIf="sortField === 'NUM_ORDEN' && sortDirection === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                  <svg *ngIf="sortField === 'NUM_ORDEN' && sortDirection === 'desc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </div>
+            </th>
+            
+            <th class="px-6 py-5 text-right w-28">ACCIONES</th>
+          </tr>
+        </thead>
+        
+        <!-- Table Body -->
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let item of getPaginatedList()" class="hover:bg-slate-50/50 transition-all font-sans font-medium text-slate-700">
+            
+            <!-- Código (Matches 000001, etc.) -->
+            <td class="px-6 py-5 text-slate-500 font-bold select-all whitespace-nowrap">
+              {{ item.CODIGO }}
+            </td>
+            
+            <!-- Tabla -->
+            <td class="px-6 py-5 text-slate-600 font-medium">
+              {{ item.TABLA }}
+            </td>
+            
+            <!-- Columna -->
+            <td class="px-6 py-5 text-slate-900 font-bold">
+              {{ item.COLUMNA }}
+            </td>
+            
+            <!-- Obligatorio (Red X or Green Check) -->
+            <td class="px-6 py-5 text-center">
+              <div class="flex justify-center">
+                <!-- Green checkmark SVG -->
+                <div *ngIf="item.FLG_OBLIGATORIO" class="bg-emerald-50 border border-emerald-100/50 p-1.5 rounded-lg text-emerald-600 shadow-sm shadow-emerald-50/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                
+                <!-- Red cross SVG -->
+                <div *ngIf="!item.FLG_OBLIGATORIO" class="bg-rose-50 border border-rose-100/50 p-1.5 rounded-lg text-rose-500 shadow-sm shadow-rose-50/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </div>
+              </div>
+            </td>
+
+            <!-- Mantenimiento (Red X or Green Check) -->
+            <td class="px-6 py-5 text-center">
+              <div class="flex justify-center">
+                <!-- Green checkmark SVG -->
+                <div *ngIf="item.FLG_MANTENIMIENTO" class="bg-emerald-50 border border-emerald-100/50 p-1.5 rounded-lg text-emerald-600 shadow-sm shadow-emerald-50/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                
+                <!-- Red cross SVG -->
+                <div *ngIf="!item.FLG_MANTENIMIENTO" class="bg-rose-50 border border-rose-100/50 p-1.5 rounded-lg text-rose-500 shadow-sm shadow-rose-50/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </div>
+              </div>
+            </td>
+
+            <!-- Carga Masiva (Red X or Green Check) -->
+            <td class="px-6 py-5 text-center">
+              <div class="flex justify-center">
+                <!-- Green checkmark SVG -->
+                <div *ngIf="item.FLG_CARGAMASIVA" class="bg-emerald-50 border border-emerald-100/50 p-1.5 rounded-lg text-emerald-600 shadow-sm shadow-emerald-50/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                
+                <!-- Red cross SVG -->
+                <div *ngIf="!item.FLG_CARGAMASIVA" class="bg-rose-50 border border-rose-100/50 p-1.5 rounded-lg text-rose-500 shadow-sm shadow-rose-50/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </div>
+              </div>
+            </td>
+
+            <!-- N° Orden -->
+            <td class="px-6 py-5 text-center text-slate-900 font-bold select-none">
+              {{ item.NUM_ORDEN }}
+            </td>
+            
+            <!-- Actions trigger: Editar button -->
+            <td class="px-6 py-5 text-right">
+              <div class="flex justify-end">
+                <button
+                  (click)="openEditModal(item)"
+                  class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-800 px-3.5 py-1.5 rounded-xl text-[11px] font-bold shadow-sm transition-all flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                  </svg>
+                  <span>Editar</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          
+          <!-- Empty State Row -->
+          <tr *ngIf="getFilteredList().length === 0">
+            <td colspan="8" class="px-6 py-12 text-center text-slate-400">
+              <div class="flex flex-col items-center justify-center">
+                <svg class="w-12 h-12 text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-xs font-bold text-slate-800">No se encontraron resultados</p>
+                <p class="text-[11px] text-slate-500 mt-1">Pruebe a cambiar su término de búsqueda.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+    </div>
+
+    <!-- Table Footer / Pagination Panel -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+      <span class="text-[11px] font-bold text-slate-400 select-none uppercase tracking-wider">
+        Mostrando {{ getFilteredList().length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} - 
+        {{ (currentPage * pageSize) > getFilteredList().length ? getFilteredList().length : (currentPage * pageSize) }} 
+        de {{ getFilteredList().length }} items
+      </span>
+      
+      <!-- Paginator Numbers -->
+      <div class="flex items-center gap-1 shrink-0">
+        <button
+          (click)="setPage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+          class="p-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 disabled:opacity-50 disabled:bg-slate-50 rounded-lg transition-all shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+
+        <button
+          *ngFor="let p of [].constructor(getTotalPages()); let idx = index"
+          (click)="setPage(idx + 1)"
+          [class]="'px-3.5 py-1.5 text-xs font-bold transition-all rounded-lg shrink-0 border ' + (currentPage === (idx + 1) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50')">
+          {{ idx + 1 }}
+        </button>
+
+        <button
+          (click)="setPage(currentPage + 1)"
+          [disabled]="currentPage === getTotalPages()"
+          class="p-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 disabled:opacity-50 disabled:bg-slate-50 rounded-lg transition-all shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- VIEW 2: OBSIDIAN DARK JSON CONSOLE VIEW -->
+  <div *ngIf="showJsonView" class="bg-slate-900 border-t border-slate-800 p-6 flex flex-col gap-4">
+    
+    <!-- Code Console Titlebar / Tools -->
+    <div class="bg-[#181818] border-b border-[#2d2d2d] px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="flex gap-1.5 shrink-0 select-none">
+          <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+          <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+          <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+        </span>
+        <div class="border-l border-[#3a3a3a] pl-3.5">
+          <h3 class="text-xs font-bold font-mono text-[#dcdcdc] flex items-center gap-2">
+            <span>POST</span>
+            <span class="text-[#569cd6] lowercase select-all">https://dev.recursoshumanos.cens.cloud/api/v1/ParametricasCampo/ListarPaginado</span>
+          </h3>
+        </div>
+      </div>
+
+      <!-- Controls: Collapse all and copy -->
+      <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+        <button
+          (click)="toggleJsonCollapse()"
+          class="bg-[#2d2d2d] hover:bg-[#383838] border border-[#3e3e3e] text-xs font-bold text-[#c8c8c8] px-3.5 py-1.5 rounded-xl transition-all font-sans flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+          <span>{{ isJsonCollapsed ? 'Expandir Todo' : 'Colapsar Todo' }}</span>
+        </button>
+
+        <button
+          (click)="copyJsonToClipboard()"
+          class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-1.5 rounded-xl transition-all shadow-md shadow-blue-200/50 font-sans flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+          </svg>
+          <span>Copiar JSON</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Inner Console Shell Panel -->
+    <div class="p-6 font-mono text-[12px] text-[#9cdcfe] leading-relaxed max-h-[600px] overflow-y-auto custom-scrollbar select-text bg-[#1e1e1e]">
+      
+      <!-- Safe Angular Escape Curly Braces formatting -->
+      <div>
+        <span class="text-[#d4d4d4] font-bold">{{ '{' }}</span>
+      </div>
+      
+      <!-- Top Level keys -->
+      <div class="pl-4.5">
+        <span class="text-[#9cdcfe]">"lista"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#d4d4d4] font-bold">[</span>
+      </div>
+
+      <!-- Iterating list nodes -->
+      <div *ngFor="let item of getPaginatedList(); let idx = index; let last = last" class="pl-9 border-l border-[#333] ml-4.5">
+        
+        <!-- Collapsible element header node -->
+        <div class="flex items-center gap-2 select-none -ml-4.5">
+          <button
+            (click)="toggleItemCollapse(idx)"
+            class="text-[#858585] hover:text-[#c8c8c8] p-0.5 hover:bg-[#2d2d2d] rounded transition-all shrink-0">
+            <svg
+              [class.rotate-90]="!isItemCollapsed(idx)"
+              class="w-3.5 h-3.5 transition-transform duration-200"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+          
+          <span class="text-[#d4d4d4] font-bold">{{ '{' }}</span>
+          <span *ngIf="isItemCollapsed(idx)" class="text-[#c586c0] font-sans text-[10px] select-none italic bg-[#2d2d2d] px-1.5 py-0.5 rounded">
+            ... {{ item.COLUMNA }} (Código: {{ item.CODIGO }}) ...
+          </span>
+        </div>
+
+        <!-- Node internal properties if expanded -->
+        <div *ngIf="!isItemCollapsed(idx)" class="pl-4.5 transition-all">
+          <div>
+            <span class="text-[#9cdcfe]">"PARAMETRICASCAMPO_ID"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#b5cea8]">{{ item.PARAMETRICASCAMPO_ID }}</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"CODIGO"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#ce9178]">"{{ item.CODIGO }}"</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"TABLA"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#ce9178]">"{{ item.TABLA }}"</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"COLUMNA"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#ce9178]">"{{ item.COLUMNA }}"</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"FLG_OBLIGATORIO"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#569cd6]">{{ item.FLG_OBLIGATORIO }}</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"FLG_MANTENIMIENTO"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#569cd6]">{{ item.FLG_MANTENIMIENTO }}</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"FLG_CARGAMASIVA"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#569cd6]">{{ item.FLG_CARGAMASIVA }}</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"NUM_ORDEN"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#b5cea8]">{{ item.NUM_ORDEN }}</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"SerialKey"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#ce9178]">"{{ item.SerialKey }}"</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"ESTADO"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#ce9178]">"{{ item.ESTADO }}"</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"USUARIO_REG"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#ce9178]">"{{ item.USUARIO_REG }}"</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"FECHA_REG"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#ce9178]">"{{ item.FECHA_REG }}"</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"USUARIO_ACT"</span><span class="text-[#d4d4d4]">:</span> 
+            <span *ngIf="item.USUARIO_ACT" class="text-[#ce9178]">"{{ item.USUARIO_ACT }}"</span>
+            <span *ngIf="!item.USUARIO_ACT" class="text-[#569cd6]">null</span><span class="text-[#d4d4d4]">,</span>
+          </div>
+          <div>
+            <span class="text-[#9cdcfe]">"FECHA_ACT"</span><span class="text-[#d4d4d4]">:</span> 
+            <span *ngIf="item.FECHA_ACT" class="text-[#ce9178]">"{{ item.FECHA_ACT }}"</span>
+            <span *ngIf="!item.FECHA_ACT" class="text-[#569cd6]">null</span>
+          </div>
+        </div>
+
+        <!-- Element tail node -->
+        <div class="-ml-4.5">
+          <span class="text-[#d4d4d4] font-bold">{{ '}' }}</span><span *ngIf="!last" class="text-[#d4d4d4]">,</span>
+        </div>
+
+      </div>
+
+      <!-- JSON Endings -->
+      <div class="pl-4.5">
+        <span class="text-[#d4d4d4] font-bold">]</span><span class="text-[#d4d4d4]">,</span>
+      </div>
+      <div class="pl-4.5">
+        <span class="text-[#9cdcfe]">"pageSize"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#b5cea8]">{{ getFilteredList().length }}</span><span class="text-[#d4d4d4]">,</span>
+      </div>
+      <div class="pl-4.5">
+        <span class="text-[#9cdcfe]">"error"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#569cd6]">false</span><span class="text-[#d4d4d4]">,</span>
+      </div>
+      <div class="pl-4.5">
+        <span class="text-[#9cdcfe]">"mej"</span><span class="text-[#d4d4d4]">:</span> <span class="text-[#569cd6]">null</span>
+      </div>
+      <div>
+        <span class="text-[#d4d4d4] font-bold">{{ '}' }}</span>
+      </div>
+
+  </div>
+
+  </div> <!-- /Main Card Container -->
+
+</div> <!-- /Main Viewport Container -->
+
+<!-- MODAL: EDITAR CAMPOS ADICIONALES (Matches screenshot modal exactly) -->
+<div *ngIf="isEditOpen" class="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in font-sans">
+  
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden border border-slate-100 transform scale-100 transition-all duration-300 animate-zoom-in">
+    
+    <!-- Modal Header -->
+    <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white">
+      <h3 class="text-sm font-bold text-slate-800">
+        Editar campos adicionales
+      </h3>
+      <button
+        (click)="closeModal()"
+        class="text-slate-400 hover:text-slate-600 hover:bg-slate-50 p-1.5 rounded-lg transition-all shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Form Fields (Matches the inputs from second screenshot) -->
+    <div class="p-6 space-y-5 max-h-[calc(100vh-200px)] overflow-y-auto">
+      
+      <!-- Tabla * -->
+      <div class="grid grid-cols-3 items-center gap-4">
+        <label class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+          Tabla <span class="text-rose-500 font-sans">*</span>
+        </label>
+        <div class="col-span-2">
+          <input
+            type="text"
+            [(ngModel)]="formTabla"
+            placeholder="Nombre de la tabla"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-xs font-semibold placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all">
+        </div>
+      </div>
+
+      <!-- Columna * -->
+      <div class="grid grid-cols-3 items-center gap-4">
+        <label class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+          Columna <span class="text-rose-500 font-sans">*</span>
+        </label>
+        <div class="col-span-2">
+          <input
+            type="text"
+            [(ngModel)]="formColumna"
+            placeholder="Nombre de la columna"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-xs font-semibold placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all">
+        </div>
+      </div>
+
+      <!-- Obligatorio (Toggle Switch) -->
+      <div class="grid grid-cols-3 items-center gap-4">
+        <label class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+          Obligatorio
+        </label>
+        <div class="col-span-2 flex justify-start">
+          <label class="relative inline-flex items-center cursor-pointer select-none">
+            <input
+              type="checkbox"
+              [(ngModel)]="formObligatorio"
+              class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Mantenimiento (Toggle Switch) -->
+      <div class="grid grid-cols-3 items-center gap-4">
+        <label class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+          Mantenimiento
+        </label>
+        <div class="col-span-2 flex justify-start">
+          <label class="relative inline-flex items-center cursor-pointer select-none">
+            <input
+              type="checkbox"
+              [(ngModel)]="formMantenimiento"
+              class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Carga masiva (Toggle Switch) -->
+      <div class="grid grid-cols-3 items-center gap-4">
+        <label class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+          Carga masiva
+        </label>
+        <div class="col-span-2 flex justify-start">
+          <label class="relative inline-flex items-center cursor-pointer select-none">
+            <input
+              type="checkbox"
+              [(ngModel)]="formCargaMasiva"
+              class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- N° Orden * (Spinner field matching screenshot) -->
+      <div class="grid grid-cols-3 items-center gap-4">
+        <label class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+          N° Orden <span class="text-rose-500 font-sans">*</span>
+        </label>
+        <div class="col-span-2">
+          <div class="relative w-32 flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+            <input
+              type="number"
+              [(ngModel)]="formNumOrden"
+              min="0"
+              class="w-full bg-transparent border-0 py-2.5 px-4 text-xs font-bold focus:outline-none text-slate-900">
+            <!-- Customized controls standard spinner -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer (with strictly specified paddings - padding-top: 18px; padding-bottom: 22px) -->
+    <div
+      style="padding-top: 18px; padding-bottom: 22px;"
+      class="px-6 border-t border-slate-100 flex justify-end gap-2 bg-slate-50/50">
+      
+      <button
+        (click)="closeModal()"
+        class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0">
+        Cerrar
+      </button>
+      
+      <button
+        (click)="saveCampo()"
+        class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-blue-200/50 transition-all shrink-0">
+        Guardar
+      </button>
+
+    </div>
+
+  </div>
+</div>

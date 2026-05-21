@@ -1,0 +1,899 @@
+<!-- TOAST NOTIFICATION -->
+<div
+  *ngIf="toastMessage"
+  [ngClass]="{
+    'translate-y-0 opacity-100': toastMessage,
+    'translate-y-[-20px] opacity-0': !toastMessage
+  }"
+  class="fixed top-6 right-6 z-[9999] max-w-md bg-white border border-slate-100 rounded-2xl shadow-xl flex items-center gap-3.5 p-4.5 transition-all duration-300 transform">
+  
+  <!-- Success Icon -->
+  <div *ngIf="toastType === 'success'" class="bg-emerald-50 text-emerald-600 p-2 rounded-xl border border-emerald-100/50 shrink-0">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+  </div>
+  
+  <!-- Error Icon -->
+  <div *ngIf="toastType === 'error'" class="bg-rose-50 text-rose-600 p-2 rounded-xl border border-rose-100/50 shrink-0">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+  </div>
+
+  <!-- Content Text -->
+  <div class="flex-1 min-w-[200px]">
+    <p class="text-xs font-bold text-slate-900">
+      {{ toastType === 'success' ? 'Operación Exitosa' : 'Aviso del Sistema' }}
+    </p>
+    <p class="text-[11px] font-medium text-slate-500 mt-0.5 leading-snug">
+      {{ toastMessage }}
+    </p>
+  </div>
+  
+  <!-- Close Button -->
+  <button
+    (click)="toastMessage = null"
+    class="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-50 rounded-lg transition-all shrink-0">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
+</div>
+
+<div class="space-y-6">
+  
+  <!-- Breadcrumbs and Header -->
+  <div class="flex flex-col gap-1">
+    <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+      <span>Parametrización</span>
+      <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      <span>Parámetros de nómina</span>
+      <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      <span class="text-blue-600 font-semibold">Comisiones SP</span>
+    </div>
+     <h2 class="text-xl font-bold text-slate-900 tracking-tight mt-1">Comisiones SP</h2>
+     <p class="text-slate-500 text-[11px] mt-1 leading-relaxed max-w-4xl">
+       Gestión y parametrización de las tasas y tarifas del Sistema Privado de Pensiones (SPP) e instituciones públicas (ONP) a nivel global. 
+       Define las comisiones sobre flujo, comisiones mixtas sobre saldo, primas de seguro previsional, aportes obligatorios 
+       y el tope de remuneración máxima asegurable vigentes por periodo devengue para el correcto cálculo de retenciones.
+     </p>
+  </div>
+
+  <!-- Main Table Card -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    
+    <!-- Filters and Action Buttons -->
+    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+      <div class="flex items-center gap-3 flex-1 max-w-lg">
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <span class="absolute left-3 top-2.5 text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </span>
+          <input
+            type="text"
+            [(ngModel)]="comisionesSearchTerm"
+            placeholder="Buscar..."
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+        </div>
+        
+        <!-- Filter Button -->
+        <button class="bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 flex items-center gap-2 transition-all">
+          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+          <span>Filtrar</span>
+          <span class="bg-slate-200 text-slate-700 text-[11px] px-1.5 py-0.5 rounded-full font-bold">0</span>
+        </button>
+      </div>
+      
+      <!-- View Toggle & Add Button Group -->
+      <div class="flex items-center gap-3 shrink-0">
+        <!-- View Toggle Segmented Control -->
+        <div class="bg-slate-100 p-0.5 rounded-xl border border-slate-200 flex items-center shrink-0">
+          <button
+            (click)="showComisionesJsonView = false"
+            [class]="!showComisionesJsonView ? 'bg-white text-slate-800 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span>Tabla</span>
+          </button>
+          <button
+            (click)="showComisionesJsonView = true"
+            [class]="showComisionesJsonView ? 'bg-white text-slate-800 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            <span>JSON</span>
+          </button>
+        </div>
+
+        <!-- Add Button -->
+        <button
+          *ngIf="!showComisionesJsonView"
+          (click)="openAddComisionModal()"
+          class="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-2.5 text-xs font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+          <span>Agregar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table View Content -->
+    <div *ngIf="!showComisionesJsonView">
+      <!-- Table -->
+      <div class="overflow-x-auto border border-slate-100 rounded-xl bg-white">
+        <table class="min-w-full divide-y divide-slate-200 text-left text-xs font-medium text-slate-700">
+          <thead class="bg-slate-50 text-slate-400 uppercase tracking-widest text-[9px] font-bold">
+            <tr>
+              <th class="px-6 py-5 w-12 text-center">
+                <label class="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [checked]="isAllComisionesSelected()"
+                    (change)="toggleSelectAllComisiones($event)"
+                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-4.5 w-4.5 transition-all">
+                </label>
+              </th>
+              <th (click)="setComisionesSort('PERIODODEVENGUE')" class="px-6 py-5 font-semibold cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1">
+                  <span>Periodo</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="comisionesSortField === 'PERIODODEVENGUE' && comisionesSortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="comisionesSortField === 'PERIODODEVENGUE' && comisionesSortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th (click)="setComisionesSort('REGIMENPENSIONARIO.DESCRIPCION')" class="px-6 py-5 font-semibold cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1">
+                  <span>Régimen Pensionario</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="comisionesSortField === 'REGIMENPENSIONARIO.DESCRIPCION' && comisionesSortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="comisionesSortField === 'REGIMENPENSIONARIO.DESCRIPCION' && comisionesSortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th (click)="setComisionesSort('CSOBREFLUJO')" class="px-6 py-5 font-semibold text-right cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1 justify-end">
+                  <span>Comisión Flujo</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="comisionesSortField === 'CSOBREFLUJO' && comisionesSortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="comisionesSortField === 'CSOBREFLUJO' && comisionesSortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th (click)="setComisionesSort('CMIXSOBREFLUJO')" class="px-6 py-5 font-semibold text-right cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1 justify-end">
+                  <span>Comisión Saldo Mixta</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="comisionesSortField === 'CMIXSOBREFLUJO' && comisionesSortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="comisionesSortField === 'CMIXSOBREFLUJO' && comisionesSortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th (click)="setComisionesSort('PRIMASEGUROS')" class="px-6 py-5 font-semibold text-right cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1 justify-end">
+                  <span>Prima de Seguro</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="comisionesSortField === 'PRIMASEGUROS' && comisionesSortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="comisionesSortField === 'PRIMASEGUROS' && comisionesSortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th (click)="setComisionesSort('APORTEOBLIGATORIO')" class="px-6 py-5 font-semibold text-right cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1 justify-end">
+                  <span>Aporte Obligatorio</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="comisionesSortField === 'APORTEOBLIGATORIO' && comisionesSortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="comisionesSortField === 'APORTEOBLIGATORIO' && comisionesSortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th (click)="setComisionesSort('REMUNERACIONMAXIMA')" class="px-6 py-5 font-semibold text-right cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1 justify-end">
+                  <span>Remuneración Máxima</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="comisionesSortField === 'REMUNERACIONMAXIMA' && comisionesSortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="comisionesSortField === 'REMUNERACIONMAXIMA' && comisionesSortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th (click)="setComisionesSort('ESTADO')" class="px-6 py-5 font-semibold text-center cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1 justify-center">
+                  <span>Estado</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="comisionesSortField === 'ESTADO' && comisionesSortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="comisionesSortField === 'ESTADO' && comisionesSortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th class="px-6 py-5 font-semibold text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+            <tr
+              *ngFor="let item of paginatedComisiones"
+              [ngClass]="{'bg-blue-50/20': isComisionSelected(item.SerialKey)}"
+              class="hover:bg-slate-50/70 transition-all border-b border-slate-100">
+              
+              <!-- Checkbox -->
+              <td class="px-6 py-5 text-center">
+                <label class="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [checked]="isComisionSelected(item.SerialKey)"
+                    (change)="toggleSelectComision(item.SerialKey)"
+                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-4.5 w-4.5 transition-all">
+                </label>
+              </td>
+              
+              <!-- Periodo -->
+              <td class="px-6 py-5 text-slate-900 font-bold tracking-wide">
+                {{ item.PERIODODEVENGUE }}
+              </td>
+              
+              <!-- Régimen Pensionario -->
+              <td class="px-6 py-5 text-slate-900 font-semibold">
+                {{ item.REGIMENPENSIONARIO?.DESCRIPCION }}
+              </td>
+              
+              <!-- Comisión Flujo -->
+              <td class="px-6 py-5 text-right text-slate-900 font-semibold font-sans">
+                {{ item.CSOBREFLUJO | number:'1.2-2' }} %
+              </td>
+              
+              <!-- Comisión Saldo Mixta -->
+              <td class="px-6 py-5 text-right text-slate-900 font-semibold font-sans">
+                {{ item.CMIXANUALSOBRESALDO | number:'1.2-2' }} %
+              </td>
+              
+              <!-- Prima Seguro -->
+              <td class="px-6 py-5 text-right text-slate-900 font-semibold font-sans">
+                {{ item.PRIMASEGUROS | number:'1.2-2' }} %
+              </td>
+              
+              <!-- Aporte Obligatorio -->
+              <td class="px-6 py-5 text-right text-slate-900 font-semibold font-sans">
+                {{ item.APORTEOBLIGATORIO | number:'1.2-2' }} %
+              </td>
+              
+              <!-- Remuneración Máxima -->
+              <td class="px-6 py-5 text-right text-slate-900 font-semibold font-sans">
+                $ {{ item.REMUNERACIONMAXIMA | number:'1.2-2' }}
+              </td>
+              
+              <!-- Estado -->
+              <td class="px-6 py-5 text-center">
+                <span
+                  [class]="item.ESTADO === 'A' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-50 text-slate-500 border-slate-100'"
+                  class="px-2.5 py-0.5 text-xs font-semibold rounded-full border inline-block tracking-wide uppercase">
+                  {{ item.ESTADO === 'A' ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              
+              <!-- Acciones -->
+              <td class="px-6 py-5 text-right">
+                <div class="flex items-center justify-end gap-1.5">
+                  <button
+                    (click)="openEditComisionModal(item)"
+                    class="hover:bg-slate-100 text-slate-600 hover:text-blue-600 p-1.5 rounded-lg transition-all"
+                    title="Editar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                  </button>
+                  <button
+                    (click)="confirmDeleteComision(item.SerialKey)"
+                    class="hover:bg-red-50 text-slate-400 hover:text-red-600 p-1.5 rounded-lg transition-all"
+                    title="Eliminar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            
+            <tr *ngIf="paginatedComisiones.length === 0">
+              <td colspan="10" class="px-6 py-12 text-center text-slate-400 font-medium bg-slate-50/30">
+                <svg class="w-10 h-10 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>No se encontraron comisiones o tasas registradas.</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold text-slate-500 bg-slate-50/40">
+        <div>
+          Mostrando del <span class="text-slate-900 font-bold">{{ filteredComisiones.length === 0 ? 0 : (comisionesCurrentPage - 1) * comisionesPageSize + 1 }}</span> al
+          <span class="text-slate-950 font-bold">{{ (comisionesCurrentPage * comisionesPageSize) > filteredComisiones.length ? filteredComisiones.length : (comisionesCurrentPage * comisionesPageSize) }}</span> de
+          <span class="text-slate-955 font-bold">{{ filteredComisiones.length }}</span> registros
+        </div>
+        
+        <div class="flex items-center gap-1">
+          <!-- Anterior -->
+          <button
+            (click)="changeComisionesPage(comisionesCurrentPage - 1)"
+            [disabled]="comisionesCurrentPage === 1"
+            class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white transition-all font-semibold">
+            Anterior
+          </button>
+          
+          <!-- Page numbers -->
+          <button
+            *ngFor="let page of comisionesTotalPagesArray"
+            (click)="changeComisionesPage(page)"
+            [class]="page === comisionesCurrentPage ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-200' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'"
+            class="w-8 h-8 rounded-lg font-bold flex items-center justify-center transition-all">
+            {{ page }}
+          </button>
+          
+          <!-- Siguiente -->
+          <button
+            (click)="changeComisionesPage(comisionesCurrentPage + 1)"
+            [disabled]="comisionesCurrentPage === comisionesTotalPages || comisionesTotalPages === 0"
+            class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white transition-all font-semibold">
+            Siguiente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JSON View Content (Dark Mode Code Editor style) -->
+    <div *ngIf="showComisionesJsonView" class="bg-slate-900 border-t border-slate-800 p-6 flex flex-col gap-4">
+      <!-- Code Header -->
+      <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center bg-slate-800 px-4 py-3 rounded-xl border border-slate-700/50 gap-4">
+        <div class="flex items-center gap-2.5 shrink-0">
+          <!-- MacOS Style Fake Buttons -->
+          <div class="flex items-center gap-1.5 select-none">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-xs"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-xs"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs"></span>
+          </div>
+          <span class="text-xs text-slate-300 font-sans font-bold select-none ml-2">ComisionesSp.json</span>
+          <span class="bg-slate-700 text-slate-400 text-[10px] px-2 py-0.5 rounded font-sans font-medium tracking-wide select-none">MEMORIA LOCAL</span>
+        </div>
+
+        <!-- Reference Links as raw URLs -->
+        <div class="flex flex-col xl:flex-row xl:items-center gap-3 text-[11px] font-sans flex-1 justify-center">
+          <a
+            href="https://payroll.pipolfy.com/TasasTarifasAfp/RegistroComisionesSp"
+            target="_blank"
+            class="text-sky-400 hover:text-sky-300 hover:underline transition-colors break-all text-center">
+            https://payroll.pipolfy.com/TasasTarifasAfp/RegistroComisionesSp
+          </a>
+          <div class="hidden xl:block text-slate-600 select-none">|</div>
+          <a
+            href="https://payroll.pipolfy.com/TasasTarifasAfp/ListarPaginado"
+            target="_blank"
+            class="text-sky-400 hover:text-sky-300 hover:underline transition-colors break-all text-center">
+            https://payroll.pipolfy.com/TasasTarifasAfp/ListarPaginado
+          </a>
+        </div>
+        
+        <button
+          (click)="copyComisionesJsonToClipboard()"
+          class="bg-slate-700 hover:bg-slate-650 text-slate-200 border border-slate-600 rounded-lg px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-xs shrink-0 self-end lg:self-auto">
+          <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2H5a2 2 0 01-2-2v-3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+          <span>Copiar JSON</span>
+        </button>
+      </div>
+
+      <!-- JSON Content (Obsidian Dark Theme style) -->
+      <div class="bg-slate-955 rounded-xl border border-slate-800 p-5 shadow-inner overflow-hidden relative">
+        <!-- Top Toolbar for Tree Actions -->
+        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 select-none">
+          <div class="flex items-center gap-2">
+            <button 
+              (click)="expandAllComisionesJson()" 
+              class="bg-slate-800 hover:bg-slate-750 text-slate-300 px-3 py-1 rounded-lg text-[11px] font-bold transition-all border border-slate-700/50">
+              Expandir todo
+            </button>
+            <button 
+              (click)="collapseAllComisionesJson()" 
+              class="bg-slate-800 hover:bg-slate-750 text-slate-300 px-3 py-1 rounded-lg text-[11px] font-bold transition-all border border-slate-700/50">
+              Colapsar todo
+            </button>
+          </div>
+          <div class="text-[10px] text-slate-600 font-sans font-bold select-none uppercase pointer-events-none tracking-wider">
+            interactive json tree
+          </div>
+        </div>
+
+        <!-- Interactive JSON Tree Code area -->
+        <div class="font-sans text-[12px] overflow-auto max-h-[500px] leading-relaxed pr-8 select-all text-slate-300">
+          <!-- Outer Object Bracket { -->
+          <div class="flex items-center gap-1 select-none">
+            <button 
+              (click)="toggleComisionesCollapse()" 
+              class="text-slate-500 hover:text-slate-300 cursor-pointer p-0.5 rounded focus:outline-none transition-colors shrink-0">
+              <svg [ngClass]="{'transform -rotate-90': isComisionesCollapsed}" class="w-3.5 h-3.5 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path>
+              </svg>
+            </button>
+            <span class="text-teal-400 font-bold">&#123;</span>
+            <span *ngIf="isComisionesCollapsed" class="text-slate-500 font-medium font-sans text-xs"> ... <span class="text-teal-400 font-bold">&#125;</span></span>
+          </div>
+
+          <!-- Object Body -->
+          <div *ngIf="!isComisionesCollapsed" class="pl-5">
+            <div>
+              <span class="text-sky-400 font-medium">"lista"</span>: <span class="text-yellow-400 font-bold">[</span>
+            </div>
+
+            <!-- Array Elements -->
+            <div class="pl-5">
+              <div *ngFor="let item of comisionesList; let i = index; let isLast = last" class="group/line py-0.5">
+                <!-- Object Start { -->
+                <div class="flex items-center gap-1 select-none">
+                  <button 
+                    (click)="toggleComisionesItemCollapse(i)" 
+                    class="text-slate-500 hover:text-slate-300 cursor-pointer p-0.5 rounded focus:outline-none transition-colors shrink-0">
+                    <svg [ngClass]="{'transform -rotate-90': isComisionesItemCollapsed(i)}" class="w-3.5 h-3.5 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path>
+                    </svg>
+                  </button>
+                  <span class="text-teal-400 font-bold">&#123;</span>
+                  <span *ngIf="isComisionesItemCollapsed(i)" class="text-slate-500 font-medium font-sans text-xs"> ... <span class="text-teal-400 font-bold">&#125;</span><span class="text-yellow-400 font-bold">{{ isLast ? '' : ',' }}</span></span>
+                </div>
+
+                <!-- Object Body (properties) -->
+                <div *ngIf="!isComisionesItemCollapsed(i)" class="pl-6 border-l border-slate-800/40 ml-1.5 space-y-0.5">
+                  <div><span class="text-sky-400 font-medium">"TASASTARIFASAFP_ID"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.TASASTARIFASAFP_ID }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"TASASTARIFASAFPS_ID"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.TASASTARIFASAFPS_ID === null ? 'null' : item.TASASTARIFASAFPS_ID }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"AFP_ID"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.AFP_ID === null ? 'null' : item.AFP_ID }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"AFPS_ID"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.AFPS_ID === null ? 'null' : item.AFPS_ID }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"PERIODO_ID"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.PERIODO_ID === null ? 'null' : item.PERIODO_ID }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"PERIODODEVENGUE"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODODEVENGUE }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"COMISIONFIJA"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.COMISIONFIJA === null ? 'null' : item.COMISIONFIJA }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"CSOBREFLUJO"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.CSOBREFLUJO }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"CMIXSOBREFLUJO"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.CMIXSOBREFLUJO }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"CMIXANUALSOBRESALDO"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.CMIXANUALSOBRESALDO }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"PRIMASEGUROS"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PRIMASEGUROS }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"APORTEOBLIGATORIO"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.APORTEOBLIGATORIO }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"REMUNERACIONMAXIMA"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.REMUNERACIONMAXIMA }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"AFPKey"</span>: <span class="text-amber-300 font-semibold">"{{ item.AFPKey }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"AFPSKey"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.AFPSKey === null ? 'null' : '"' + item.AFPSKey + '"' }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"PERIODOKey"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODOKey }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"TASASTARIFASAFPKey"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.TASASTARIFASAFPKey === null ? 'null' : '"' + item.TASASTARIFASAFPKey + '"' }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"PERIODORECIENTE"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.PERIODORECIENTE }}</span>,</div>
+                  
+                  <!-- Nested Object REGIMENPENSIONARIO -->
+                  <div>
+                    <div class="flex items-center gap-1 select-none">
+                      <button 
+                        (click)="toggleComisionesSubObjectCollapse(i)" 
+                        class="text-slate-500 hover:text-slate-300 cursor-pointer p-0.5 rounded focus:outline-none transition-colors shrink-0">
+                        <svg [ngClass]="{'transform -rotate-90': isComisionesSubObjectCollapsed(i)}" class="w-3.5 h-3.5 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path>
+                        </svg>
+                      </button>
+                      <span class="text-sky-400 font-medium">"REGIMENPENSIONARIO"</span>: <span class="text-indigo-400 font-bold">&#123;</span>
+                      <span *ngIf="isComisionesSubObjectCollapsed(i)" class="text-slate-500 font-medium font-sans text-xs"> ... <span class="text-indigo-400 font-bold">&#125;</span>,</span>
+                    </div>
+                    
+                    <!-- REGIMENPENSIONARIO Body -->
+                    <div *ngIf="!isComisionesSubObjectCollapsed(i)" class="pl-6 border-l border-slate-800/40 ml-1.5 space-y-0.5">
+                      <div *ngIf="item.REGIMENPENSIONARIO">
+                        <div><span class="text-sky-400 font-medium">"REMUNERATIVOS_ID"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.REMUNERATIVOS_ID }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"MAESTRA_ID"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.MAESTRA_ID }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"CODIGO"</span>: <span class="text-amber-300 font-semibold">"{{ item.REGIMENPENSIONARIO.CODIGO }}"</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"DESCRIPCION"</span>: <span class="text-amber-300 font-semibold">"{{ item.REGIMENPENSIONARIO.DESCRIPCION }}"</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"MAESTRACODIGO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.MAESTRACODIGO === null ? 'null' : '"' + item.REGIMENPENSIONARIO.MAESTRACODIGO + '"' }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"MAESTRAKey"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.MAESTRAKey === null ? 'null' : '"' + item.REGIMENPENSIONARIO.MAESTRAKey + '"' }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"MAESTRAPERSONAL"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.MAESTRAPERSONAL === null ? 'null' : item.REGIMENPENSIONARIO.MAESTRAPERSONAL }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"SOCIO_NEGOCIO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.SOCIO_NEGOCIO === null ? 'null' : item.REGIMENPENSIONARIO.SOCIO_NEGOCIO }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"REMUNERATIVOS_IDs"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.REMUNERATIVOS_IDs === null ? 'null' : item.REGIMENPENSIONARIO.REMUNERATIVOS_IDs }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FLG_ACTIVO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.FLG_ACTIVO }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"SerialKey"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.SerialKey === null ? 'null' : '"' + item.REGIMENPENSIONARIO.SerialKey + '"' }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"ESTADO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.ESTADO === null ? 'null' : '"' + item.REGIMENPENSIONARIO.ESTADO + '"' }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"USUARIO_REG"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.USUARIO_REG === null ? 'null' : '"' + item.REGIMENPENSIONARIO.USUARIO_REG + '"' }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FECHA_REG"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.FECHA_REG === null ? 'null' : '"' + item.REGIMENPENSIONARIO.FECHA_REG + '"' }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"USUARIO_ACT"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.USUARIO_ACT === null ? 'null' : '"' + item.REGIMENPENSIONARIO.USUARIO_ACT + '"' }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FECHA_ACT"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.FECHA_ACT === null ? 'null' : '"' + item.REGIMENPENSIONARIO.FECHA_ACT + '"' }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FILTRO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.FILTRO === null ? 'null' : item.REGIMENPENSIONARIO.FILTRO }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FLG_MASIVO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.FLG_MASIVO }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FLG_MEMORIA"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.FLG_MEMORIA }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FLG_MODIFICADO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.FLG_MODIFICADO }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"PageSize"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.PageSize }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"PageNumber"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.PageNumber }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"TotalPage"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.REGIMENPENSIONARIO.TotalPage }}</span></div>
+                      </div>
+                      <div *ngIf="!item.REGIMENPENSIONARIO" class="text-slate-500 font-medium font-sans text-xs">null</div>
+                    </div>
+                    
+                    <div *ngIf="!isComisionesSubObjectCollapsed(i)" class="text-indigo-400 font-bold pl-4 select-none">&#125;,</div>
+                  </div>
+
+                  <!-- Nested Object PERIODO -->
+                  <div>
+                    <div class="flex items-center gap-1 select-none">
+                      <span class="w-4 h-4 shrink-0"></span> <!-- spacer -->
+                      <span class="text-sky-400 font-medium">"PERIODO"</span>: <span class="text-indigo-400 font-bold">&#123;</span>
+                    </div>
+                    
+                    <!-- PERIODO Body -->
+                    <div class="pl-6 border-l border-slate-800/40 ml-1.5 space-y-0.5">
+                      <div *ngIf="item.PERIODO">
+                        <div><span class="text-sky-400 font-medium">"PERIODO_ID"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PERIODO.PERIODO_ID }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"DESCRIPCION"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODO.DESCRIPCION }}"</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"PERIODO_DESDE"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODO.PERIODO_DESDE }}"</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"PERIODO_HASTA"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODO.PERIODO_HASTA }}"</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"PERIODOS_ID"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"ListaPeriodos"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"ListaPeriodosAnios"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"AGRUPADOR"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"ANOS"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"PERIODODETALLE_IDS"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"SerialKey"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"ESTADO"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"USUARIO_REG"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FECHA_REG"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"USUARIO_ACT"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FECHA_ACT"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FILTRO"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FLG_MASIVO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.PERIODO.FLG_MASIVO }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FLG_MEMORIA"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.PERIODO.FLG_MEMORIA }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"FLG_MODIFICADO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.PERIODO.FLG_MODIFICADO }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"PageSize"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PERIODO.PageSize }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"PageNumber"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PERIODO.PageNumber }}</span>,</div>
+                        <div><span class="text-sky-400 font-medium">"TotalPage"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PERIODO.TotalPage }}</span></div>
+                      </div>
+                      <div *ngIf="!item.PERIODO" class="text-slate-500 font-medium font-sans text-xs">null</div>
+                    </div>
+                    
+                    <div class="text-indigo-400 font-bold pl-4 select-none">&#125;,</div>
+                  </div>
+
+                  <div><span class="text-sky-400 font-medium">"ListaRegimenPensionario"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"ListaPeriodos"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"SerialKey"</span>: <span class="text-amber-300 font-semibold">"{{ item.SerialKey }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"ESTADO"</span>: <span class="text-amber-300 font-semibold">"{{ item.ESTADO }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"USUARIO_REG"</span>: <span class="text-amber-300 font-semibold">"{{ item.USUARIO_REG }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"FECHA_REG"</span>: <span class="text-amber-300 font-semibold">"{{ item.FECHA_REG }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"USUARIO_ACT"</span>: <span class="text-amber-300 font-semibold">"{{ item.USUARIO_ACT }}"</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"FECHA_ACT"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.FECHA_ACT === null ? 'null' : '"' + item.FECHA_ACT + '"' }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"FILTRO"</span>: <span class="text-purple-400 font-bold font-sans">null</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"FLG_MASIVO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.FLG_MASIVO }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"FLG_MEMORIA"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.FLG_MEMORIA }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"FLG_MODIFICADO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.FLG_MODIFICADO }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"PageSize"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PageSize }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"PageNumber"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PageNumber }}</span>,</div>
+                  <div><span class="text-sky-400 font-medium">"TotalPage"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.TotalPage }}</span></div>
+                </div>
+
+                <!-- Object End } -->
+                <div *ngIf="!isComisionesItemCollapsed(i)" class="select-none">
+                  <span class="text-teal-400 font-bold pl-4">&#125;</span><span class="text-yellow-400 font-bold">{{ isLast ? '' : ',' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Outer Array Bracket ] -->
+            <div class="select-none">
+              <span class="text-yellow-400 font-bold">]</span>,
+            </div>
+            <div>
+              <span class="text-sky-400 font-medium">"pageSize"</span>: <span class="text-emerald-400 font-bold font-sans">{{ comisionesList.length }}</span>,
+            </div>
+            <div>
+              <span class="text-sky-400 font-medium">"error"</span>: <span class="text-purple-400 font-bold font-sans">false</span>,
+            </div>
+            <div>
+              <span class="text-sky-400 font-medium">"msj"</span>: <span class="text-purple-400 font-bold font-sans">null</span>
+            </div>
+          </div>
+
+          <!-- Outer Object Bracket Close } -->
+          <div *ngIf="!isComisionesCollapsed" class="text-teal-400 font-bold select-none">&#125;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADD/EDIT COMISIONES MODAL -->
+<div *ngIf="isComisionesModalOpen" class="fixed inset-0 z-[999] overflow-y-auto">
+  <!-- Backdrop overlay -->
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" (click)="closeComisionModal()"></div>
+  
+  <!-- Modal container -->
+  <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+    <div class="relative transform overflow-hidden rounded-[24px] bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-[500px]">
+      
+      <!-- Header (No border-b, equal side margin) -->
+      <div class="bg-white p-8 pb-5 flex justify-between items-center select-none">
+        <h3 class="text-[20px] font-bold text-slate-900 tracking-tight">
+          {{ isEditingComision ? 'Editar Tasas y Tarifas AFP' : 'Registrar Tasas y Tarifas AFP' }}
+        </h3>
+        <button
+          (click)="closeComisionModal()"
+          class="text-slate-400 hover:text-slate-600 transition-colors p-1 flex items-center justify-center focus:outline-none">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Form Content (No border-b/t, equal side margin, compact vertical space) -->
+      <div class="px-8 pb-5 bg-white space-y-4 max-h-[50vh] overflow-y-auto pr-2 mr-2">
+        
+        <!-- Régimen pensionario -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Régimen pensionario <span class="text-rose-500">*</span></label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <select
+              [(ngModel)]="selectedRegimenCodigo"
+              class="w-full h-full bg-transparent px-3.5 text-sm text-slate-800 border-none outline-none focus:ring-0 focus:outline-none appearance-none cursor-pointer pr-10">
+              <option value="" disabled selected>[SELECCIONE]</option>
+              <option *ngFor="let option of regimenPensionarioOptions" [value]="option.CODIGO">
+                {{ option.DESCRIPCION }}
+              </option>
+            </select>
+            <div class="absolute right-3.5 pointer-events-none text-slate-500 flex items-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Periodo desde -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Periodo desde <span class="text-rose-500">*</span></label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="date"
+              [(ngModel)]="comisionPeriodoDesdeStr"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="month/year">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Coupled Calendar Box -->
+            <div class="px-3.5 flex items-center justify-center text-slate-400 shrink-0 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer h-full border-l border-slate-200">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Periodo hasta -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Periodo hasta <span class="text-rose-500">*</span></label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="date"
+              [(ngModel)]="comisionPeriodoHastaStr"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="month/year">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Coupled Calendar Box -->
+            <div class="px-3.5 flex items-center justify-center text-slate-400 shrink-0 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer h-full border-l border-slate-200">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comisión flujo -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Comisión flujo <span class="text-rose-500">*</span></label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="number"
+              step="0.01"
+              [(ngModel)]="currentComisionForm.CSOBREFLUJO"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="0.00">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Spin buttons coupled -->
+            <div class="w-10 flex flex-col justify-center items-center h-full text-slate-400 select-none bg-slate-50/50 border-l border-slate-200">
+              <button (click)="currentComisionForm.CSOBREFLUJO = +((currentComisionForm.CSOBREFLUJO || 0) + 0.01).toFixed(2)" class="hover:text-slate-600 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pb-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+              </button>
+              <div class="w-full h-px bg-slate-200"></div>
+              <button (click)="currentComisionForm.CSOBREFLUJO = +((currentComisionForm.CSOBREFLUJO || 0) - 0.01).toFixed(2)" class="hover:text-slate-600 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pt-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comisión flujo mixta -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Comisión flujo mixta</label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="number"
+              step="0.01"
+              [(ngModel)]="currentComisionForm.CMIXSOBREFLUJO"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="0.00">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Spin buttons coupled -->
+            <div class="w-10 flex flex-col justify-center items-center h-full text-slate-400 select-none bg-slate-50/50 border-l border-slate-200">
+              <button (click)="currentComisionForm.CMIXSOBREFLUJO = +((currentComisionForm.CMIXSOBREFLUJO || 0) + 0.01).toFixed(2)" class="hover:text-slate-650 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pb-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+              </button>
+              <div class="w-full h-px bg-slate-200"></div>
+              <button (click)="currentComisionForm.CMIXSOBREFLUJO = +((currentComisionForm.CMIXSOBREFLUJO || 0) - 0.01).toFixed(2)" class="hover:text-slate-650 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pt-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comisión saldo mixta -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Comisión saldo mixta <span class="text-rose-500">*</span></label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="number"
+              step="0.01"
+              [(ngModel)]="currentComisionForm.CMIXANUALSOBRESALDO"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="0.00">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Spin buttons coupled -->
+            <div class="w-10 flex flex-col justify-center items-center h-full text-slate-400 select-none bg-slate-50/50 border-l border-slate-200">
+              <button (click)="currentComisionForm.CMIXANUALSOBRESALDO = +((currentComisionForm.CMIXANUALSOBRESALDO || 0) + 0.01).toFixed(2)" class="hover:text-slate-650 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pb-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+              </button>
+              <div class="w-full h-px bg-slate-200"></div>
+              <button (click)="currentComisionForm.CMIXANUALSOBRESALDO = +((currentComisionForm.CMIXANUALSOBRESALDO || 0) - 0.01).toFixed(2)" class="hover:text-slate-650 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pt-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prima de seguro -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Prima de seguro <span class="text-rose-500">*</span></label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="number"
+              step="0.01"
+              [(ngModel)]="currentComisionForm.PRIMASEGUROS"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="0.00">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Spin buttons coupled -->
+            <div class="w-10 flex flex-col justify-center items-center h-full text-slate-400 select-none bg-slate-50/50 border-l border-slate-200">
+              <button (click)="currentComisionForm.PRIMASEGUROS = +((currentComisionForm.PRIMASEGUROS || 0) + 0.01).toFixed(2)" class="hover:text-slate-650 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pb-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+              </button>
+              <div class="w-full h-px bg-slate-200"></div>
+              <button (click)="currentComisionForm.PRIMASEGUROS = +((currentComisionForm.PRIMASEGUROS || 0) - 0.01).toFixed(2)" class="hover:text-slate-650 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pt-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aporte obligatorio -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Aporte obligatorio <span class="text-rose-500">*</span></label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="number"
+              step="0.01"
+              [(ngModel)]="currentComisionForm.APORTEOBLIGATORIO"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="0.00">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Spin buttons coupled -->
+            <div class="w-10 flex flex-col justify-center items-center h-full text-slate-400 select-none bg-slate-50/50 border-l border-slate-200">
+              <button (click)="currentComisionForm.APORTEOBLIGATORIO = +((currentComisionForm.APORTEOBLIGATORIO || 0) + 0.01).toFixed(2)" class="hover:text-slate-650 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pb-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+              </button>
+              <div class="w-full h-px bg-slate-200"></div>
+              <button (click)="currentComisionForm.APORTEOBLIGATORIO = +((currentComisionForm.APORTEOBLIGATORIO || 0) - 0.01).toFixed(2)" class="hover:text-slate-650 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pt-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Remuneración máxima -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Remuneración máxima <span class="text-rose-500">*</span></label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="number"
+              [(ngModel)]="currentComisionForm.REMUNERACIONMAXIMA"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="0.00">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Spin buttons coupled -->
+            <div class="w-10 flex flex-col justify-center items-center h-full text-slate-400 select-none bg-slate-50/50 border-l border-slate-200">
+              <button (click)="currentComisionForm.REMUNERACIONMAXIMA = (currentComisionForm.REMUNERACIONMAXIMA || 0) + 100" class="hover:text-slate-650 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pb-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+              </button>
+              <div class="w-full h-px bg-slate-200"></div>
+              <button (click)="currentComisionForm.REMUNERACIONMAXIMA = (currentComisionForm.REMUNERACIONMAXIMA || 0) - 100" class="hover:text-slate-650 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pt-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Estado</label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <select
+              [(ngModel)]="currentComisionForm.ESTADO"
+              class="w-full h-full bg-transparent px-3.5 text-sm text-slate-800 border-none outline-none focus:ring-0 focus:outline-none appearance-none cursor-pointer pr-10">
+              <option value="A">Activo</option>
+              <option value="I">Inactivo</option>
+            </select>
+            <div class="absolute right-3.5 pointer-events-none text-slate-500 flex items-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Actions (No border-t, equal side margin, elegant bottom spacing) -->
+      <div class="bg-white px-8 pb-8 pt-3 flex justify-end gap-3 select-none">
+        <button
+          (click)="closeComisionModal()"
+          class="px-5 py-2.5 border border-slate-200 rounded-lg bg-white text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-50 hover:border-slate-300 transition-all focus:outline-none shadow-2xs hover:shadow-xs">
+          Cerrar
+        </button>
+        <button
+          (click)="saveComision()"
+          class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-sm font-bold text-white rounded-lg shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all focus:outline-none font-bold">
+          {{ isEditingComision ? 'Guardar' : 'Registrar' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DELETE COMISION CONFIRMATION MODAL -->
+<div *ngIf="isDeleteComisionModalOpen" class="fixed inset-0 z-[1000] overflow-y-auto">
+  <!-- Backdrop overlay -->
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" (click)="closeDeleteComisionModal()"></div>
+  
+  <!-- Modal container -->
+  <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+    <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-slate-100">
+      
+      <!-- Content Body -->
+      <div class="p-6">
+        <div class="flex items-start gap-4">
+          <!-- Icon Container (Warning Amber) -->
+          <div class="bg-amber-50 text-amber-600 p-3 rounded-2xl shrink-0 border border-amber-100/50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          
+          <!-- Text Info -->
+          <div class="space-y-1.5 flex-1">
+            <h3 class="text-base font-bold text-slate-900">¿Eliminar Tasas de Pensiones?</h3>
+            <p class="text-xs font-medium text-slate-500 leading-relaxed font-sans">
+              Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminar este registro de comisiones y tasas de pensión?
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer Actions -->
+      <div class="bg-slate-50 p-6 border-t border-slate-100 flex justify-end gap-3">
+        <button
+          (click)="closeDeleteComisionModal()"
+          class="px-4 py-2 border border-slate-200 rounded-xl bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all font-semibold">
+          Cancelar
+        </button>
+        <button
+          (click)="executeDeleteComision()"
+          class="px-4 py-2 bg-red-600 hover:bg-red-700 text-xs font-bold text-white rounded-xl shadow-md hover:shadow-lg transition-all font-bold">
+          Confirmar y Eliminar
+        </button>
+      </div>
+      
+    </div>
+  </div>
+</div>

@@ -1,0 +1,674 @@
+<!-- TOAST NOTIFICATION -->
+<div
+  *ngIf="toastMessage"
+  [ngClass]="{
+    'translate-y-0 opacity-100': toastMessage,
+    'translate-y-[-20px] opacity-0': !toastMessage
+  }"
+  class="fixed top-6 right-6 z-[9999] max-w-md bg-white border border-slate-100 rounded-2xl shadow-xl flex items-center gap-3.5 p-4.5 transition-all duration-300 transform">
+  
+  <!-- Success Icon -->
+  <div *ngIf="toastType === 'success'" class="bg-emerald-50 text-emerald-600 p-2 rounded-xl border border-emerald-100/50 shrink-0">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+  </div>
+  
+  <!-- Error Icon -->
+  <div *ngIf="toastType === 'error'" class="bg-rose-50 text-rose-600 p-2 rounded-xl border border-rose-100/50 shrink-0">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+  </div>
+
+  <!-- Content Text -->
+  <div class="flex-1 min-w-[200px]">
+    <p class="text-xs font-bold text-slate-900">
+      {{ toastType === 'success' ? 'Operación Exitosa' : 'Aviso del Sistema' }}
+    </p>
+    <p class="text-[11px] font-medium text-slate-500 mt-0.5 leading-snug">
+      {{ toastMessage }}
+    </p>
+  </div>
+  
+  <!-- Close Button -->
+  <button
+    (click)="toastMessage = null"
+    class="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-50 rounded-lg transition-all shrink-0">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
+</div>
+
+<div class="space-y-6">
+  
+  <!-- Breadcrumbs and Header -->
+  <div class="flex flex-col gap-1">
+    <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+      <span>Parametrización</span>
+      <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      <span>Parámetros de nómina</span>
+      <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      <span class="text-blue-600 font-semibold">Periodo de cálculo</span>
+    </div>
+     <h2 class="text-xl font-bold text-slate-900 tracking-tight mt-1">Periodo de cálculo</h2>
+     <p class="text-slate-500 text-[11px] mt-1 leading-relaxed max-w-4xl">
+       Configuración y gestión de periodos de devengue mensuales para el procesamiento de planillas a nivel global. 
+       Este control define las fechas de corte, estados de cierre y los valores gubernamentales clave (como la UIT, 
+       RMV y Tipo de Cambio oficial) necesarios para liquidaciones de impuestos, aportes previsionales y haberes.
+     </p>
+  </div>
+
+  <!-- Main Table Card -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    
+    <!-- Filters and Action Buttons -->
+    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+      <div class="flex items-center gap-3 flex-1 max-w-lg">
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <span class="absolute left-3.5 top-2.5 text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </span>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Buscar..."
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+        </div>
+        
+        <!-- Filter Button -->
+        <button class="bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 flex items-center gap-2 transition-all">
+          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+          <span>Filtrar</span>
+          <span class="bg-slate-200 text-slate-700 text-[11px] px-1.5 py-0.5 rounded-full font-bold">0</span>
+        </button>
+      </div>
+      
+      <!-- View Toggle & Add Button Group -->
+      <div class="flex items-center gap-3 shrink-0">
+        <!-- View Toggle Segmented Control -->
+        <div class="bg-slate-100 p-0.5 rounded-xl border border-slate-200 flex items-center shrink-0">
+          <button
+            (click)="showJsonView = false"
+            [class]="!showJsonView ? 'bg-white text-slate-800 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span>Tabla</span>
+          </button>
+          <button
+            (click)="showJsonView = true"
+            [class]="showJsonView ? 'bg-white text-slate-800 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            <span>JSON</span>
+          </button>
+        </div>
+
+        <!-- Add Button -->
+        <button
+          *ngIf="!showJsonView"
+          (click)="openAddPeriodModal()"
+          class="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-2.5 text-xs font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+          <span>Periodo de planilla</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table View Content -->
+    <div *ngIf="!showJsonView">
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-100 text-left text-sm text-slate-600">
+          <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100">
+            <tr>
+              <th class="px-6 py-4 w-12 text-center">
+                <label class="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [checked]="isAllSelected()"
+                    (change)="toggleSelectAll($event)"
+                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-4.5 w-4.5 transition-all">
+                </label>
+              </th>
+              <th (click)="setSort('PERIODODESC')" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1">
+                  <span>Periodo</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="sortField === 'PERIODODESC' && sortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="sortField === 'PERIODODESC' && sortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th (click)="setSort('UIT')" class="px-6 py-4 font-semibold text-right cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1 justify-end">
+                  <span>UIT</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="sortField === 'UIT' && sortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="sortField === 'UIT' && sortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th (click)="setSort('RMV')" class="px-6 py-4 font-semibold text-right cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1 justify-end">
+                  <span>Sueldo Mínimo</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="sortField === 'RMV' && sortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="sortField === 'RMV' && sortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th (click)="setSort('TC')" class="px-6 py-4 font-semibold text-right cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1 justify-end">
+                  <span>Dólar</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="sortField === 'TC' && sortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="sortField === 'TC' && sortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th (click)="setSort('ESTADO')" class="px-6 py-4 font-semibold text-center cursor-pointer hover:bg-slate-100/50 select-none transition-colors">
+                <div class="flex items-center gap-1 justify-center">
+                  <span>Estado</span>
+                  <span class="flex flex-col shrink-0">
+                    <svg [class.text-blue-600]="sortField === 'ESTADO' && sortDirection === 'asc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6h12z"/></svg>
+                    <svg [class.text-blue-600]="sortField === 'ESTADO' && sortDirection === 'desc'" class="w-2 h-1.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l6-6H6z"/></svg>
+                  </span>
+                </div>
+              </th>
+              <th class="px-6 py-4 font-semibold text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-medium">
+            <tr
+              *ngFor="let item of paginatedPeriods"
+              [ngClass]="{'bg-blue-50/20': isSelected(item.PERIODOKey)}"
+              class="hover:bg-slate-50/70 transition-all border-b border-slate-100">
+              
+              <!-- Checkbox -->
+              <td class="px-6 py-4 text-center">
+                <label class="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(item.PERIODOKey)"
+                    (change)="toggleSelectPeriod(item.PERIODOKey)"
+                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-4.5 w-4.5 transition-all">
+                </label>
+              </td>
+              
+              <!-- Periodo -->
+              <td class="px-6 py-4 text-slate-900 font-bold text-sm tracking-wide">
+                {{ item.PERIODODESC }}
+              </td>
+              
+              <!-- UIT -->
+              <td class="px-6 py-4 text-right text-slate-900 font-semibold font-sans text-sm">
+                {{ item.UIT | number:'1.2-2' }}
+              </td>
+              
+              <!-- Sueldo Minimo -->
+              <td class="px-6 py-4 text-right text-slate-900 font-semibold font-sans text-sm">
+                {{ item.RMV | number:'1.2-2' }}
+              </td>
+              
+              <!-- Dolar -->
+              <td class="px-6 py-4 text-right text-slate-900 font-semibold font-sans text-sm">
+                {{ item.TC | number:'1.4-4' }}
+              </td>
+              
+              <!-- Estado -->
+              <td class="px-6 py-4 text-center">
+                <span
+                  [class]="item.ESTADO === 'A' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-50 text-slate-500 border-slate-100'"
+                  class="px-2.5 py-0.5 text-xs font-semibold rounded-full border inline-block tracking-wide uppercase">
+                  {{ item.ESTADO === 'A' ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              
+              <!-- Acciones -->
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-1.5">
+                  <button
+                    (click)="openEditPeriodModal(item)"
+                    class="hover:bg-slate-100 text-slate-600 hover:text-blue-600 p-1.5 rounded-lg transition-all"
+                    title="Editar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                  </button>
+                  <button
+                    (click)="confirmDeletePeriod(item.PERIODOKey)"
+                    class="hover:bg-red-50 text-slate-400 hover:text-red-600 p-1.5 rounded-lg transition-all"
+                    title="Eliminar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            
+            <tr *ngIf="paginatedPeriods.length === 0">
+              <td colspan="7" class="px-6 py-12 text-center text-slate-400 font-medium bg-slate-50/30">
+                <svg class="w-10 h-10 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>No se encontraron periodos de cálculo.</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold text-slate-500 bg-slate-50/40">
+        <div>
+          Mostrando del <span class="text-slate-900 font-bold">{{ filteredPeriods.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }}</span> al
+          <span class="text-slate-955 font-bold">{{ (currentPage * pageSize) > filteredPeriods.length ? filteredPeriods.length : (currentPage * pageSize) }}</span> de
+          <span class="text-slate-955 font-bold">{{ filteredPeriods.length }}</span> periodos
+        </div>
+        
+        <div class="flex items-center gap-1">
+          <!-- Anterior -->
+          <button
+            (click)="changePage(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white transition-all">
+            Anterior
+          </button>
+          
+          <!-- Page numbers -->
+          <button
+            *ngFor="let page of totalPagesArray"
+            (click)="changePage(page)"
+            [class]="page === currentPage ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-200' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'"
+            class="w-8 h-8 rounded-lg font-bold flex items-center justify-center transition-all">
+            {{ page }}
+          </button>
+          
+          <!-- Siguiente -->
+          <button
+            (click)="changePage(currentPage + 1)"
+            [disabled]="currentPage === totalPages || totalPages === 0"
+            class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white transition-all">
+            Siguiente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JSON View Content (Dark Mode Code Editor style) -->
+    <div *ngIf="showJsonView" class="bg-slate-900 border-t border-slate-800 p-6 flex flex-col gap-4">
+      <!-- Code Header -->
+      <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center bg-slate-800 px-4 py-3 rounded-xl border border-slate-700/50 gap-4">
+        <div class="flex items-center gap-2.5 shrink-0">
+          <!-- MacOS Style Fake Buttons -->
+          <div class="flex items-center gap-1.5 select-none">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-xs"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-xs"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs"></span>
+          </div>
+          <span class="text-xs text-slate-300 font-sans font-bold select-none ml-2">PeriodosCalculo.json</span>
+          <span class="bg-slate-700 text-slate-400 text-[10px] px-2 py-0.5 rounded font-sans font-medium tracking-wide select-none">MEMORIA LOCAL</span>
+        </div>
+
+        <!-- Reference Links as raw URLs -->
+        <div class="flex flex-col xl:flex-row xl:items-center gap-3 text-[11px] font-sans flex-1 justify-center">
+          <a
+            href="https://payroll.pipolfy.com/PeriodoCalculo/RegistroPeriodoCalculo"
+            target="_blank"
+            class="text-sky-400 hover:text-sky-300 hover:underline transition-colors break-all text-center">
+            https://payroll.pipolfy.com/PeriodoCalculo/RegistroPeriodoCalculo
+          </a>
+          <div class="hidden xl:block text-slate-600 select-none">|</div>
+          <a
+            href="https://payroll.pipolfy.com/PeriodoCalculo/ListarPaginado"
+            target="_blank"
+            class="text-sky-400 hover:text-sky-300 hover:underline transition-colors break-all text-center">
+            https://payroll.pipolfy.com/PeriodoCalculo/ListarPaginado
+          </a>
+        </div>
+        
+        <button
+          (click)="copyJsonToClipboard()"
+          class="bg-slate-700 hover:bg-slate-650 text-slate-200 border border-slate-600 rounded-lg px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-xs shrink-0 self-end lg:self-auto">
+          <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2H5a2 2 0 01-2-2v-3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+          <span>Copiar JSON</span>
+        </button>
+      </div>
+
+      <!-- JSON Content (Obsidian Dark Theme style) -->
+      <div class="bg-slate-955 rounded-xl border border-slate-800 p-5 shadow-inner overflow-hidden relative">
+        <!-- Top Toolbar for Tree Actions -->
+        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 select-none">
+          <div class="flex items-center gap-2">
+            <button 
+              (click)="expandAllJson()" 
+              class="bg-slate-800 hover:bg-slate-750 text-slate-300 px-3 py-1 rounded-lg text-[11px] font-bold transition-all border border-slate-700/50">
+              Expandir todo
+            </button>
+            <button 
+              (click)="collapseAllJson()" 
+              class="bg-slate-800 hover:bg-slate-750 text-slate-300 px-3 py-1 rounded-lg text-[11px] font-bold transition-all border border-slate-700/50">
+              Colapsar todo
+            </button>
+          </div>
+          <div class="text-[10px] text-slate-600 font-sans font-bold select-none uppercase pointer-events-none tracking-wider">
+            interactive json tree
+          </div>
+        </div>
+
+        <!-- Interactive JSON Tree Code area -->
+        <div class="font-sans text-[12px] overflow-auto max-h-[500px] leading-relaxed pr-8 select-all text-slate-300">
+          <!-- Outer Array Bracket [ -->
+          <div class="flex items-center gap-1 select-none">
+            <button 
+              (click)="togglePeriodsCollapse()" 
+              class="text-slate-500 hover:text-slate-300 cursor-pointer p-0.5 rounded focus:outline-none transition-colors shrink-0">
+              <svg [ngClass]="{'transform -rotate-90': isPeriodsCollapsed}" class="w-3.5 h-3.5 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path>
+              </svg>
+            </button>
+            <span class="text-yellow-400 font-bold">[</span>
+            <span *ngIf="isPeriodsCollapsed" class="text-slate-500 font-medium font-sans text-xs"> ... <span class="text-yellow-400 font-bold">]</span></span>
+          </div>
+
+          <!-- Array Elements -->
+          <div *ngIf="!isPeriodsCollapsed" class="pl-5">
+            <div *ngFor="let item of periods; let i = index; let isLast = last" class="group/line py-0.5">
+              <!-- Object Start { -->
+              <div class="flex items-center gap-1 select-none">
+                <button 
+                  (click)="toggleItemCollapse(i)" 
+                  class="text-slate-500 hover:text-slate-300 cursor-pointer p-0.5 rounded focus:outline-none transition-colors shrink-0">
+                  <svg [ngClass]="{'transform -rotate-90': isItemCollapsed(i)}" class="w-3.5 h-3.5 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path>
+                  </svg>
+                </button>
+                <span class="text-teal-400 font-bold">&#123;</span>
+                <span *ngIf="isItemCollapsed(i)" class="text-slate-500 font-medium font-sans text-xs"> ... <span class="text-teal-400 font-bold">&#125;</span><span class="text-yellow-400 font-bold">{{ isLast ? '' : ',' }}</span></span>
+              </div>
+
+              <!-- Object Body (properties) -->
+              <div *ngIf="!isItemCollapsed(i)" class="pl-6 border-l border-slate-800/40 ml-1.5 space-y-0.5">
+                <div><span class="text-sky-400 font-medium">"PERIODOCALCULO_ID"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PERIODOCALCULO_ID }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"UIT"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.UIT }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"RMV"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.RMV }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"TC"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.TC }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"RMV_RMINERO"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.RMV_RMINERO }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"FLG_EDITABLE"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.FLG_EDITABLE }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"PERIODOKey"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODOKey }}"</span>,</div>
+                <div><span class="text-sky-400 font-medium">"PERIODODESC"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODODESC }}"</span>,</div>
+                <div><span class="text-sky-400 font-medium">"PERIODO_DESDE"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODO_DESDE }}"</span>,</div>
+                <div><span class="text-sky-400 font-medium">"PERIODO_HASTA"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODO_HASTA }}"</span>,</div>
+                
+                <!-- Nested Object PERIODO -->
+                <div>
+                  <div class="flex items-center gap-1 select-none">
+                    <button 
+                      (click)="toggleSubObjectCollapse(i)" 
+                      class="text-slate-500 hover:text-slate-300 cursor-pointer p-0.5 rounded focus:outline-none transition-colors shrink-0">
+                      <svg [ngClass]="{'transform -rotate-90': isSubObjectCollapsed(i)}" class="w-3.5 h-3.5 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path>
+                      </svg>
+                    </button>
+                    <span class="text-sky-400 font-medium">"PERIODO"</span>: <span class="text-indigo-400 font-bold">&#123;</span>
+                    <span *ngIf="isSubObjectCollapsed(i)" class="text-slate-500 font-medium font-sans text-xs"> ... <span class="text-indigo-400 font-bold">&#125;</span>,</span>
+                  </div>
+                  
+                  <!-- PERIODO Body -->
+                  <div *ngIf="!isSubObjectCollapsed(i)" class="pl-6 border-l border-slate-800/40 ml-1.5 space-y-0.5">
+                    <div *ngIf="item.PERIODO">
+                      <div><span class="text-sky-400 font-medium">"PERIODO_ID"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PERIODO.PERIODO_ID }}</span>,</div>
+                      <div><span class="text-sky-400 font-medium">"DESCRIPCION"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODO.DESCRIPCION }}"</span>,</div>
+                      <div><span class="text-sky-400 font-medium">"PERIODO_DESDE"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODO.PERIODO_DESDE }}"</span>,</div>
+                      <div><span class="text-sky-400 font-medium">"PERIODO_HASTA"</span>: <span class="text-amber-300 font-semibold">"{{ item.PERIODO.PERIODO_HASTA }}"</span>,</div>
+                      <div><span class="text-sky-400 font-medium">"FLG_MASIVO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.PERIODO.FLG_MASIVO }}</span>,</div>
+                      <div><span class="text-sky-400 font-medium">"FLG_MEMORIA"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.PERIODO.FLG_MEMORIA }}</span>,</div>
+                      <div><span class="text-sky-400 font-medium">"FLG_MODIFICADO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.PERIODO.FLG_MODIFICADO }}</span>,</div>
+                      <div><span class="text-sky-400 font-medium">"PageSize"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PERIODO.PageSize }}</span>,</div>
+                      <div><span class="text-sky-400 font-medium">"PageNumber"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PERIODO.PageNumber }}</span>,</div>
+                      <div><span class="text-sky-400 font-medium">"TotalPage"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PERIODO.TotalPage }}</span></div>
+                    </div>
+                    <div *ngIf="!item.PERIODO" class="text-slate-500 font-medium font-sans text-xs">null</div>
+                  </div>
+                  
+                  <div *ngIf="!isSubObjectCollapsed(i)" class="text-indigo-400 font-bold pl-4 select-none">&#125;,</div>
+                </div>
+
+                <div><span class="text-sky-400 font-medium">"mostrarInputMinero"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.mostrarInputMinero }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"SerialKey"</span>: <span class="text-amber-300 font-semibold">"{{ item.SerialKey }}"</span>,</div>
+                <div><span class="text-sky-400 font-medium">"ESTADO"</span>: <span class="text-amber-300 font-semibold">"{{ item.ESTADO }}"</span>,</div>
+                <div><span class="text-sky-400 font-medium">"FLG_MASIVO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.FLG_MASIVO }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"FLG_MEMORIA"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.FLG_MEMORIA }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"FLG_MODIFICADO"</span>: <span class="text-purple-400 font-bold font-sans">{{ item.FLG_MODIFICADO }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"PageSize"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PageSize }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"PageNumber"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.PageNumber }}</span>,</div>
+                <div><span class="text-sky-400 font-medium">"TotalPage"</span>: <span class="text-emerald-400 font-bold font-sans">{{ item.TotalPage }}</span></div>
+              </div>
+
+              <!-- Object End } -->
+              <div *ngIf="!isItemCollapsed(i)" class="select-none">
+                <span class="text-teal-400 font-bold pl-4">&#125;</span><span class="text-yellow-400 font-bold">{{ isLast ? '' : ',' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Outer Array Bracket ] -->
+          <div *ngIf="!isPeriodsCollapsed" class="text-yellow-400 font-bold select-none">]</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADD/EDIT PERIOD MODAL -->
+<div *ngIf="isPeriodModalOpen" class="fixed inset-0 z-[999] overflow-y-auto">
+  <!-- Backdrop overlay -->
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" (click)="closePeriodModal()"></div>
+  
+  <!-- Modal container -->
+  <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+    <div class="relative transform overflow-hidden rounded-[24px] bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-[500px]">
+      
+      <!-- Header -->
+      <div class="bg-white p-8 pb-5 flex justify-between items-center select-none">
+        <h3 class="text-[20px] font-bold text-slate-900 tracking-tight">
+          {{ isEditingPeriod ? 'Editar periodo de cálculo' : 'Registrar periodo de planilla' }}
+        </h3>
+        <button
+          (click)="closePeriodModal()"
+          class="text-slate-400 hover:text-slate-600 transition-colors p-1 flex items-center justify-center focus:outline-none">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Form Content -->
+      <div class="px-8 pb-5 bg-white space-y-4.5">
+        <!-- Periodo desde -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Periodo desde</label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="date"
+              [(ngModel)]="periodoDesdeStr"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="dd/mm/aaaa">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Coupled Calendar Box -->
+            <div class="px-3.5 flex items-center justify-center text-slate-400 shrink-0 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer h-full border-l border-slate-200">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Periodo hasta -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Periodo hasta</label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="date"
+              [(ngModel)]="periodoHastaStr"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="dd/mm/aaaa">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Coupled Calendar Box -->
+            <div class="px-3.5 flex items-center justify-center text-slate-400 shrink-0 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer h-full border-l border-slate-200">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- UIT -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">UIT</label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="number"
+              [(ngModel)]="currentPeriodForm.UIT"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="5500.00">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Spin buttons coupled -->
+            <div class="w-10 flex flex-col justify-center items-center h-full text-slate-400 select-none bg-slate-50/50 border-l border-slate-200">
+              <button (click)="currentPeriodForm.UIT = (currentPeriodForm.UIT || 0) + 100" class="hover:text-slate-600 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pb-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+              </button>
+              <div class="w-full h-px bg-slate-200"></div>
+              <button (click)="currentPeriodForm.UIT = (currentPeriodForm.UIT || 0) - 100" class="hover:text-slate-600 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pt-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Remuneración mínima -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Remuneración mínima</label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="number"
+              [(ngModel)]="currentPeriodForm.RMV"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="1130.00">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Spin buttons coupled -->
+            <div class="w-10 flex flex-col justify-center items-center h-full text-slate-400 select-none bg-slate-50/50 border-l border-slate-200">
+              <button (click)="currentPeriodForm.RMV = (currentPeriodForm.RMV || 0) + 10" class="hover:text-slate-600 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pb-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+              </button>
+              <div class="w-full h-px bg-slate-200"></div>
+              <button (click)="currentPeriodForm.RMV = (currentPeriodForm.RMV || 0) - 10" class="hover:text-slate-600 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pt-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tipo de cambio -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Tipo de cambio</label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <input
+              type="number"
+              step="0.0001"
+              [(ngModel)]="currentPeriodForm.TC"
+              class="w-full h-full px-3.5 text-sm text-slate-800 placeholder-slate-400 border-none outline-none focus:ring-0 focus:outline-none"
+              placeholder="3.8000">
+            <!-- Vertical border separator -->
+            <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+            <!-- Spin buttons coupled -->
+            <div class="w-10 flex flex-col justify-center items-center h-full text-slate-400 select-none bg-slate-50/50 border-l border-slate-200">
+              <button (click)="currentPeriodForm.TC = +((currentPeriodForm.TC || 0) + 0.01).toFixed(4)" class="hover:text-slate-600 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pb-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+              </button>
+              <div class="w-full h-px bg-slate-200"></div>
+              <button (click)="currentPeriodForm.TC = +((currentPeriodForm.TC || 0) - 0.01).toFixed(4)" class="hover:text-slate-600 flex-1 w-full flex items-center justify-center hover:bg-slate-100 transition-colors focus:outline-none pt-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Estado</label>
+          <div class="relative flex items-center h-[42px] border border-slate-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
+            <select
+              [(ngModel)]="currentPeriodForm.ESTADO"
+              class="w-full h-full bg-transparent px-3.5 text-sm text-slate-800 border-none outline-none focus:ring-0 focus:outline-none appearance-none cursor-pointer pr-10">
+              <option value="A">Activo</option>
+              <option value="I">Inactivo</option>
+            </select>
+            <div class="absolute right-3.5 pointer-events-none text-slate-500 flex items-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="bg-white px-8 pb-8 pt-3 flex justify-end gap-3 select-none">
+        <button
+          (click)="closePeriodModal()"
+          class="px-5 py-2.5 border border-slate-200 rounded-lg bg-white text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-50 hover:border-slate-300 transition-all focus:outline-none shadow-2xs hover:shadow-xs">
+          Cerrar
+        </button>
+        <button
+          (click)="savePeriod()"
+          class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-sm font-bold text-white rounded-lg shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all focus:outline-none">
+          {{ isEditingPeriod ? 'Guardar' : 'Registrar' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div *ngIf="isDeleteModalOpen" class="fixed inset-0 z-[1000] overflow-y-auto">
+  <!-- Backdrop overlay -->
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" (click)="closeDeleteModal()"></div>
+  
+  <!-- Modal container -->
+  <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+    <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-slate-100">
+      
+      <!-- Content Body -->
+      <div class="p-6">
+        <div class="flex items-start gap-4">
+          <!-- Icon Container (Warning Amber) -->
+          <div class="bg-amber-50 text-amber-600 p-3 rounded-2xl shrink-0 border border-amber-100/50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          
+          <!-- Text Info -->
+          <div class="space-y-1.5 flex-1">
+            <h3 class="text-base font-bold text-slate-900">¿Eliminar Periodo de Cálculo?</h3>
+            <p class="text-xs font-medium text-slate-500 leading-relaxed">
+              Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminar este periodo de cálculo? Esto podría afectar la integridad de cálculos históricos asociados.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer Actions -->
+      <div class="bg-slate-50 p-6 border-t border-slate-100 flex justify-end gap-3">
+        <button
+          (click)="closeDeleteModal()"
+          class="px-4 py-2 border border-slate-200 rounded-xl bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all">
+          Cancelar
+        </button>
+        <button
+          (click)="executeDeletePeriod()"
+          class="px-4 py-2 bg-red-600 hover:bg-red-700 text-xs font-bold text-white rounded-xl shadow-md hover:shadow-lg transition-all">
+          Confirmar y Eliminar
+        </button>
+      </div>
+      
+    </div>
+  </div>
+</div>
