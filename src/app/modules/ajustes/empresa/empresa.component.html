@@ -1,1 +1,165 @@
-<p>empresa works!</p>
+<div class="flex flex-col flex-auto">
+
+    <!-- ═══════════════════════════════════════════════
+         PAGE HEADER — Sección 13.2 del design system
+    ════════════════════════════════════════════════ -->
+    <div
+        class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between p-6 sm:py-12 md:px-8 border-b bg-card dark:bg-transparent">
+        <div class="flex flex-col">
+            <h1 class="text-4xl font-extrabold tracking-tight leading-none">Empresas</h1>
+            <div class="flex items-center mt-0.5 font-medium text-secondary">
+                Gestión de empresas asociadas al sistema
+            </div>
+        </div>
+
+        <div class="mt-4 sm:mt-0 flex items-center gap-3">
+            <!-- New — abre el modal -->
+            <button mat-flat-button color="primary" (click)="openCreateDialog()">
+                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                Nueva Empresa
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         PAGE CONTENT — Sección 13.3 del design system
+    ════════════════════════════════════════════════ -->
+    <div class="p-6 md:p-8 space-y-8">
+
+        <!-- ─────────────────────────────────────────
+             COMPANIES LIST CARD
+        ────────────────────────────────────────── -->
+        <div
+            class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+
+            <!-- Card Header — Contador -->
+            <div *ngIf="!isLoading && empresas.length > 0"
+                class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Empresas registradas</span>
+                    <span
+                        class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                        {{ empresas.length }}
+                    </span>
+                </div>
+                <span class="text-xs text-slate-400 dark:text-slate-500">
+                    Actualizado: {{ lastUpdated | date:'HH:mm:ss' }}
+                </span>
+            </div>
+
+            <!-- Loading State -->
+            <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-24 gap-4">
+                <mat-progress-spinner [diameter]="44" mode="indeterminate"></mat-progress-spinner>
+                <span class="text-sm font-medium text-slate-500">Cargando empresas...</span>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!isLoading && empresas.length === 0"
+                class="flex flex-col items-center justify-center py-24 px-6 text-center gap-4">
+                <div class="flex items-center justify-center w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-700">
+                    <mat-icon class="icon-size-10 text-slate-400 dark:text-slate-500"
+                        [svgIcon]="'heroicons_outline:building-office-2'"></mat-icon>
+                </div>
+                <div>
+                    <p class="text-base font-semibold text-slate-700 dark:text-slate-300">No hay empresas registradas
+                    </p>
+                    <p class="text-sm text-slate-400 dark:text-slate-500 mt-1">
+                        Haz clic en <strong class="text-indigo-600">"Nueva Empresa"</strong> para comenzar.
+                    </p>
+                </div>
+                <button mat-flat-button color="primary" (click)="openCreateDialog()">
+                    <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                    Agregar primera empresa
+                </button>
+            </div>
+
+            <!-- Company Rows -->
+            <div *ngIf="!isLoading && empresas.length > 0"
+                class="flex flex-col divide-y divide-slate-100 dark:divide-slate-700">
+
+                <div *ngFor="let empresa of empresas; trackBy: trackByEmpresaId"
+                    [ngClass]="{ 'bg-indigo-50 dark:bg-indigo-900/10': selectedEmpresaId === empresa.EmpresaId }"
+                    class="empresa-row relative flex items-center justify-between py-4 px-6 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors duration-150 cursor-pointer group"
+                    (click)="openViewDialog(empresa)">
+
+                    <!-- Indicador lateral -->
+                    <span
+                        class="absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-indigo-600 transition-opacity duration-200"
+                        [class.opacity-100]="selectedEmpresaId === empresa.EmpresaId"
+                        [class.opacity-0]="selectedEmpresaId !== empresa.EmpresaId"></span>
+
+                    <!-- Avatar + Info -->
+                    <div class="flex items-center gap-4 min-w-0">
+
+                        <!-- Avatar: imagen (Base64) o iniciales -->
+                        <div class="relative flex-shrink-0">
+                            <img *ngIf="empresa.ImagenEmpresa && getFileUrl(empresa.ImagenEmpresa)"
+                                [src]="getFileUrl(empresa.ImagenEmpresa)" [alt]="empresa.NombreEmpresa"
+                                class="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm">
+                            <div *ngIf="!empresa.ImagenEmpresa || !getFileUrl(empresa.ImagenEmpresa)"
+                                class="flex items-center justify-center w-11 h-11 rounded-full bg-indigo-100 dark:bg-indigo-900/40 border-2 border-white dark:border-slate-700 shadow-sm">
+                                <span
+                                    class="empresa-avatar-initials text-base font-bold text-indigo-600 dark:text-indigo-400">
+                                    {{ getInitials(empresa.NombreEmpresa) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Nombre + NIT + Info Extra -->
+                        <div class="flex flex-col min-w-0">
+                            <span
+                                class="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                                {{ empresa.NombreEmpresa }}
+                            </span>
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
+                                <span class="text-sm text-slate-500 dark:text-slate-400">
+                                    RUC: <span class="font-medium text-slate-700 dark:text-slate-300">{{
+                                        empresa.RucEmpresa }}</span>
+                                </span>
+                                <!-- Representante Legal -->
+                                <span *ngIf="empresa.NombreRepresentanteEmpresa" class="text-xs text-slate-400 dark:text-slate-500 hidden sm:inline">
+                                    · Rep. Legal: {{ empresa.NombreRepresentanteEmpresa }}
+                                </span>
+                                <!-- Dirección -->
+                                <span *ngIf="empresa.DireccionEmpresa" class="text-xs text-slate-400 dark:text-slate-500 hidden md:inline">
+                                    · {{ empresa.DireccionEmpresa }}
+                                </span>
+                                <!-- Móvil -->
+                                <span *ngIf="empresa.MovilEmpresa" class="text-xs text-slate-400 dark:text-slate-500 hidden lg:inline">
+                                    · {{ empresa.MovilEmpresa }}
+                                </span>
+                                <!-- Correo -->
+                                <span *ngIf="empresa.CorreoEmpresa" class="text-xs text-slate-400 dark:text-slate-500 hidden xl:inline">
+                                    · {{ empresa.CorreoEmpresa }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Badge + Acciones -->
+                    <div class="flex items-center gap-1 ml-4 flex-shrink-0">
+
+                        <span
+                            class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 mr-2">
+                            Activo
+                        </span>
+                        <!-- Acción: Editar -->
+                        <button mat-icon-button class="text-slate-400 hover:text-indigo-600 transition-colors"
+                            title="Editar empresa" (click)="openEditDialog(empresa); $event.stopPropagation()">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                        </button>
+
+                        <!-- Acción: Eliminar -->
+                        <button mat-icon-button class="text-slate-400 hover:text-rose-600 transition-colors"
+                            title="Eliminar empresa" (click)="deleteEmpresa(empresa); $event.stopPropagation()">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                        </button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

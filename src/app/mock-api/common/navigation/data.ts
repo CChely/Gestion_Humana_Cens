@@ -54,7 +54,14 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 title: 'Maestro Empleado',
                 type: 'basic',
                 icon: 'heroicons_outline:user',
-                link: '/gestion-personal/maestro-empleado'
+                link: '/gestion-personal/maestro-empleado-list'
+            },
+            {
+                id: 'gestion-personal.maestro-areas',
+                title: 'Estructura Organizacional',
+                type: 'basic',
+                icon: 'heroicons_outline:folder',
+                link: '/gestion-personal/maestro-areas'
             },
             {
                 id: 'gestion-personal.contrato',
@@ -143,6 +150,13 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 link: '/ajustes/configuracion-perfil'
             },
             {
+                id: 'ajustes.configuracion-seguridad',
+                title: 'Configuración de seguridad',
+                type: 'basic',
+                icon: 'heroicons_outline:shield-check',
+                link: '/ajustes/configuracion-seguridad'
+            },
+            {
                 id: 'ajustes.configuracion-almacenamiento',
                 title: 'Configuración de almacenamiento',
                 type: 'basic',
@@ -165,8 +179,6 @@ export const defaultNavigation: FuseNavigationItem[] = [
             }
         ]
     },
-
-
     {
         id: 'mantenimiento',
         title: 'Mantenimiento',
@@ -174,37 +186,416 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type: 'group',
         icon: 'heroicons_outline:database',
         children: [
+                        {
+                id: 'mantenimiento.datos-personales',
+                title: 'Datos Personales',
+                type: 'collapsable',
+                icon: 'heroicons_outline:identification',
+                children: [
+                    {
+                        id: 'mantenimiento.datos-personales.identidad',
+                        title: 'Identidad y Perfil',
+                        type: 'collapsable',
+                        children: [
+                            {
+                                id: 'mantenimiento.tipo-documento',
+                                title: 'Tipo de Documento',
+                                type: 'basic',
+                                link: '/mantenimiento/main/tipo-documento',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.estado-civil',
+                                title: 'Estado Civil',
+                                type: 'basic',
+                                link: '/mantenimiento/main/estado-civil',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.sexo',
+                                title: 'Sexo',
+                                type: 'basic',
+                                link: '/mantenimiento/main/sexo',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.grupo-sanguineo',
+                                title: 'Grupo Sanguíneo',
+                                type: 'basic',
+                                link: '/mantenimiento/main/grupo-sanguineo',
+                                group: 'main'
+                            }
+                        ]
+                    },
+                    {
+                        id: 'mantenimiento.datos-personales.domicilio',
+                        title: 'Domicilio',
+                        type: 'collapsable',
+                        children: [
+                            {
+                                id: 'mantenimiento.indicador-domiciliado',
+                                title: 'Indicador Domiciliado',
+                                type: 'basic',
+                                link: '/mantenimiento/main/indicador-domiciliado',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.tipo-via',
+                                title: 'Tipo de Vía',
+                                type: 'basic',
+                                link: '/mantenimiento/main/tipo-via',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.tipo-zona',
+                                title: 'Tipo de Zona',
+                                type: 'basic',
+                                link: '/mantenimiento/main/tipo-zona',
+                                group: 'main'
+                            }
+                        ]
+                    },
+                    {
+                        id: 'mantenimiento.datos-personales.familia-educacion',
+                        title: 'Familiar y Académico',
+                        type: 'collapsable',
+                        children: [
+                            {
+                                id: 'mantenimiento.vinculos-familiares',
+                                title: 'Vínculos Familiares',
+                                type: 'basic',
+                                link: '/mantenimiento/main/vinculos-familiares',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.formacion-superior-completa',
+                                title: 'Formación Superior Completa',
+                                type: 'basic',
+                                link: '/mantenimiento/main/formacion-superior-completa',
+                                group: 'main'
+                            }
+                        ]
+                    },
+                    {
+                        id: 'mantenimiento.datos-personales.bancarios',
+                        title: 'Datos Bancarios y Pago',
+                        type: 'collapsable',
+                        children: [
+                            {
+                                id: 'mantenimiento.tipo-moneda',
+                                title: 'Tipo de Moneda',
+                                type: 'basic',
+                                link: '/mantenimiento/main/tipo-moneda',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.unidad-salarial',
+                                title: 'Unidad Salarial',
+                                type: 'basic',
+                                link: '/mantenimiento/main/unidad-salarial',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.forma-pago-haberes',
+                                title: 'Forma de Pago de Haberes',
+                                type: 'basic',
+                                link: '/mantenimiento/main/forma-pago-haberes',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.periodicidad-remuneracion',
+                                title: 'Periodicidad de Remuneración',
+                                type: 'basic',
+                                link: '/mantenimiento/main/periodicidad-remuneracion',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.tipo-cuenta',
+                                title: 'Tipo de Cuenta',
+                                type: 'basic',
+                                link: '/mantenimiento/main/tipo-cuenta',
+                                group: 'main'
+                            }
+                        ]
+                    },
+                    {
+                        id: 'mantenimiento.datos-personales.laborales',
+                        title: 'Datos Laborales',
+                        type: 'collapsable',
+                        children: [
+                            {
+                                id: 'mantenimiento.modalidad-trabajo',
+                                title: 'Modalidad de Trabajo',
+                                type: 'basic',
+                                link: '/mantenimiento/main/modalidad-trabajo',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.tipo-comision',
+                                title: 'Tipo de Comisión',
+                                type: 'basic',
+                                link: '/mantenimiento/main/tipo-comision',
+                                group: 'main'
+                            },
+                            {
+                                id: 'mantenimiento.categoria-ctc',
+                                title: 'Categoría CTC',
+                                type: 'basic',
+                                link: '/mantenimiento/main/categoria-ctc',
+                                group: 'main'
+                            }
+                        ]
+                    }
+                ]
+            },
             {
-                id: 'mantenimiento.puesto-jerarquia',
-                title: 'Puesto Jerarquía',
-                type: 'basic',
+                id: 'mantenimiento.contratacion',
+                title: 'Contratación',
+                type: 'collapsable',
+                icon: 'heroicons_outline:document-text',
+                children: [
+                    {
+                        id: 'mantenimiento.tipo-trabajador',
+                        title: 'Tipo de trabajador',
+                        type: 'basic',
+                        link: '/mantenimiento/main/tipo-trabajador',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.regimen-laboral',
+                        title: 'Régimen Laboral',
+                        type: 'basic',
+                        link: '/mantenimiento/main/regimen-laboral',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.tipo-contrato',
+                        title: 'Tipo de Contrato',
+                        type: 'basic',
+                        link: '/mantenimiento/main/tipo-contrato',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.motivo-contratacion',
+                        title: 'Motivo de Contratación',
+                        type: 'basic',
+                        link: '/mantenimiento/main/motivo-contratacion',
+                        group: 'main'
+                    }
+                ]
+            },
+            {
+                id: 'mantenimiento.modalidad-trabajo',
+                title: 'Modalidad de trabajo',
+                type: 'collapsable',
                 icon: 'heroicons_outline:briefcase',
-                link: '/mantenimiento/puesto-jerarquia'
+                children: [
+                    {
+                        id: 'mantenimiento.situacion-trabajador',
+                        title: 'Situacion Trabajador',
+                        type: 'basic',
+                        link: '/mantenimiento/main/situacion-trabajador',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.tipo-jornada',
+                        title: 'Tipo de Jornada',
+                        type: 'basic',
+                        link: '/mantenimiento/main/tipo-jornada',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.situacion-especial',
+                        title: 'Situación Especial',
+                        type: 'basic',
+                        link: '/mantenimiento/main/situacion-especial',
+                        group: 'main'
+                    }
+                ]
             },
             {
-                id: 'mantenimiento.area',
-                title: 'Área',
-                type: 'basic',
+                id: 'mantenimiento.afiliacion',
+                title: 'Afiliación',
+                type: 'collapsable',
+                icon: 'heroicons_outline:shield-check',
+                children: [
+                    {
+                        id: 'mantenimiento.regimen-essalud',
+                        title: 'Regimen Essalud',
+                        type: 'basic',
+                        link: '/mantenimiento/main/regimen-essalud',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.salud-eps',
+                        title: 'Salud Eps',
+                        type: 'basic',
+                        link: '/mantenimiento/main/salud-eps',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.regimen-pensionario',
+                        title: 'Regimen Pensionario',
+                        type: 'basic',
+                        link: '/mantenimiento/main/regimen-pensionario',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.sctr-salud',
+                        title: 'Sctr Salud',
+                        type: 'basic',
+                        link: '/mantenimiento/main/sctr-salud',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.aporte-sctr-salud',
+                        title: 'Aporte Sctr Salud',
+                        type: 'basic',
+                        link: '/mantenimiento/main/aporte-sctr-salud',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.sctr-pension',
+                        title: 'Sctr Pension',
+                        type: 'basic',
+                        link: '/mantenimiento/main/sctr-pension',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.aporte-sctr-pension',
+                        title: 'Aporte Sctr Pension',
+                        type: 'basic',
+                        link: '/mantenimiento/main/aporte-sctr-pension',
+                        group: 'main'
+                    }
+                ]
+            },
+            {
+                id: 'mantenimiento.remuneracion',
+                title: 'Remuneración',
+                type: 'collapsable',
+                icon: 'heroicons_outline:currency-dollar',
+                children: [
+                    {
+                        id: 'mantenimiento.doble-tributacion',
+                        title: 'Doble Tributación',
+                        type: 'basic',
+                        link: '/mantenimiento/main/doble-tributacion',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.tipo-nomina-ria',
+                        title: 'Tipo Nomina Ria',
+                        type: 'basic',
+                        link: '/mantenimiento/main/tipo-nomina-ria',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.entidad-financiera',
+                        title: 'Entidad Financiera',
+                        type: 'basic',
+                        link: '/mantenimiento/main/entidad-financiera',
+                        group: 'main'
+                    }
+                ]
+            },
+            {
+                id: 'mantenimiento.rol-organizativo',
+                title: 'Rol Organizativo',
+                type: 'collapsable',
+                icon: 'heroicons_outline:user-group',
+                children: [
+                    {
+                        id: 'mantenimiento.grupo-nomina',
+                        title: 'Grupo Nomina',
+                        type: 'basic',
+                        link: '/mantenimiento/main/grupo-nomina',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.categoria-plame',
+                        title: 'Categoria Plame',
+                        type: 'basic',
+                        link: '/mantenimiento/main/categoria-plame',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.categoria-ocupacional',
+                        title: 'Categoria Ocupacional',
+                        type: 'basic',
+                        link: '/mantenimiento/main/categoria-ocupacional',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.cargo',
+                        title: 'Cargo',
+                        type: 'basic',
+                        link: '/mantenimiento/main/cargo',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.ocupacion',
+                        title: 'Ocupacion',
+                        type: 'basic',
+                        link: '/mantenimiento/main/ocupacion',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.proyecto-obra',
+                        title: 'Proyecto',
+                        type: 'basic',
+                        link: '/mantenimiento/main/proyecto-obra',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.lugar-trabajo',
+                        title: 'Lugar de Trabajo',
+                        type: 'basic',
+                        link: '/mantenimiento/main/lugar-trabajo',
+                        group: 'main'
+                    }
+                ]
+            },
+            {
+                id: 'mantenimiento.educacion',
+                title: 'Educación',
+                type: 'collapsable',
+                icon: 'heroicons_outline:academic-cap',
+                children: [
+                    {
+                        id: 'mantenimiento.situacion-educativa',
+                        title: 'Situacion Educativa',
+                        type: 'basic',
+                        link: '/mantenimiento/main/situacion-educativa',
+                        group: 'main'
+                    },
+                    {
+                        id: 'mantenimiento.especialidad-ctc',
+                        title: 'Especialidad Ctc',
+                        type: 'basic',
+                        link: '/mantenimiento/main/especialidad-ctc',
+                        group: 'main'
+                    }
+                ]
+            },
+            {
+                id: 'mantenimiento.datos-complementarios',
+                title: 'Datos Complementarios',
+                type: 'collapsable',
                 icon: 'heroicons_outline:collection',
-                link: '/mantenimiento/area'
-            },
-            {
-                id: 'mantenimiento.proyecto',
-                title: 'Proyecto',
-                type: 'basic',
-                icon: 'heroicons_outline:clipboard-list',
-                link: '/mantenimiento/proyecto'
-            },
-            {
-                id: 'mantenimiento.ubigeo',
-                title: 'Ubigeo',
-                type: 'basic',
-                icon: 'heroicons_outline:location-marker',
-                link: '/mantenimiento/ubigeo'
+                children: [
+                    {
+                        id: 'mantenimiento.empresas-externas',
+                        title: 'Empresas Externas',
+                        type: 'basic',
+                        link: '/mantenimiento/main/empresas-externas',
+                        group: 'main'
+                    }
+                ]
             }
+
         ]
     },
-
     {
         id: 'apps',
         title: 'Applications',

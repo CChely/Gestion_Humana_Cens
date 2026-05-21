@@ -1,0 +1,264 @@
+<div class="flex flex-col w-full min-w-0" style="width: 540px; max-width: 100vw;">
+
+    <!-- ── Header del modal ─────────────────────────── -->
+    <div class="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-700">
+        <div class="flex items-center gap-3">
+            <!-- Cuadro de la izquierda: Icono/Imagen Empresa -->
+            <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 overflow-hidden">
+                <img *ngIf="previewUrl" [src]="previewUrl" class="w-full h-full object-cover">
+                <mat-icon *ngIf="!previewUrl" class="icon-size-5 text-indigo-600 dark:text-indigo-400"
+                          [svgIcon]="'heroicons_outline:building-office-2'"></mat-icon>
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 leading-none">
+                    {{ isEdit ? 'Editar Empresa' : 'Crear Nueva Empresa' }}
+                </h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    {{ isEdit ? 'Modifica los datos de la empresa' : 'Complete los campos para registrar la empresa' }}
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Círculo: Cerrar -->
+            <button mat-icon-button mat-dialog-close class="w-10 h-10 min-w-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:x'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Body del modal ─────────────────────────── -->
+    <div class="flex-auto overflow-y-auto px-6 py-6">
+        <form [formGroup]="form" class="flex flex-col gap-8">
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- SECCIÓN: DATOS DE LA EMPRESA -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <div class="flex flex-col gap-4">
+                <!-- Título de la sección -->
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-700">
+                    <mat-icon class="icon-size-5 text-indigo-600 dark:text-indigo-400"
+                              [svgIcon]="'heroicons_outline:building-office-2'"></mat-icon>
+                    <h3 class="text-base font-semibold text-slate-800 dark:text-slate-100">
+                        Datos de la Empresa
+                    </h3>
+                </div>
+
+                <!-- Nombre y RUC -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Nombre de la Empresa <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                <mat-icon class="icon-size-5 text-slate-400" [svgIcon]="'heroicons_outline:building-office'"></mat-icon>
+                            </div>
+                            <input
+                                type="text"
+                                formControlName="nombre"
+                                placeholder="Ej. CENS S.A.S"
+                                class="w-full pl-12 pr-4 py-3 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-slate-400 dark:text-slate-100"
+                                [class.border-red-500]="form.get('nombre')?.invalid && form.get('nombre')?.touched"
+                            />
+                        </div>
+                        <span *ngIf="form.get('nombre')?.invalid && form.get('nombre')?.touched"
+                              class="text-xs text-red-500">
+                            Este campo es requerido
+                        </span>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                            RUC / NIT <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                <mat-icon class="icon-size-5 text-slate-400" [svgIcon]="'heroicons_outline:identification'"></mat-icon>
+                            </div>
+                            <input
+                                type="text"
+                                formControlName="ruc"
+                                placeholder="Ej. 123456789-0"
+                                class="w-full pl-12 pr-4 py-3 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-slate-400 dark:text-slate-100"
+                                [class.border-red-500]="form.get('ruc')?.invalid && form.get('ruc')?.touched"
+                            />
+                        </div>
+                        <span *ngIf="form.get('ruc')?.invalid && form.get('ruc')?.touched"
+                              class="text-xs text-red-500">
+                            Este campo es requerido
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Sitio Web -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Sitio Web</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                            <mat-icon class="icon-size-5 text-slate-400" [svgIcon]="'heroicons_outline:globe-alt'"></mat-icon>
+                        </div>
+                        <input
+                            type="url"
+                            formControlName="sitioWeb"
+                            placeholder="www.empresa.com"
+                            class="w-full pl-12 pr-4 py-3 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-slate-400 dark:text-slate-100"
+                        />
+                    </div>
+                </div>
+
+                <!-- Logo -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Logo de la Empresa</label>
+                    <div class="relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/60 py-4 px-2 cursor-pointer transition-colors hover:border-indigo-400 hover:bg-indigo-50/30"
+                         (click)="logoInput.click()" (dragover)="$event.preventDefault()" (drop)="onFileDrop($event)">
+
+                        <ng-container *ngIf="previewUrl; else noLogo">
+                            <img [src]="previewUrl" class="w-16 h-16 rounded-lg object-cover border border-slate-200">
+                        </ng-container>
+                        <ng-template #noLogo>
+                            <mat-icon class="icon-size-8 text-slate-300" [svgIcon]="'heroicons_outline:photo'"></mat-icon>
+                            <span class="text-[10px] text-slate-500 text-center">Click para subir logo</span>
+                        </ng-template>
+                        <input #logoInput type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)">
+                    </div>
+                    <div *ngIf="isUploading" class="text-[10px] text-slate-400">Subiendo...</div>
+                    <div *ngIf="uploadError" class="text-[10px] text-rose-500">{{ uploadError }}</div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- SECCIÓN: REPRESENTANTE LEGAL -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <div class="flex flex-col gap-4">
+                <!-- Título de la sección -->
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-700">
+                    <mat-icon class="icon-size-5 text-emerald-600 dark:text-emerald-400"
+                              [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
+                    <h3 class="text-base font-semibold text-slate-800 dark:text-slate-100">
+                        Representante Legal
+                    </h3>
+                </div>
+
+                <!-- Dirección -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Nombre del Representante</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                            <mat-icon class="icon-size-5 text-slate-400" [svgIcon]="'heroicons_outline:user'"></mat-icon>
+                        </div>
+                        <input
+                            type="text"
+                            formControlName="nombreRepresentante"
+                            placeholder="Ej. Juan Pérez García"
+                            class="w-full pl-12 pr-4 py-3 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-slate-400 dark:text-slate-100"
+                        />
+                    </div>
+                </div>
+
+                <!-- Dirección -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Dirección</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                            <mat-icon class="icon-size-5 text-slate-400" [svgIcon]="'heroicons_outline:map-pin'"></mat-icon>
+                        </div>
+                        <input
+                            type="text"
+                            formControlName="direccion"
+                            placeholder="Ej. Av. Principal 123"
+                            class="w-full pl-12 pr-4 py-3 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-slate-400 dark:text-slate-100"
+                        />
+                    </div>
+                </div>
+
+                <!-- Correo y Móvil -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Correo Electrónico</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                <mat-icon class="icon-size-5 text-slate-400" [svgIcon]="'heroicons_outline:envelope'"></mat-icon>
+                            </div>
+                            <input
+                                type="email"
+                                formControlName="correo"
+                                placeholder="correo@empresa.com"
+                                class="w-full pl-12 pr-4 py-3 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-slate-400 dark:text-slate-100"
+                                [class.border-red-500]="form.get('correo')?.hasError('email') && form.get('correo')?.touched"
+                            />
+                        </div>
+                        <span *ngIf="form.get('correo')?.hasError('email') && form.get('correo')?.touched"
+                              class="text-xs text-red-500">
+                            Correo no válido
+                        </span>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Celular (Perú)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                <mat-icon class="icon-size-5 text-slate-400" [svgIcon]="'heroicons_outline:phone'"></mat-icon>
+                            </div>
+                            <input
+                                type="tel"
+                                formControlName="movil"
+                                placeholder="987654321"
+                                maxlength="9"
+                                class="w-full pl-12 pr-4 py-3 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-slate-400 dark:text-slate-100"
+                                [class.border-red-500]="form.get('movil')?.hasError('pattern') && form.get('movil')?.touched"
+                            />
+                        </div>
+                        <span *ngIf="form.get('movil')?.hasError('pattern') && form.get('movil')?.touched"
+                              class="text-xs text-red-500">
+                            Debe empezar con 9 y tener 9 dígitos
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Firma -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Firma del Representante</label>
+                    <div class="relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/60 py-4 px-2 cursor-pointer transition-colors hover:border-emerald-400 hover:bg-emerald-50/30"
+                         (click)="firmaInput.click()" (dragover)="$event.preventDefault()" (drop)="onFirmaDrop($event)">
+
+                        <ng-container *ngIf="previewFirmaUrl; else noFirma">
+                            <img [src]="previewFirmaUrl" class="w-16 h-16 rounded-lg object-cover border border-slate-200">
+                        </ng-container>
+                        <ng-template #noFirma>
+                            <mat-icon class="icon-size-8 text-slate-300" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                            <span class="text-[10px] text-slate-500 text-center">Click para subir firma</span>
+                        </ng-template>
+                        <input #firmaInput type="file" accept="image/*" class="hidden" (change)="onFirmaSelected($event)">
+                    </div>
+                    <div *ngIf="isUploadingFirma" class="text-[10px] text-slate-400">Subiendo...</div>
+                    <div *ngIf="uploadFirmaError" class="text-[10px] text-rose-500">{{ uploadFirmaError }}</div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- ── Footer / Acciones ────────────────────────── -->
+    <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40">
+        <button mat-stroked-button mat-dialog-close [disabled]="isSaving || isUploading || isUploadingFirma || isLoadingData">
+            Cancelar
+        </button>
+        <button mat-flat-button
+                color="primary"
+                [disabled]="isSaving || isUploading || isUploadingFirma || isLoadingData"
+                (click)="save()">
+            <mat-progress-spinner *ngIf="isSaving || isLoadingData"
+                                  [diameter]="18"
+                                  mode="indeterminate"
+                                  class="mr-2">
+            </mat-progress-spinner>
+            <mat-icon *ngIf="!isSaving && !isLoadingData"
+                      class="icon-size-5 mr-2"
+                      [svgIcon]="'heroicons_outline:check-circle'">
+            </mat-icon>
+            {{ isLoadingData ? 'Cargando...' : (isSaving ? 'Guardando...' : (isEdit ? 'Actualizar Empresa' : 'Guardar Empresa')) }}
+        </button>
+    </div>
+
+</div>

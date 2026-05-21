@@ -90,6 +90,7 @@ export const appRoutes: Route[] = [
                 {path: 'diccionario-variables', loadChildren: () => import('app/modules/ajustes/diccionario-variables/diccionario-variables.module').then(m => m.DiccionarioVariablesModule)},
                 {path: 'documento-impresion', loadChildren: () => import('app/modules/ajustes/documento-impresion/documento-impresion.module').then(m => m.DocumentoImpresionModule)},
                 {path: 'configuracion-perfil', loadChildren: () => import('app/modules/ajustes/configuracion-perfil/configuracion-perfil.module').then(m => m.ConfiguracionPerfilModule)},
+                {path: 'configuracion-seguridad', loadChildren: () => import('app/modules/ajustes/seguridad/seguridad.module').then(m => m.SeguridadModule)},
                 {path: 'configuracion-almacenamiento', loadChildren: () => import('app/modules/ajustes/configuracion-almacenamiento/configuracion-almacenamiento.module').then(m => m.ConfiguracionAlmacenamientoModule)},
                 {path: 'empresa', loadChildren: () => import('app/modules/ajustes/empresa/empresa.module').then(m => m.EmpresaModule)},
                 {path: 'organigrama', loadChildren: () => import('app/modules/ajustes/organigrama/organigrama.module').then(m => m.OrganigramaModule)},
@@ -103,7 +104,9 @@ export const appRoutes: Route[] = [
 
             // Gestion Personal
             {path: 'gestion-personal', children: [
+                {path: 'maestro-empleado-list', loadChildren: () => import('app/modules/gestionPersonal/maestro-empleado-list/maestro-empleado-list.module').then(m => m.MaestroEmpleadoListModule)},
                 {path: 'maestro-empleado', loadChildren: () => import('app/modules/gestionPersonal/maestro-empleado/maestro-empleado.module').then(m => m.MaestroEmpleadoModule)},
+                {path: 'maestro-areas', loadChildren: () => import('app/modules/gestionPersonal/maestro-areas/maestro-areas.module').then(m => m.MaestroAreasModule)},
                 {path: 'contrato', loadChildren: () => import('app/modules/gestionPersonal/contrato/contrato.module').then(m => m.ContratoModule)},
                 {path: 'registro-usuario', loadChildren: () => import('app/modules/gestionPersonal/registro-usuario/registro-usuario.module').then(m => m.RegistroUsuarioModule)},
             ]},
@@ -112,7 +115,7 @@ export const appRoutes: Route[] = [
             {path: 'mantenimiento', children: [
                 {path: 'puesto-jerarquia', loadChildren: () => import('app/modules/mantenimiento/puesto-jerarquia/puesto-jerarquia.module').then(m => m.PuestoJerarquiaModule)},
                 {path: 'area', loadChildren: () => import('app/modules/mantenimiento/area/area.module').then(m => m.AreaModule)},
-                {path: 'proyecto', loadChildren: () => import('app/modules/mantenimiento/proyecto/proyecto.module').then(m => m.ProyectoModule)},
+                {path: 'main', loadChildren: () => import('app/modules/mantenimiento/main/main.module').then(m => m.MainModule)},
                 {path: 'ubigeo', loadChildren: () => import('app/modules/mantenimiento/ubigeo/ubigeo.module').then(m => m.UbigeoModule)},
             ]},
 

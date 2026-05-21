@@ -1,0 +1,188 @@
+/* Estilos específicos para la vista de seguridad */
+:host {
+    display: flex;
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+/* Estilos para los modales de seguridad */
+.custom-security-dialog {
+    .mat-dialog-container,
+    .mat-mdc-dialog-container {
+        padding: 0 !important;
+        border-radius: 2rem !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+        overflow: hidden !important;
+        
+        /* Asegurar que el contenido interno también respete el redondeo */
+        > * {
+            border-radius: 2rem !important;
+        }
+    }
+}
+
+/* Corregir transparencia y alineación en los desplegables */
+.custom-select-panel {
+    background-color: #ffffff !important;
+    border-radius: 1.25rem !important;
+    padding: 4px 0 !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    margin-top: 4px !important;
+    min-width: 100% !important;
+    
+    /* Eliminar el solapamiento con el trigger */
+    transform: translateY(0) !important;
+}
+
+/* Soporte para modo oscuro */
+.dark .custom-select-panel {
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+}
+
+/* Estilo para las opciones individuales */
+.mat-mdc-option, .mat-option {
+    transition: background-color 0.2s ease !important;
+    min-height: 48px !important;
+    padding: 0 24px !important; /* Alinear con el px-6 del trigger */
+    
+    &:hover:not(.mat-mdc-option-disabled) {
+        background-color: rgba(0, 0, 0, 0.03) !important;
+    }
+    
+    &.mat-mdc-selected:not(.mat-mdc-option-disabled),
+    &.mat-selected:not(.mat-option-disabled) {
+        background-color: rgba(99, 102, 241, 0.08) !important;
+        .mdc-list-item__primary-text, .mat-option-text {
+            color: #4f46e5 !important;
+            font-weight: 600 !important;
+        }
+    }
+}
+
+/* Custom style for the Select to look like rounded pill inputs */
+.rounded-full-select {
+    display: flex !important;
+    align-items: center;
+    width: 100% !important;
+    height: 3.5rem !important; /* h-14 */
+    border-radius: 9999px !important; /* rounded-full */
+    background-color: rgba(248, 250, 252, 0.5) !important; /* bg-slate-50/50 */
+    border: 1px solid #f1f5f9 !important; /* border-slate-100 */
+    padding-left: 2rem !important; /* px-8 */
+    padding-right: 2rem !important;
+    font-weight: 500 !important; /* font-medium */
+    transition: all 0.2s ease-in-out;
+    outline: none !important;
+    cursor: pointer;
+
+    .dark & {
+        background-color: rgba(30, 41, 59, 0.3) !important; /* dark:bg-slate-800/30 */
+        border-color: #1e293b !important; /* dark:border-slate-800 */
+    }
+
+    &:hover, &.mat-select-focused {
+        background-color: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        .dark & {
+            background-color: #0f172a !important;
+            border-color: #475569 !important;
+        }
+    }
+
+    .mat-mdc-select-trigger {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .mat-mdc-select-value {
+        display: flex !important;
+        align-items: center;
+        color: #1e293b !important; /* text-slate-800 */
+        font-size: 0.875rem !important;
+        
+        .dark & {
+            color: #f1f5f9 !important; /* text-slate-100 */
+        }
+    }
+
+    .mat-mdc-select-placeholder {
+        color: #cbd5e1 !important; /* text-slate-300 */
+        font-weight: 500 !important;
+        font-size: 0.875rem !important;
+        
+        .dark & {
+            color: #475569 !important; /* dark:text-slate-600 */
+        }
+    }
+
+    .mat-mdc-select-arrow-wrapper {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mat-mdc-select-arrow {
+        color: #94a3b8 !important; /* text-slate-400 */
+        svg {
+            width: 18px !important;
+            height: 18px !important;
+        }
+    }
+}
+
+/* ── Barra de búsqueda dentro del panel de iconos ── */
+.icon-search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.dark .icon-search-wrapper {
+    background-color: #1e293b;
+    border-bottom-color: #334155;
+}
+
+.icon-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1e293b;
+
+    &::placeholder {
+        color: #cbd5e1;
+        font-weight: 400;
+    }
+}
+
+.dark .icon-search-input {
+    color: #f1f5f9;
+}
+
+.icon-search-icon {
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.icon-search-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.25rem 1rem;
+    color: #94a3b8;
+    font-size: 0.8125rem;
+    font-style: italic;
+}

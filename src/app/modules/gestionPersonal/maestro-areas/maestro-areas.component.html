@@ -1,0 +1,274 @@
+<div class="w-full h-screen bg-[#f8f9fa] font-sans overflow-hidden flex flex-col">
+  <div class="max-w-[1800px] mx-auto w-full h-full p-4 md:p-6 lg:p-8 flex flex-col gap-6">
+
+    <!-- HEADER Y ACCIONES -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 flex-shrink-0">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Estructura Organizacional</h1>
+        <p class="text-sm text-gray-500 mt-1">Configuración dinámica de jerarquías de la empresa.</p>
+      </div>
+      <div class="flex items-center gap-4 w-full md:w-auto">
+        <button (click)="abrirModalNivel('crear')" class="px-4 py-2 text-sm bg-indigo-600 text-white font-medium rounded-lg shadow-sm hover:bg-indigo-700 transition flex items-center gap-2 whitespace-nowrap">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Agregar Nivel Estructural
+        </button>
+        <div class="relative w-full md:w-80">
+           <input type="text" [(ngModel)]="searchTerm" placeholder="Buscar código, nombre..."
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-sm">
+           <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÁREA CENTRAL CON SCROLL HORIZONTAL PARA N NIVELES -->
+    <div class="flex-1 flex gap-6 min-h-0 overflow-x-auto custom-scrollbar pb-2">
+
+      <!-- ESTADO VACÍO SI NO HAY NIVELES -->
+      <div *ngIf="niveles.length === 0" class="flex-1 flex flex-col items-center justify-center bg-white rounded-xl shadow-sm border border-gray-200 border-dashed">
+        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        </div>
+        <h3 class="text-lg font-bold text-gray-700">Sin Estructura</h3>
+        <p class="text-sm text-gray-500 mb-4 mt-1">Comienza creando el primer nivel de la empresa.</p>
+        <button (click)="abrirModalNivel('crear')" class="px-4 py-2 text-sm text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md font-medium transition">
+          Crear Nivel 1
+        </button>
+      </div>
+
+      <!-- BUCLE DINÁMICO DE NIVELES (COLUMNAS) -->
+      <div *ngFor="let nivel of niveles; let i = index" class="min-w-[320px] w-[350px] bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden h-full">
+
+        <!-- HEADER COLUMNA CON BOTONES EDITAR Y ELIMINAR -->
+        <div class="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center group">
+          <div class="flex items-center gap-1">
+            <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider mr-2">{{ i + 1 }}. {{ nivel.Nombre }}</h2>
+
+            <div class="flex opacity-0 group-hover:opacity-100 transition-opacity">
+              <!-- Botón Editar Nivel -->
+              <button (click)="abrirModalNivel('editar', nivel)" class="p-1 text-gray-400 hover:text-indigo-600 rounded hover:bg-indigo-50 transition" title="Editar nombre de columna">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              </button>
+              <!-- Botón Eliminar Nivel -->
+              <button (click)="abrirModalEliminarNivel(nivel)" class="p-1 text-gray-400 hover:text-red-600 rounded hover:bg-red-50 transition" title="Eliminar columna entera">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <button *ngIf="puedeCrearEnNivel(i)" (click)="abrirModalForm('crear', nivel, i)" class="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition shadow-sm" title="Agregar elemento">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto custom-scrollbar relative">
+          <div *ngIf="i > 0 && !selecciones[niveles[i-1].Id]" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-gray-400">
+            <svg class="w-12 h-12 mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+            <p class="text-sm">Selecciona un <strong>{{ niveles[i-1].Nombre }}</strong> previo.</p>
+          </div>
+
+          <ul *ngIf="i === 0 || selecciones[niveles[i-1].Id]" class="divide-y divide-gray-100">
+            <li *ngFor="let nodo of getNodosVisibles(nivel, i)"
+                class="p-4 cursor-pointer transition-colors flex justify-between items-start group"
+                [ngClass]="{'bg-blue-50 border-l-4 border-blue-600': selecciones[nivel.Id]?.Id === nodo.Id, 'hover:bg-gray-50 border-l-4 border-transparent': selecciones[nivel.Id]?.Id !== nodo.Id}"
+                (click)="seleccionarNodo(nivel.Id, nodo, i)">
+
+              <div class="flex-1 mr-3">
+                <p class="text-sm font-semibold" [ngClass]="selecciones[nivel.Id]?.Id === nodo.Id ? 'text-blue-800' : 'text-gray-800'">{{ nodo.Nombre }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">Cod: {{ nodo.Codigo }}</p>
+
+                <div *ngIf="nodo.ResponsableId" class="flex items-center gap-2 mt-3 pt-2 border-t border-gray-100">
+                  <img [src]="nodo.ResponsableAvatar || getResponsable(nodo.ResponsableId)?.Avatar" class="w-6 h-6 rounded-full border border-gray-200">
+                  <span class="text-xs text-gray-600 font-medium truncate">{{ nodo.ResponsableNombre || getResponsable(nodo.ResponsableId)?.Nombre }}</span>
+                </div>
+              </div>
+
+              <div class="flex flex-col items-end space-y-2">
+                <div class="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button (click)="abrirModalForm('editar', nivel, i, nodo); $event.stopPropagation()" class="p-1 bg-gray-100 text-gray-500 hover:text-blue-600 rounded" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                  <button (click)="abrirModalEliminar(nodo); $event.stopPropagation()" class="p-1 bg-gray-100 text-gray-500 hover:text-red-600 rounded" title="Eliminar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                </div>
+                <svg *ngIf="selecciones[nivel.Id]?.Id === nodo.Id" class="w-5 h-5 text-blue-600 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+<!-- AUDITORÍA / TRAZABILIDAD (PANEL DERECHO) -->
+      <div class="w-[450px] 2xl:w-[550px] flex-shrink-0 h-full hidden xl:flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 ml-2 overflow-hidden">
+
+        <!-- Estado vacío (Cuando no hay nada seleccionado) -->
+        <div *ngIf="!itemToTrace" class="flex-1 flex flex-col items-center justify-center p-6 text-center text-gray-400">
+          <svg class="w-16 h-16 mb-4 text-gray-200 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+          <h3 class="text-gray-700 font-semibold mb-1">Seleccione un registro</h3>
+          <p class="text-xs">Haga clic en un elemento de la estructura a la izquierda para ver su trazabilidad detallada.</p>
+        </div>
+
+        <!-- Componente real (Sin header duplicado y forzando ancho completo) -->
+        <div *ngIf="itemToTrace" class="flex-1 w-full h-full bg-white relative overflow-y-auto">
+          <app-trazabilidad #trazabilidadComp
+            class="block w-full min-h-full trazabilidad-stretch"
+            nombreTabla="NodoOrganizacional"
+            [idRegistro]="itemToTrace?.Id">
+          </app-trazabilidad>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: ELIMINAR NIVEL ESTRUCTURAL (NUEVO)  -->
+<!-- ========================================== -->
+<div *ngIf="showDeleteNivelModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 backdrop-blur-sm">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+    <div class="p-6 text-center">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+      <h3 class="mb-2 text-lg font-bold text-gray-800">¿Eliminar Columna "{{ nivelToDelete?.Nombre }}"?</h3>
+      <p class="text-sm text-gray-500 mb-6">Esta acción borrará toda la columna estructural. <br>Las columnas posteriores a la derecha se reordenarán.</p>
+
+      <div *ngIf="deleteNivelErrorMsg" class="mb-4 p-3 bg-red-50 text-red-700 text-[13px] rounded-md border border-red-200 font-medium text-left">
+        {{ deleteNivelErrorMsg }}
+      </div>
+
+      <div class="flex justify-center space-x-3">
+        <button (click)="cerrarModalEliminarNivel()" class="px-4 py-2 w-full text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">Cancelar</button>
+        <button (click)="confirmarEliminarNivel()" class="px-4 py-2 w-full text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: NIVEL ESTRUCTURAL (CREAR Y EDITAR)  -->
+<!-- ========================================== -->
+<div *ngIf="showNivelModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 backdrop-blur-sm">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <div class="p-1.5 bg-indigo-100 text-indigo-600 rounded-md">
+          <svg *ngIf="modalNivelMode === 'crear'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          <svg *ngIf="modalNivelMode === 'editar'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+        </div>
+        <h3 class="text-lg font-bold text-gray-800">
+          {{ modalNivelMode === 'crear' ? 'Nuevo Nivel Estructural' : 'Editar Nivel' }}
+        </h3>
+      </div>
+      <button (click)="cerrarModalNivel()" class="text-gray-400 hover:text-gray-600 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <div class="p-6">
+      <div class="mb-4">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Nivel <span class="text-red-500">*</span></label>
+        <input type="text" [(ngModel)]="nuevoNivelNombre"
+               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <div class="mb-6" *ngIf="modalNivelMode === 'crear'">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Posición donde se insertará <span class="text-red-500">*</span></label>
+        <select [(ngModel)]="nuevoNivelPosicion" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+          <option [value]="1" *ngIf="niveles.length === 0">Al principio (Nivel 1)</option>
+          <option [value]="1" *ngIf="niveles.length > 0">Al principio (Antes de {{ niveles[0].Nombre }})</option>
+          <option *ngFor="let n of niveles; let last = last" [value]="n.Nivel + 1">
+            Después de {{ n.Nombre }} {{ last ? '(Al final)' : '' }}
+          </option>
+        </select>
+        <p class="text-xs text-gray-500 mt-2">Los niveles posteriores se desplazarán automáticamente hacia la derecha.</p>
+      </div>
+
+      <div class="flex justify-end space-x-3">
+        <button (click)="cerrarModalNivel()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+        <button (click)="guardarNivel()" [disabled]="!nuevoNivelNombre"
+                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ modalNivelMode === 'crear' ? 'Agregar Nivel' : 'Guardar Cambios' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL DE FORMULARIO (Nodos / Datos)        -->
+<!-- ========================================== -->
+<div *ngIf="showFormModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 backdrop-blur-sm">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-start">
+      <div>
+        <h3 class="text-lg font-bold text-gray-800 capitalize">{{ modalMode === 'crear' ? 'Nuevo Elemento' : 'Editar Elemento' }}</h3>
+      </div>
+      <button (click)="cerrarModalForm()" class="text-gray-400 hover:text-gray-600 transition mt-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <div class="p-6">
+      <div class="mb-4" *ngIf="padresDisponibles.length > 0">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Pertenece a (Elemento Padre) <span class="text-red-500">*</span></label>
+        <select [(ngModel)]="formData.IdPadre" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+          <option [ngValue]="null" disabled>Seleccione a quién pertenece...</option>
+          <option *ngFor="let padre of padresDisponibles" [value]="padre.Id"> {{ padre.Codigo }} - {{ padre.Nombre }}</option>
+        </select>
+        <p class="text-[11px] text-gray-400 mt-1 leading-tight">Si se insertaron niveles intermedios, puedes reasignar este elemento a su nuevo padre correspondiente.</p>
+      </div>
+
+      <div class="grid grid-cols-4 gap-4 mb-4">
+        <div class="col-span-1">
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Código <span class="text-red-500">*</span></label>
+          <input type="text" [(ngModel)]="formData.Codigo" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="col-span-3">
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre <span class="text-red-500">*</span></label>
+          <input type="text" [(ngModel)]="formData.Nombre" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Descripción <span class="text-red-500">*</span></label>
+        <textarea [(ngModel)]="formData.Descripcion" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Responsable asignado</label>
+        <app-search-select [opciones]="empleados" campoValor="Id" campoDesc="Nombre" [(ngModel)]="formData.ResponsableId"></app-search-select>
+      </div>
+
+      <div class="flex justify-end space-x-3 pt-2 border-t border-gray-100">
+        <button (click)="cerrarModalForm()" class="px-4 py-2 mt-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+        <button (click)="guardarForm()" [disabled]="!formData.Codigo || !formData.Nombre || !formData.Descripcion || (padresDisponibles.length > 0 && !formData.IdPadre)"
+                class="px-4 py-2 mt-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: ELIMINAR NODO                       -->
+<!-- ========================================== -->
+<div *ngIf="showDeleteModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 backdrop-blur-sm">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+    <div class="p-6 text-center">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+      <h3 class="mb-2 text-lg font-bold text-gray-800">¿Eliminar registro?</h3>
+      <p class="text-sm text-gray-500 mb-6">Estás a punto de eliminar "{{ itemToDelete?.Nombre }}". Esta acción no se puede deshacer.</p>
+      <div *ngIf="deleteErrorMsg" class="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200 font-medium">{{ deleteErrorMsg }}</div>
+      <div class="flex justify-center space-x-3">
+        <button (click)="cerrarModalEliminar()" class="px-4 py-2 w-full text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">Cancelar</button>
+        <button (click)="confirmarEliminar()" class="px-4 py-2 w-full text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showSuccessModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-gray-900 bg-opacity-20 backdrop-blur-sm transition-opacity">
+  <div class="bg-white rounded-xl shadow-2xl p-6 px-10 flex flex-col items-center animate-[fadeIn_0.2s_ease-out]">
+    <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-4"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
+    <h3 class="text-lg font-bold text-gray-800 text-center">{{ successMessage }}</h3>
+  </div>
+</div>

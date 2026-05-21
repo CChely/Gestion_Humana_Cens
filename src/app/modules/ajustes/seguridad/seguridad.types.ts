@@ -1,0 +1,73 @@
+export interface Permiso {
+    PermisoId: number;
+    ModuloId: number;
+    AccionId: number;
+    CodigoPermiso: string;
+    DescripcionPermiso: string;
+    NombreModulo?: string;
+    CodigoModulo?: string;
+    NombreAccion?: string;
+    CodigoAccion?: string;
+}
+
+export interface Modulo {
+    ModuloId: number;
+    ModuloPadreId: number | null;
+    CodigoModulo: string;
+    NombreModulo: string;
+    RutaModulo: string;
+    IconoModulo: string;
+    OrdenModulo: number;
+    EsVisibleMenu: number;
+    EsActivo: number;
+}
+
+/** Nodo del árbol de módulos con soporte a N niveles de profundidad */
+export interface ModuloNode extends Modulo {
+    children: ModuloNode[];
+}
+
+export interface Rol {
+    RolId: number;
+    NombreRol: string;
+    DescripcionRol: string;
+    FechaRegistro?: string;
+    FechaModificacion?: string;
+    permisos?: Permiso[];
+    modulos?: Modulo[];
+    activo?: boolean;
+}
+
+export interface RolResponse {
+    status: boolean;
+    data: Rol[];
+    message: string;
+}
+
+export interface PermisoResponse {
+    status: boolean;
+    data: Permiso[];
+    message: string;
+}
+
+export interface ModuloResponse {
+    status: boolean;
+    data: Modulo[];
+    message: string;
+}
+
+export interface Procedimiento {
+    ProcedimientoId: number;
+    NombreProcedimiento: string;
+    Descripcion: string;
+    EsPublico: number;
+    EsActivo: number;
+    FechaCreacion: string;
+    FechaActualizacion: string;
+}
+
+export interface ProcedimientoResponse {
+    status: boolean;
+    data: Procedimiento[];
+    message: string;
+}

@@ -1,0 +1,226 @@
+<div class="flex flex-col w-full overflow-hidden bg-card dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-slate-700/50">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 sm:py-8 md:px-8 border-b bg-slate-50 dark:bg-transparent">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400">
+                <mat-icon class="icon-size-6" [svgIcon]="'heroicons_outline:shield-check'"></mat-icon>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 leading-none tracking-tight">
+                    Nuevo Permiso
+                </h2>
+                <p class="text-sm text-secondary mt-1 font-medium">
+                    Asigne una nueva acción a un módulo del sistema
+                </p>
+            </div>
+        </div>
+        <button mat-icon-button (click)="close()" class="text-slate-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors rounded-full">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Content -->
+    <form [formGroup]="form" class="p-8 overflow-y-auto max-h-160 bg-white dark:bg-slate-900">
+        <div class="grid grid-cols-1 gap-y-6">
+            
+            <!-- Modulo -->
+            <div class="flex flex-col gap-2 relative">
+                <label class="text-sm font-bold text-slate-800 dark:text-slate-200 ml-4">
+                    Módulo <span class="text-rose-500">*</span>
+                </label>
+                
+                <!-- Custom Select Trigger -->
+                <div (click)="toggleModulo()"
+                     [ngClass]="{'border-indigo-500 ring-2 ring-indigo-500/10': isModuloOpen, 'border-rose-500 ring-2 ring-rose-500/10': form.get('p_IdModulo').invalid && form.get('p_IdModulo').touched}"
+                     class="flex items-center justify-between w-full px-6 h-12 rounded-full border bg-transparent cursor-pointer transition-all duration-200 border-slate-200 dark:border-slate-700 group hover:border-slate-300 dark:hover:border-slate-600">
+                    <span [class.text-slate-400]="!selectedModuloName" class="text-sm font-medium truncate">
+                        {{ selectedModuloName || 'Seleccione un módulo' }}
+                    </span>
+                    <mat-icon class="icon-size-5 text-slate-400 transition-transform duration-300"
+                              [class.rotate-180]="isModuloOpen"
+                              [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
+                </div>
+
+                <!-- Custom Dropdown List -->
+                <div *ngIf="isModuloOpen" 
+                     class="absolute top-[85px] left-0 z-50 w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 py-2 animate-in fade-in zoom-in duration-200">
+                    <div class="max-h-60 overflow-y-auto custom-scrollbar">
+                        <div *ngFor="let modulo of modulosRaiz"
+                             (click)="selectModulo(modulo)"
+                             class="px-6 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors flex items-center justify-between">
+                            {{ modulo.NombreModulo }}
+                            <mat-icon *ngIf="form.get('p_IdModulo').value === modulo.ModuloId" 
+                                      class="icon-size-4 text-indigo-500" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <span *ngIf="form.get('p_IdModulo').invalid && form.get('p_IdModulo').touched" class="text-xs text-rose-500 ml-4 font-medium mt-1">
+                    Debe seleccionar un módulo
+                </span>
+            </div>
+
+            <!-- Submodulo -->
+            <div *ngIf="submodulosFiltrados.length > 0" class="flex flex-col gap-2 relative">
+                <label class="text-sm font-bold text-slate-800 dark:text-slate-200 ml-4">
+                    Submódulo <span class="text-rose-500">*</span>
+                </label>
+                
+                <!-- Custom SubSelect Trigger -->
+                <div (click)="toggleSubModulo()"
+                     [ngClass]="{'border-sky-500 ring-2 ring-sky-500/10': isSubModuloOpen, 'border-rose-500 ring-2 ring-rose-500/10': form.get('p_IdSubModulo').invalid && form.get('p_IdSubModulo').touched}"
+                     class="flex items-center justify-between w-full px-6 h-12 rounded-full border bg-transparent cursor-pointer transition-all duration-200 border-slate-200 dark:border-slate-700 group hover:border-slate-300 dark:hover:border-slate-600">
+                    <span [class.text-slate-400]="!selectedSubModuloName" class="text-sm font-medium truncate">
+                        {{ selectedSubModuloName || 'Seleccione un submódulo' }}
+                    </span>
+                    <mat-icon class="icon-size-5 text-slate-400 transition-transform duration-300"
+                              [class.rotate-180]="isSubModuloOpen"
+                              [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
+                </div>
+
+                <!-- Custom SubDropdown List -->
+                <div *ngIf="isSubModuloOpen" 
+                     class="absolute top-[85px] left-0 z-50 w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 py-2 animate-in fade-in zoom-in duration-200">
+                    <div class="max-h-60 overflow-y-auto custom-scrollbar">
+                        <div *ngFor="let sub of submodulosFiltrados"
+                             (click)="selectSubModulo(sub)"
+                             class="px-6 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-sky-50 dark:hover:bg-sky-900/20 hover:text-sky-600 dark:hover:text-sky-400 cursor-pointer transition-colors flex items-center justify-between">
+                            {{ sub.NombreModulo }}
+                            <mat-icon *ngIf="form.get('p_IdSubModulo').value === sub.ModuloId" 
+                                      class="icon-size-4 text-sky-500" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <span *ngIf="form.get('p_IdSubModulo').invalid && form.get('p_IdSubModulo').touched" class="text-xs text-rose-500 ml-4 font-medium mt-1">
+                    Debe seleccionar un submódulo
+                </span>
+            </div>
+
+            <!-- Accion (Selector Personalizado) -->
+            <div class="flex flex-col gap-2 relative">
+                <label class="text-sm font-bold text-slate-800 dark:text-slate-200 ml-4">
+                    Acción <span class="text-rose-500">*</span>
+                </label>
+                
+                <div (click)="toggleAccionSelect()"
+                     [ngClass]="{'border-indigo-500 ring-2 ring-indigo-500/10': isAccionOpen, 'border-rose-500 ring-2 ring-rose-500/10': form.get('p_IdAccion').invalid && form.get('p_IdAccion').touched}"
+                     class="flex items-center justify-between w-full px-6 h-12 rounded-full border bg-slate-50/50 dark:bg-slate-800/50 cursor-pointer transition-all duration-200 border-slate-200 dark:border-slate-700 group hover:border-slate-300 dark:hover:border-slate-600">
+                    <span [class.text-slate-400]="!selectedAccionName" class="text-sm font-medium truncate">
+                        {{ selectedAccionName || 'Seleccione una acción (Ej. Leer, Escribir...)' }}
+                    </span>
+                    <mat-icon class="icon-size-5 text-slate-400 transition-transform duration-300"
+                              [class.rotate-180]="isAccionOpen"
+                              [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
+                </div>
+
+                <div *ngIf="isAccionOpen" 
+                     class="absolute top-[85px] left-0 z-50 w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 py-2 animate-in fade-in zoom-in duration-200">
+                    <div class="max-h-60 overflow-y-auto custom-scrollbar">
+                        <div *ngFor="let accion of acciones"
+                             (click)="selectAccion(accion)"
+                             class="px-6 py-3 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 cursor-pointer transition-colors flex items-center justify-between group">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 transition-colors">
+                                    {{ accion.NombreAccion }}
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-medium uppercase">{{ accion.CodigoAccion }}</span>
+                            </div>
+                            <mat-icon *ngIf="form.get('p_IdAccion').value === accion.AccionId" 
+                                      class="icon-size-4 text-indigo-500" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <span *ngIf="form.get('p_IdAccion').invalid && form.get('p_IdAccion').touched" class="text-xs text-rose-500 ml-4 font-medium mt-1">
+                    Debe seleccionar una acción
+                </span>
+            </div>
+
+            <!-- Descripcion -->
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-bold text-slate-800 dark:text-slate-200 ml-4">
+                    Descripción
+                </label>
+                <textarea [formControlName]="'p_Descripcion'"
+                          class="w-full px-6 py-4 rounded-3xl border bg-transparent text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none border-slate-200 dark:border-slate-700 min-h-24 resize-none text-sm"
+                          placeholder="Propósito de este permiso..."></textarea>
+            </div>
+
+            <!-- Procedimientos Asociados (Búsqueda + Lista) -->
+            <div class="flex flex-col gap-3 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-700">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <mat-icon class="icon-size-5 text-indigo-500" [svgIcon]="'heroicons_outline:command-line'"></mat-icon>
+                        <span class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-tight">Procedimientos</span>
+                    </div>
+                    
+                    <div class="relative flex items-center w-full sm:max-w-60 group">
+                        <mat-icon class="absolute left-3 icon-size-4 text-slate-400 group-focus-within:text-indigo-500" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                        <input [(ngModel)]="searchQueryProcedimientos" 
+                               [ngModelOptions]="{standalone: true}"
+                               (input)="filterProcedimientos()"
+                               class="w-full pl-10 pr-4 h-8 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-[10px] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                               placeholder="Filtrar por nombre...">
+                    </div>
+                </div>
+
+                <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 mt-2">
+                    <div class="max-h-52 overflow-y-auto custom-scrollbar p-1">
+                        <div *ngFor="let proc of filteredProcedimientos" 
+                             (click)="toggleProcedimiento(proc.ProcedimientoId)"
+                             class="flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 group"
+                             [ngClass]="isProcedimientoSelected(proc.ProcedimientoId) ? 'bg-indigo-50 dark:bg-indigo-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800'">
+                            
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center justify-center w-5 h-5 rounded border-2 transition-all duration-200"
+                                     [ngClass]="isProcedimientoSelected(proc.ProcedimientoId) ? 'bg-indigo-500 border-indigo-500' : 'border-slate-300 dark:border-slate-600 group-hover:border-slate-400'">
+                                    <mat-icon *ngIf="isProcedimientoSelected(proc.ProcedimientoId)" class="icon-size-3 text-white" [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200 leading-tight">
+                                        {{ proc.NombreProcedimiento }}
+                                    </span>
+                                    <span class="text-[10px] text-slate-400 font-medium line-clamp-1 italic">{{ proc.Descripcion || 'Sin descripción' }}</span>
+                                </div>
+                            </div>
+
+                            <span *ngIf="isProcedimientoSelected(proc.ProcedimientoId)" 
+                                  class="text-[9px] font-bold text-indigo-500 uppercase tracking-widest px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 rounded-full border border-indigo-200 dark:border-indigo-800">
+                                Seleccionado
+                            </span>
+                        </div>
+
+                        <!-- No results -->
+                        <div *ngIf="filteredProcedimientos.length === 0" class="p-8 text-center text-secondary text-xs italic">
+                            No se encontraron procedimientos.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end mt-1">
+                    <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">
+                        {{ selectedProcedimientoIds.length }} vinculados
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-end px-8 py-6 border-t bg-slate-50 dark:bg-transparent gap-3">
+        <button mat-stroked-button (click)="close()" class="rounded-full px-8 h-11 font-medium text-slate-600 dark:text-slate-300 transition-all duration-200">
+            Cancelar
+        </button>
+        <button mat-flat-button (click)="save()" [disabled]="form.invalid || isSaving" class="rounded-full px-10 h-11 font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-lg shadow-sky-200 dark:shadow-none transition-all duration-200">
+            <span *ngIf="!isSaving" class="flex items-center">
+                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                Registrar Permiso
+            </span>
+            <mat-progress-spinner *ngIf="isSaving" [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
+        </button>
+    </div>
+
+</div>

@@ -1,0 +1,210 @@
+<div
+    class="flex flex-col w-full overflow-hidden bg-card dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-slate-700/50">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between p-8 border-b bg-slate-50 dark:bg-transparent">
+        <div class="flex items-center gap-4">
+            <div
+                class="flex items-center justify-center w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 dark:bg-sky-900 dark:text-sky-400 shadow-sm">
+                <mat-icon class="icon-size-7" [svgIcon]="'heroicons_outline:view-columns'"></mat-icon>
+            </div>
+            <div>
+                <h2 class="text-xl font-black text-slate-800 dark:text-slate-100 leading-none tracking-tight">
+                    Módulos Asignados
+                </h2>
+                <p class="text-xs text-secondary mt-1 font-medium">Rol: <span
+                        class="text-sky-600 dark:text-sky-400 font-bold uppercase">{{ rol.NombreRol }}</span></p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button mat-flat-button [color]="'primary'" (click)="openNuevoModuloDialog()"
+                class="fuse-mat-button-rounded rounded-full px-5 h-10 font-medium text-sm transition-all duration-200 ease-in-out">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                <span class="ml-2">Nuevo Módulo</span>
+            </button>
+            <button mat-icon-button (click)="close()"
+                class="text-slate-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors duration-200 rounded-full">
+                <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="p-8 max-h-180 overflow-y-auto bg-slate-50/30 dark:bg-transparent">
+
+        <!-- Template recursivo para renderizar nodos a cualquier profundidad -->
+        <ng-template #moduloNode let-nodes="nodes" let-depth="depth">
+            <mat-accordion multi="true" cdkDropList
+                class="flex flex-col"
+                [class.space-y-0]="depth === 0"
+                [class.space-y-3]="depth > 0"
+                [class.border]="depth === 0"
+                [class.border-slate-200]="depth === 0"
+                [class.dark:border-slate-800]="depth === 0"
+                [class.rounded-2xl]="depth === 0"
+                [class.overflow-hidden]="depth === 0"
+                [class.shadow-sm]="depth === 0">
+
+                <mat-expansion-panel
+                    *ngFor="let node of nodes"
+                    cdkDrag [cdkDragData]="node"
+                    [expanded]="isNodeExpanded(node.ModuloId)"
+                    (opened)="onExpansionChange(node.ModuloId, true)"
+                    (closed)="onExpansionChange(node.ModuloId, false)"
+                    [class]="depth === 0
+                        ? 'shadow-none border-b border-slate-200 dark:border-slate-800 last:border-b-0 bg-white dark:bg-slate-900 rounded-none'
+                        : 'shadow-none border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 rounded-2xl overflow-hidden transition-all group'">
+
+                    <!-- Panel Header -->
+                    <mat-expansion-panel-header
+                        [class]="depth === 0
+                            ? 'h-20 px-8 bg-slate-50/50 dark:bg-slate-800/30 hover:bg-white dark:hover:bg-slate-800 transition-all duration-300'
+                            : 'px-6 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors'"
+                        [style.height]="depth === 0 ? '5rem' : (3.75 - depth * 0.25) + 'rem'">
+
+                        <mat-panel-title class="flex items-center gap-4">
+                            <!-- Drag Handle -->
+                            <div cdkDragHandle class="cursor-move text-slate-400 hover:text-sky-600 transition-colors flex-shrink-0">
+                                <mat-icon
+                                    [class]="depth === 0 ? 'icon-size-6' : 'icon-size-5'"
+                                    [svgIcon]="'heroicons_outline:arrows-expand'">
+                                </mat-icon>
+                            </div>
+
+                            <!-- Icono del módulo -->
+                            <div
+                                [class]="depth === 0
+                                    ? 'flex items-center justify-center w-12 h-12 rounded-xl bg-white dark:bg-slate-800 text-sky-500 shadow-sm border border-slate-100 dark:border-slate-700 flex-shrink-0'
+                                    : 'flex items-center justify-center w-9 h-9 rounded-lg bg-white dark:bg-slate-800 text-sky-500 shadow-sm border border-slate-100 dark:border-slate-700 flex-shrink-0'">
+                                <mat-icon
+                                    [class]="depth === 0 ? 'icon-size-6' : 'icon-size-5'"
+                                    [svgIcon]="node.IconoModulo || 'heroicons_outline:document'">
+                                </mat-icon>
+                            </div>
+
+                            <!-- Nombre y nivel -->
+                            <div class="flex flex-col min-w-0">
+                                <span
+                                    [class]="depth === 0
+                                        ? 'font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight text-base leading-tight truncate'
+                                        : 'font-bold text-slate-700 dark:text-slate-200 tracking-tight truncate'"
+                                    [style.font-size]="depth > 0 ? (1 - depth * 0.05) + 'rem' : null">
+                                    {{ node.NombreModulo }}
+                                </span>
+                                <span *ngIf="depth === 0"
+                                    class="text-[10px] text-secondary font-bold uppercase tracking-widest mt-1 opacity-60">
+                                    Módulo de Sistema
+                                </span>
+                                <span *ngIf="depth > 0 && node.children.length > 0"
+                                    class="text-[10px] text-sky-500 dark:text-sky-400 font-semibold mt-0.5">
+                                    {{ node.children.length }} sub{{ node.children.length === 1 ? 'módulo' : 'módulos' }}
+                                </span>
+                            </div>
+
+                            <!-- Acciones -->
+                            <div class="ml-auto flex items-center gap-2 flex-shrink-0"
+                                [class.mr-4]="depth > 0">
+
+                                <!-- Agregar hijo -->
+                                <button mat-icon-button
+                                    (click)="$event.stopPropagation(); openNuevoModuloDialog(node.ModuloId)"
+                                    class="text-slate-400 hover:text-indigo-600 transition-colors duration-200"
+                                    matTooltip="Agregar submódulo">
+                                    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                                </button>
+
+                                <!-- Editar -->
+                                <button mat-icon-button
+                                    (click)="$event.stopPropagation(); openEditarModuloDialog(node)"
+                                    class="text-slate-400 hover:text-indigo-600 transition-colors duration-200"
+                                    matTooltip="Editar módulo">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                </button>
+
+                                <!-- Badge -->
+                                <span *ngIf="depth === 0"
+                                    class="px-3 py-1 rounded-full bg-sky-500 text-white text-[10px] font-black uppercase">
+                                    {{ node.children.length }} Submódulos
+                                </span>
+                                <span *ngIf="depth > 0 && node.children.length === 0"
+                                    class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-800 text-[10px] font-bold text-slate-400 border border-slate-100 dark:border-slate-700 uppercase">
+                                    {{ getPermisosByModulo(node.ModuloId).length }} Permisos
+                                </span>
+                            </div>
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <!-- Panel Body -->
+                    <div [class]="depth === 0 ? 'p-6 bg-white dark:bg-slate-900' : 'bg-white dark:bg-slate-900'">
+
+                        <!-- Si tiene hijos → renderizar recursivamente con más indentación -->
+                        <ng-container *ngIf="node.children.length > 0">
+                            <div [style.padding-left]="depth > 0 ? '1rem' : '0'">
+                                <ng-container *ngTemplateOutlet="moduloNode; context: { nodes: node.children, depth: depth + 1 }">
+                                </ng-container>
+                            </div>
+                        </ng-container>
+
+                        <!-- Si no tiene hijos → mostrar permisos propios -->
+                        <ng-container *ngIf="node.children.length === 0">
+                            <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div *ngFor="let perm of getPermisosByModulo(node.ModuloId)"
+                                    (click)="togglePermiso(perm.PermisoId)"
+                                    class="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer group/perm">
+                                    <mat-checkbox [checked]="isPermisoSelected(perm.PermisoId)" [color]="'primary'"
+                                        (click)="$event.stopPropagation()" (change)="togglePermiso(perm.PermisoId)"
+                                        class="fuse-mat-dense"></mat-checkbox>
+                                    <div class="flex flex-col min-w-0">
+                                        <span class="text-xs font-black text-slate-800 dark:text-slate-100 truncate uppercase leading-none tracking-tight group-hover/perm:text-sky-600 transition-colors">
+                                            {{ perm.CodigoPermiso }}
+                                        </span>
+                                        <span class="text-[11px] text-slate-400 truncate italic mt-1.5 font-medium">
+                                            {{ perm.DescripcionPermiso }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div *ngIf="getPermisosByModulo(node.ModuloId).length === 0"
+                                    class="col-span-full text-xs text-slate-400 italic py-6 px-4 bg-slate-100/30 dark:bg-slate-800/30 rounded-2xl text-center border-2 border-dashed border-slate-200 dark:border-slate-700">
+                                    No hay permisos configurados para este módulo
+                                </div>
+                            </div>
+                        </ng-container>
+
+                    </div>
+
+                </mat-expansion-panel>
+            </mat-accordion>
+        </ng-template>
+
+        <!-- Renderizado inicial con los nodos raíz (depth = 0) -->
+        <ng-container *ngIf="rootNodes.length > 0">
+            <ng-container *ngTemplateOutlet="moduloNode; context: { nodes: rootNodes, depth: 0 }">
+            </ng-container>
+        </ng-container>
+
+        <div *ngIf="rootNodes.length === 0"
+            class="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+            <mat-icon class="icon-size-12 text-slate-300 mb-4"
+                [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
+            <p class="text-secondary font-medium">No hay módulos disponibles en el catálogo.</p>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-end p-8 border-t bg-slate-50 dark:bg-transparent gap-4">
+        <button mat-stroked-button (click)="close()"
+            class="px-8 h-11 rounded-full border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            Cerrar
+        </button>
+        <button mat-flat-button (click)="saveChanges()" [disabled]="isSaving"
+            class="rounded-full px-10 h-11 font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200 dark:shadow-none transition-all duration-200">
+            <span *ngIf="!isSaving" class="flex items-center">
+                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                Guardar Cambios
+            </span>
+            <mat-progress-spinner *ngIf="isSaving" [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
+        </button>
+    </div>
+
+</div>

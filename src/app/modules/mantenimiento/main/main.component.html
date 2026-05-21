@@ -1,0 +1,236 @@
+<div class="flex flex-col flex-auto min-w-0 bg-slate-50 dark:bg-slate-900 min-h-screen relative">
+
+    <!-- Encabezado y Listado Principal -->
+    <div class="flex-auto p-4 sm:p-8 space-y-6 max-w-[1400px] mx-auto w-full">
+        <!-- Título -->
+        <div class="flex flex-col mb-4">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{{ titulo }}</h1>
+            <p class="text-sm font-medium text-slate-500 mt-2">Gestión de códigos y descripciones para {{ titulo | lowercase }}</p>
+        </div>
+
+        <!-- Split View: Tabla + Trazabilidad -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Izquierda: Tabla (Ocupa 2/3 en pantallas grandes) -->
+            <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+                <!-- Barra de Herramientas -->
+                <div class="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50">
+                    <!-- Buscador -->
+                    <div class="relative max-w-md w-full">
+                        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <input type="text" [formControl]="searchInputControl" class="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-all shadow-sm" placeholder="Buscar por código o descripción...">
+                    </div>
+                    <!-- Botones de Acción -->
+                    <div class="flex items-center gap-3">
+                        <!-- Botón Exportar a Excel -->
+                        <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center transition-all shadow-sm hover:shadow active:scale-[0.98]" (click)="exportarExcel()" title="Exportar a Excel">
+                            <svg class="w-5 h-5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span class="hidden sm:inline">Exportar Excel</span>
+                        </button>
+                        <!-- Botón Agregar -->
+                        <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center transition-all shadow-sm hover:shadow active:scale-[0.98]" (click)="openModal()">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            Nuevo Registro
+                        </button>
+                    </div>
+                </div>
+
+                              <!-- Tabla -->
+                <div class="overflow-x-auto min-h-[300px]">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                <th class="px-4 py-3 w-1/4 cursor-pointer select-none hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors group" (click)="sortBy('Codigo')">
+                                    <div class="flex items-center">
+                                        Código
+                                        <svg *ngIf="sortColumn !== 'Codigo'" class="w-4 h-4 ml-1 opacity-0 group-hover:opacity-40 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
+                                        <svg *ngIf="sortColumn === 'Codigo' && sortDirection === 'asc'" class="w-4 h-4 ml-1 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                        <svg *ngIf="sortColumn === 'Codigo' && sortDirection === 'desc'" class="w-4 h-4 ml-1 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-3 cursor-pointer select-none hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors group" (click)="sortBy('Descripcion')">
+                                    <div class="flex items-center">
+                                        Descripción
+                                        <svg *ngIf="sortColumn !== 'Descripcion'" class="w-4 h-4 ml-1 opacity-0 group-hover:opacity-40 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
+                                        <svg *ngIf="sortColumn === 'Descripcion' && sortDirection === 'asc'" class="w-4 h-4 ml-1 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                        <svg *ngIf="sortColumn === 'Descripcion' && sortDirection === 'desc'" class="w-4 h-4 ml-1 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-3 text-right w-32">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                            <tr *ngFor="let item of paginatedItems"
+                                class="hover:bg-indigo-50/60 dark:hover:bg-slate-700/40 transition-colors group cursor-pointer"
+                                [ngClass]="{'bg-indigo-50/80 dark:bg-slate-700/60': (itemToTrace?.Id || itemToTrace?.id) === (item?.Id || item?.id)}"
+                                (click)="openTrazabilidad(item)">
+
+                                <td class="px-4 py-2 text-sm font-bold text-slate-900 dark:text-slate-100">{{ item.Codigo || item.codigo }}</td>
+                                <td class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300">{{ item.Descripcion || item.descripcion }}</td>
+                                <td class="px-4 py-1.5 text-right space-x-2 whitespace-nowrap">
+                                    <button class="text-slate-400 hover:text-indigo-600 transition-colors p-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" (click)="$event.stopPropagation(); openModal(item)" title="Editar">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                    <button class="text-slate-400 hover:text-rose-600 transition-colors p-2 rounded-lg hover:bg-rose-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-500" (click)="$event.stopPropagation(); openDeleteModal(item)" title="Eliminar">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- Empty State -->
+                            <tr *ngIf="processedItems.length === 0">
+                                <td colspan="3" class="px-6 py-16 text-center">
+                                    <div class="bg-slate-100 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                    <h4 class="text-base font-bold text-slate-900 dark:text-white mb-1">No hay resultados</h4>
+                                    <p class="text-slate-500 dark:text-slate-400 text-sm">No se encontraron registros que coincidan con su búsqueda.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación -->
+                <div class="px-5 py-3 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50" *ngIf="processedItems.length > 0">
+                    <span class="text-sm font-medium text-slate-500 dark:text-slate-400">
+                        Mostrando <span class="font-bold text-slate-900 dark:text-white">{{ startIndex }}</span> a <span class="font-bold text-slate-900 dark:text-white">{{ endIndex }}</span> de <span class="font-bold text-slate-900 dark:text-white">{{ totalItems }}</span> resultados
+                    </span>
+                    <div class="flex items-center space-x-2">
+                        <button class="px-3 py-1.5 text-sm font-semibold border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-slate-700 dark:text-slate-300"
+                                [disabled]="currentPage === 1"
+                                (click)="prevPage()">
+                            Anterior
+                        </button>
+                        <button class="px-3 py-1.5 text-sm font-semibold border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-slate-700 dark:text-slate-300"
+                                [disabled]="currentPage === totalPages || totalPages === 0"
+                                (click)="nextPage()">
+                            Siguiente
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Derecha: Trazabilidad Fija (Ocupa 1/3 en pantallas grandes) -->
+            <div class="lg:col-span-1 h-full">
+                <app-trazabilidad
+                    [nombreTabla]="'MainData'"
+                    [idRegistro]="itemToTrace?.Id || itemToTrace?.id">
+                </app-trazabilidad>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Formulario CRUD -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity" *ngIf="isModalOpen">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in-up border border-slate-200 dark:border-slate-700">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ isEditing ? 'Editar ' + titulo : 'Registrar ' + titulo }}</h3>
+            </div>
+            <button class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700" (click)="closeModal()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <!-- Body -->
+        <form [formGroup]="mainForm" (ngSubmit)="save()">
+            <div class="p-6 space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Código <span class="text-rose-500">*</span></label>
+                    <input type="text" formControlName="codigo" class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 transition-all shadow-sm" placeholder="Ingrese el código único">
+                    <p class="text-rose-500 text-xs font-medium mt-1.5 flex items-center" *ngIf="mainForm.get('codigo')?.hasError('required') && mainForm.get('codigo')?.touched">
+                        <svg class="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                        El código es obligatorio
+                    </p>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Descripción <span class="text-rose-500">*</span></label>
+                    <textarea formControlName="descripcion" rows="4" class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 transition-all shadow-sm resize-none" placeholder="Ingrese la descripción detallada"></textarea>
+                    <p class="text-rose-500 text-xs font-medium mt-1.5 flex items-center" *ngIf="mainForm.get('descripcion')?.hasError('required') && mainForm.get('descripcion')?.touched">
+                        <svg class="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                        La descripción es obligatoria
+                    </p>
+                </div>
+            </div>
+            <!-- Footer -->
+            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
+                <button type="button" class="px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm" (click)="closeModal()">Cancelar</button>
+                <button type="submit" class="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed flex items-center" [disabled]="mainForm.invalid">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    {{ isEditing ? 'Actualizar Registro' : 'Guardar Registro' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Eliminación -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity" *ngIf="isDeleteModalOpen">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in-up border border-slate-200 dark:border-slate-700">
+        <div class="p-6 text-center pt-8">
+            <div class="w-20 h-20 rounded-full bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mx-auto mb-6 relative">
+                <div class="absolute inset-0 rounded-full border-4 border-rose-100 dark:border-rose-500/20 scale-110"></div>
+                <svg class="w-10 h-10 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </div>
+            <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">¿Eliminar registro?</h3>
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6">
+                Se eliminará permanentemente el registro <br>
+                <span class="font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded text-xs mt-2 inline-block">
+                    {{ itemToDelete?.Codigo || itemToDelete?.codigo }}
+                </span>
+            </p>
+            <div class="flex gap-3 w-full">
+                <button type="button" class="flex-1 px-5 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm" (click)="closeDeleteModal()">Cancelar</button>
+                <button type="button" class="flex-1 px-5 py-3 text-sm font-semibold text-white bg-rose-500 rounded-xl hover:bg-rose-600 transition-all shadow-sm hover:shadow flex items-center justify-center" (click)="confirmDelete()">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Éxito (Success) -->
+<div class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-opacity" *ngIf="isSuccessModalOpen">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in-up border border-slate-200 dark:border-slate-700 text-center p-8">
+        <div class="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-6 relative">
+            <div class="absolute inset-0 rounded-full border-4 border-emerald-100 dark:border-emerald-500/20 scale-110"></div>
+            <!-- Icono Check -->
+            <svg class="w-10 h-10 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+        <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">{{ successTitle }}</h3>
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6">
+            {{ successMessage }}
+        </p>
+        <div class="w-full">
+            <button type="button" class="w-full px-5 py-3 text-sm font-semibold text-white bg-emerald-500 rounded-xl hover:bg-emerald-600 transition-all shadow-sm hover:shadow flex items-center justify-center" (click)="closeSuccessModal()">
+                Aceptar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Error / Duplicados -->
+<div class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity" *ngIf="isErrorModalOpen">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in-up border border-slate-200 dark:border-slate-700 text-center p-8">
+        <div class="w-20 h-20 rounded-full bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mx-auto mb-6 relative">
+            <div class="absolute inset-0 rounded-full border-4 border-rose-100 dark:border-rose-500/20 scale-110"></div>
+            <!-- Icono Cruz (Error) -->
+            <svg class="w-10 h-10 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </div>
+        <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">{{ errorTitle }}</h3>
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6">
+            {{ errorMessage }}
+        </p>
+        <div class="w-full">
+            <button type="button" class="w-full px-5 py-3 text-sm font-semibold text-white bg-rose-500 rounded-xl hover:bg-rose-600 transition-all shadow-sm hover:shadow flex items-center justify-center" (click)="closeErrorModal()">
+                Entendido
+            </button>
+        </div>
+    </div>
+</div>

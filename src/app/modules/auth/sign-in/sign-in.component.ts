@@ -5,6 +5,9 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
 import { catchError, of, switchMap } from 'rxjs';
+import { UserService } from 'app/core/user/user.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'environments/environment';
 
 // Storage key constants — never store plain passwords; we store only email
 // and a flag. The password is stored encrypted via the browser's own
@@ -43,7 +46,9 @@ export class AuthSignInComponent implements OnInit
         private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
         private _formBuilder: UntypedFormBuilder,
-        private _router: Router
+        private _router: Router,
+        private _httpClient: HttpClient,
+        private _userService: UserService
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -90,10 +95,47 @@ export class AuthSignInComponent implements OnInit
                     switchMap((permissionsResponse) => {
                         // Actualizar el estado de permisos en el servicio
                         this._authService.permissionsValue = permissionsResponse.data;
+                        
+                        // If user has an avatar, download it and store the data URL
+                        if (response.data?.avatar) {
+                            return this._downloadAndStoreAvatar(response.data.avatar).pipe(
+                                switchMap((avatarUrl) => {
+                                    // Update user service with avatar URL
+                                    const currentUser = this._authService.user();
+                                    if (currentUser && avatarUrl) {
+                                        this._userService.user = {
+                                            id: currentUser.id,
+                                            correo: currentUser.correo,
+                                            name: currentUser.name,
+                                            avatar: avatarUrl as string,
+                                            status: 'online'
+                                        };
+                                    }
+                                    return of(response);
+                                })
+                            );
+                        }
                         return of(response);
                     }),
                     catchError(() => {
-                        // Si falla la carga de permisos, igual permitimos el login
+                        // Si falla la carga de permisos, igual permitimos el login y procesamos el avatar
+                        if (response.data?.avatar) {
+                            return this._downloadAndStoreAvatar(response.data.avatar).pipe(
+                                switchMap((avatarUrl) => {
+                                    const currentUser = this._authService.user();
+                                    if (currentUser && avatarUrl) {
+                                        this._userService.user = {
+                                            id: currentUser.id,
+                                            correo: currentUser.correo,
+                                            name: currentUser.name,
+                                            avatar: avatarUrl as string,
+                                            status: 'online'
+                                        };
+                                    }
+                                    return of(response);
+                                })
+                            );
+                        }
                         return of(response);
                     })
                 );
@@ -143,6 +185,40 @@ export class AuthSignInComponent implements OnInit
     // -----------------------------------------------------------------------------------------------------
     // @ Private methods
     // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Download avatar and store it in localStorage as a data URL
+     */
+    private _downloadAndStoreAvatar(avatarCode: string): any {
+        if (!avatarCode) {
+            return of(null);
+        }
+
+        return this._httpClient.get<{
+            status: boolean;
+            data: {
+                extension: string;
+                fileName: string;
+                bytesFile: string;
+                contentType: string;
+            };
+            message?: string;
+        }>(`${environment.apiUrl}/file/download/${avatarCode}`).pipe(
+            switchMap((response) => {
+                if (response.status && response.data.bytesFile) {
+                    // Create data URL from base64
+                    const avatarUrl = `data:${response.data.contentType};base64,${response.data.bytesFile}`;
+
+                    // Store in localStorage for later use
+                    localStorage.setItem('userAvatarUrl', avatarUrl);
+                    localStorage.setItem('userAvatarCode', avatarCode);
+
+                    return of(avatarUrl);
+                }
+                return of(null);
+            })
+        );
+    }
 
     /**
      * Restore email from localStorage when rememberMe was previously checked.

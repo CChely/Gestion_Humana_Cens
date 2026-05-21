@@ -1,1 +1,164 @@
-<p>carga-masiva works!</p>
+<div class="flex flex-col flex-auto min-w-0 bg-slate-100 dark:bg-slate-900 min-h-screen relative p-6 sm:p-10">
+
+  <!-- ============================================================== -->
+  <!-- VISTA 1: MENÚ PRINCIPAL (HUB DE CARGAS MASIVAS)                -->
+  <!-- ============================================================== -->
+  <div *ngIf="vistaActual === 'menu'" class="animate-fade-in max-w-5xl mx-auto w-full mt-4">
+
+    <div class="mb-10 text-center">
+      <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none mb-3">Centro de Cargas Masivas</h1>
+      <p class="text-lg text-slate-500 max-w-2xl mx-auto">Seleccione el módulo que desea alimentar. Asegúrese de tener listos sus archivos Excel (.xlsx) con el formato correspondiente.</p>
+    </div>
+
+    <!-- GRILLA DE OPCIONES DE CARGA -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- CARD 1: Carga Masiva de Empleados -->
+      <div (click)="irCargaEmpleados()" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all duration-300 cursor-pointer group flex flex-col items-center text-center">
+        <div class="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+          <svg class="w-10 h-10 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2 group-hover:text-indigo-600 transition-colors">Carga de Empleados</h3>
+        <p class="text-sm text-slate-500 mb-4">Registre a todo su personal, incluyendo datos personales, contratos, planillas y ubicación organizacional.</p>
+        <span class="mt-auto text-indigo-600 font-semibold text-sm flex items-center">Acceder al módulo <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
+      </div>
+
+      <!-- AQUÍ PUEDES AGREGAR MÁS CARDS EN EL FUTURO -->
+      <!-- Ejemplo de Card deshabilitada/Próximamente -->
+      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200 border-dashed dark:border-slate-700 flex flex-col items-center text-center opacity-70">
+        <div class="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mb-5">
+          <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-600 mb-2">Estructura Org.</h3>
+        <p class="text-sm text-slate-500 mb-4">Carga masiva de la estructura de la empresa.</p>
+        <span class="mt-auto text-slate-400 font-semibold text-sm bg-slate-200 px-3 py-1 rounded-full">Próximamente</span>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ============================================================== -->
+  <!-- VISTA 2: MÓDULO CARGA DE EMPLEADOS                             -->
+  <!-- ============================================================== -->
+  <div *ngIf="vistaActual === 'empleados'" class="animate-fade-in w-full h-full flex flex-col gap-6">
+
+    <!-- CABECERA DE MÓDULO -->
+    <div class="flex flex-col md:flex-row justify-between md:items-end gap-4">
+      <div>
+        <button (click)="volverAlMenu()" class="text-slate-500 hover:text-indigo-600 flex items-center text-sm font-semibold mb-3 transition-colors">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          Volver al menú
+        </button>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">Carga de Empleados</h1>
+        <p class="text-sm font-medium text-slate-500 mt-1">Importe personal masivamente usando la plantilla Excel validada.</p>
+      </div>
+
+      <!-- BOTÓN DESCARGAR PLANTILLA -->
+      <button (click)="descargarPlantilla()" [disabled]="isCatalogosLoading" class="inline-flex items-center justify-center px-4 py-2 bg-emerald-600 border border-transparent rounded-lg text-sm font-medium text-white shadow-sm hover:bg-emerald-700 transition-colors disabled:opacity-50">
+        <svg *ngIf="!isCatalogosLoading" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        <svg *ngIf="isCatalogosLoading" class="animate-spin w-5 h-5 mr-2 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+        {{ isCatalogosLoading ? 'Cargando catálogos...' : 'Descargar Plantilla Excel' }}
+      </button>
+    </div>
+
+    <!-- ZONA DE CARGA -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8">
+      <div class="flex items-center justify-center w-full">
+        <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-slate-300 border-dashed rounded-xl transition-colors" [ngClass]="isCatalogosLoading ? 'cursor-not-allowed bg-slate-100 opacity-60' : 'cursor-pointer bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'">
+          <div class="flex flex-col items-center justify-center pt-5 pb-6">
+            <svg class="w-12 h-12 mb-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            <p class="mb-2 text-sm text-slate-600 dark:text-slate-300"><span class="font-semibold">{{ isCatalogosLoading ? 'Esperando catálogos...' : 'Haz clic para subir o arrastra' }}</span></p>
+            <p class="text-xs text-slate-500">Solo se permiten archivos Excel (.xlsx o .xls)</p>
+          </div>
+          <input id="dropzone-file" type="file" class="hidden" accept=".xlsx, .xls" (change)="onFileChange($event)" [disabled]="isCatalogosLoading" />
+        </label>
+      </div>
+      <div *ngIf="fileName" class="mt-4 text-sm font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-lg p-3 inline-flex items-center w-full">
+        <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span>Archivo preparado: <span class="font-black">{{ fileName }}</span> ({{ excelData.length }} filas encontradas)</span>
+      </div>
+    </div>
+
+    <!-- ERRORES DE VALIDACIÓN VISUALES E INTERACTIVOS -->
+    <div *ngIf="erroresValidacion.length > 0" class="bg-rose-50 border border-rose-200 rounded-2xl p-6 animate-fade-in shadow-sm">
+      <div class="flex items-center text-rose-700 mb-4">
+        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        <h3 class="text-lg font-bold">Hemos detectado {{ erroresValidacion.length }} errores en su Excel</h3>
+      </div>
+      <p class="text-sm text-rose-600 mb-4 font-medium">Corrija los valores directamente en la tabla y presione <kbd class="bg-rose-100 px-1 rounded border border-rose-300">Enter</kbd> para revalidar.</p>
+
+      <div class="overflow-y-auto max-h-80 bg-white rounded-lg border border-rose-100 shadow-inner custom-scrollbar">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-rose-100/50 sticky top-0 text-rose-800 z-10 shadow-sm">
+            <tr>
+              <th class="px-4 py-3 font-bold w-20">Fila Excel</th>
+              <th class="px-4 py-3 font-bold">Nombre (Referencia)</th>
+              <th class="px-4 py-3 font-bold">Columna con Error</th>
+              <th class="px-4 py-3 font-bold w-48">Corregir Valor</th>
+              <th class="px-4 py-3 font-bold">Motivo del Error</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-rose-50">
+            <tr *ngFor="let err of erroresValidacion" class="hover:bg-rose-50/50 transition-colors">
+              <td class="px-4 py-3 font-semibold text-rose-600">Fila {{ err.filaExcel }}</td>
+              <td class="px-4 py-3 font-medium text-slate-700 truncate max-w-[150px]" [title]="err.nombrePersona">{{ err.nombrePersona }}</td>
+              <td class="px-4 py-3 text-slate-600">{{ err.columna }}</td>
+              <td class="px-4 py-3">
+                <input type="text" class="w-full px-2 py-1.5 border border-rose-300 rounded text-rose-700 bg-rose-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono transition-colors"
+                       [value]="err.valorActual"
+                       (input)="err.nuevoValor = $event.target.value"
+                       (blur)="actualizarValorEnExcel(err, err.nuevoValor || err.valorActual)"
+                       (keyup.enter)="actualizarValorEnExcel(err, err.nuevoValor || err.valorActual)"
+                       [placeholder]="err.valorActual === '' ? '(vacío)' : ''">
+              </td>
+              <td class="px-4 py-3 text-slate-500 text-xs">{{ err.mensaje }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VISTA PREVIA DE DATOS Y BOTÓN PROCESAR -->
+    <div *ngIf="excelData.length > 0" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden animate-fade-in">
+      <div class="p-5 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-center bg-slate-50 dark:bg-slate-800 gap-4">
+        <h2 class="text-lg font-bold text-slate-800 dark:text-white">Vista Previa de Registros</h2>
+
+        <button class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium flex items-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto justify-center"
+                [disabled]="isLoading || erroresValidacion.length > 0"
+                (click)="procesarCarga()">
+          <svg *ngIf="isLoading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+          {{ isLoading ? 'Insertando empleados en Base de Datos...' : 'Procesar e Insertar Carga Masiva' }}
+        </button>
+      </div>
+
+      <div *ngIf="isLoading" class="px-5 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 animate-fade-in">
+         <div class="flex justify-between text-sm font-medium text-slate-500 mb-2">
+           <span>Guardando registros de forma asíncrona...</span>
+           <span class="text-indigo-600 font-bold">{{ procesados }} / {{ totalRegistros }} completados</span>
+         </div>
+         <div class="w-full bg-slate-100 rounded-full h-3 dark:bg-slate-700 overflow-hidden shadow-inner">
+           <div class="bg-indigo-500 h-3 rounded-full transition-all duration-300 ease-out" [style.width.%]="(procesados / totalRegistros) * 100"></div>
+         </div>
+      </div>
+
+      <div class="overflow-x-auto max-h-[500px] custom-scrollbar">
+        <table class="w-full text-left border-collapse whitespace-nowrap min-w-max" [ngClass]="{'opacity-50': erroresValidacion.length > 0}">
+          <thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 uppercase tracking-wider z-10 shadow-sm">
+            <tr>
+              <th class="px-6 py-4 border-r border-slate-200">#</th>
+              <th *ngFor="let header of headers" class="px-6 py-4 border-r border-slate-200">{{ header }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+            <tr *ngFor="let row of excelData; let i = index" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+              <td class="px-6 py-3 text-slate-400 font-medium border-r border-slate-100 bg-slate-50">{{ i + 1 }}</td>
+              <td *ngFor="let header of headers" class="px-6 py-3 text-sm text-slate-700 dark:text-slate-300 border-r border-slate-100">{{ row[header] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
