@@ -7,6 +7,7 @@ import { Rol, Modulo, ModuloNode, Permiso } from '../seguridad.types';
 import { SeguridadService } from '../seguridad.service';
 import { UserService } from 'app/core/user/user.service';
 import { SeguridadModuloFormDialogComponent } from '../seguridad-modulo-form-dialog/seguridad-modulo-form-dialog.component';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
     selector     : 'app-seguridad-modulos-dialog',
@@ -38,7 +39,8 @@ export class SeguridadModulosDialogComponent implements OnInit {
         private _dialogRef: MatDialogRef<SeguridadModulosDialogComponent>,
         private _dialog: MatDialog,
         private _seguridadService: SeguridadService,
-        private _userService: UserService
+        private _userService: UserService,
+        private _fuseConfirmationService: FuseConfirmationService
     ) {
         this.rol = _data.rol;
         // Inicializar permisos seleccionados desde el rol
@@ -147,12 +149,53 @@ export class SeguridadModulosDialogComponent implements OnInit {
             },
             width: '100%',
             maxWidth: '600px',
-            panelClass: 'custom-security-dialog'
+            panelClass: 'fuse-mat-dialog-rounded'
         });
 
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
                 this.loadModulos();
+            }
+        });
+    }
+
+    /**
+     * Mostrar diálogo de confirmación y eliminar módulo
+     */
+    eliminarModulo(node: ModuloNode): void {
+        const confirmation = this._fuseConfirmationService.open({
+            title: 'Eliminar módulo',
+            message: `¿Estás seguro de que deseas eliminar el módulo <b>${node.NombreModulo}</b>? Esta acción no se puede deshacer.`,
+            actions: {
+                confirm: {
+                    show: true,
+                    label: 'Eliminar',
+                    color: 'warn'
+                },
+                cancel: {
+                    show: true,
+                    label: 'Cancelar'
+                }
+            }
+        });
+
+        confirmation.afterClosed().subscribe((result) => {
+            if (result === 'confirmed') {
+                this.isSaving = true;
+                this._seguridadService.deleteModulo(node.ModuloId).subscribe({
+                    next: (res) => {
+                        this.isSaving = false;
+                        if (res.status) {
+                            this.loadModulos();
+                        } else {
+                            console.error('Error al eliminar módulo:', res.message);
+                        }
+                    },
+                    error: (err) => {
+                        this.isSaving = false;
+                        console.error('Error al eliminar módulo', err);
+                    }
+                });
             }
         });
     }

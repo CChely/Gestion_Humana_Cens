@@ -27,7 +27,29 @@ export interface AuthState {
     isAuthenticated: boolean;
     user: { id: string; correo: string; name: string } | null;
     token: string | null;
+    permissions: PermissionNode[] | null;
     containerId: string | null;
+}
+
+export interface PermissionNode {
+    id: string;
+    parentId: string | null;
+    title: string;
+    ruta: string;
+    icono: string | null;
+    esVisibleMenu: boolean;
+    esActivo: boolean;
+    orden: number;
+    permisos: string[];
+    hijos: PermissionNode[];
+}
+
+export interface PermissionsResponse {
+    data: PermissionNode[];
+    errors: any[];
+    message: string;
+    metadata: any[];
+    status: boolean;
 }
 
 @Injectable()
@@ -41,6 +63,7 @@ export class AuthService {
         isAuthenticated: false,
         user: null,
         token: null,
+        permissions: null,
         containerId: null,
     });
 
@@ -48,6 +71,7 @@ export class AuthService {
     public isAuthenticated = computed(() => this._authState().isAuthenticated);
     public user = computed(() => this._authState().user);
     public token = computed(() => this._authState().token);
+    public permissions = computed(() => this._authState().permissions);
     public containerId = computed(() => this._authState().containerId);
 
     constructor() {
@@ -62,6 +86,9 @@ export class AuthService {
                 localStorage.setItem("containerId", state.containerId ?? "");
                 if (state.user) {
                     localStorage.setItem("user", JSON.stringify(state.user));
+                }
+                if (state.permissions) {
+                    localStorage.setItem("permissions", JSON.stringify(state.permissions));
                 }
             }
         });
@@ -86,10 +113,21 @@ export class AuthService {
                 }
             }
 
+            let permissions = null;
+            const permissionsData = localStorage.getItem("permissions");
+            if (permissionsData) {
+                try {
+                    permissions = JSON.parse(permissionsData);
+                } catch (e) {
+                    console.error("Error parsing permissions data", e);
+                }
+            }
+
             this._authState.set({
                 isAuthenticated: true,
                 user: user,
                 token: token,
+                permissions: permissions,
                 containerId: containerId,
             });
 
@@ -118,6 +156,22 @@ export class AuthService {
         this._authState.update((state) => ({ ...state, token }));
     }
 
+    /**
+     * Set permissions
+     *
+     * @param permissions
+     */
+    set permissionsValue(permissions: PermissionNode[]) {
+        this._authState.update((state) => ({
+            ...state,
+            permissions: permissions,
+        }));
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
     /** Sign‑in logic, mapping the response to our state */
     signIn(credentials: {
         correo: string;
@@ -139,6 +193,11 @@ export class AuthService {
                             id: response.data.usuarioId.toString(),
                             correo: response.data.correo,
                             name: response.data.nombres,
+                            status:
+                                response.data.roles &&
+                                    response.data.roles.length > 0
+                                    ? response.data.roles[0]
+                                    : "online",
                         };
 
                         // Persist both the token and the container id
@@ -146,6 +205,7 @@ export class AuthService {
                             isAuthenticated: true,
                             user: userData,
                             token: response.data.token,
+                            permissions: null, // Será actualizado por el componente
                             containerId: response.data.contenedorArchivo,
                         });
 
@@ -187,15 +247,27 @@ export class AuthService {
             isAuthenticated: false,
             user: null,
             token: null,
+            permissions: null,
             containerId: null,
         });
 
         this._userService.user = null;
+        // Redirigir al login
+        localStorage.removeItem("permissions");
         this._router.navigate(["/sign-in"]);
     }
 
-    // Additional auth helpers – minimal implementations
+    /**
+     * Get permissions for the current user
+     */
+    getPermissions(): Observable<PermissionsResponse> {
+        return this._httpClient.get<PermissionsResponse>(
+            `${environment.apiUrl}/auth/permissions`,
+            {},
+        );
+    }
 
+    // Additional auth helpers – minimal implementations
     forgotPassword(email: string): Observable<any> {
         return this._httpClient.post("api/auth/forgot-password", email);
     }

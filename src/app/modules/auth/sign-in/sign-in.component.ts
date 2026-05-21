@@ -4,10 +4,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { catchError, of, switchMap } from 'rxjs';
 import { UserService } from 'app/core/user/user.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
-import { switchMap, of } from 'rxjs';
 
 // Storage key constants — never store plain passwords; we store only email
 // and a flag. The password is stored encrypted via the browser's own
@@ -90,30 +90,55 @@ export class AuthSignInComponent implements OnInit
 
         this._authService.signIn(loginData).pipe(
             switchMap((response) => {
-                // If user has an avatar, download it and store the data URL
-                if (response.data?.avatar) {
-                    console.log('📷 User has avatar, downloading:', response.data.avatar);
-                    return this._downloadAndStoreAvatar(response.data.avatar).pipe(
-                        switchMap((avatarUrl) => {
-                            console.log('✅ Avatar downloaded and stored');
-
-                            // Update user service with avatar URL
-                            const currentUser = this._authService.user();
-                            if (currentUser && avatarUrl) {
-                                this._userService.user = {
-                                    id: currentUser.id,
-                                    correo: currentUser.correo,
-                                    name: currentUser.name,
-                                    avatar: avatarUrl as string,
-                                    status: 'online'
-                                };
-                            }
-
-                            return of(response);
-                        })
-                    );
-                }
-                return of(response);
+                // Consultar permisos inmediatamente después del login exitoso
+                return this._authService.getPermissions().pipe(
+                    switchMap((permissionsResponse) => {
+                        // Actualizar el estado de permisos en el servicio
+                        this._authService.permissionsValue = permissionsResponse.data;
+                        
+                        // If user has an avatar, download it and store the data URL
+                        if (response.data?.avatar) {
+                            return this._downloadAndStoreAvatar(response.data.avatar).pipe(
+                                switchMap((avatarUrl) => {
+                                    // Update user service with avatar URL
+                                    const currentUser = this._authService.user();
+                                    if (currentUser && avatarUrl) {
+                                        this._userService.user = {
+                                            id: currentUser.id,
+                                            correo: currentUser.correo,
+                                            name: currentUser.name,
+                                            avatar: avatarUrl as string,
+                                            status: 'online'
+                                        };
+                                    }
+                                    return of(response);
+                                })
+                            );
+                        }
+                        return of(response);
+                    }),
+                    catchError(() => {
+                        // Si falla la carga de permisos, igual permitimos el login y procesamos el avatar
+                        if (response.data?.avatar) {
+                            return this._downloadAndStoreAvatar(response.data.avatar).pipe(
+                                switchMap((avatarUrl) => {
+                                    const currentUser = this._authService.user();
+                                    if (currentUser && avatarUrl) {
+                                        this._userService.user = {
+                                            id: currentUser.id,
+                                            correo: currentUser.correo,
+                                            name: currentUser.name,
+                                            avatar: avatarUrl as string,
+                                            status: 'online'
+                                        };
+                                    }
+                                    return of(response);
+                                })
+                            );
+                        }
+                        return of(response);
+                    })
+                );
             })
         ).subscribe(
             () => {
