@@ -1,0 +1,828 @@
+<div class="min-h-screen bg-slate-50 text-slate-700 font-sans pb-12 antialiased">
+  <!-- TOAST NOTIFICATION -->
+  <div
+    *ngIf="toastMessage"
+    [ngClass]="{
+      'translate-y-0 opacity-100': toastMessage,
+      'translate-y-[-20px] opacity-0': !toastMessage
+    }"
+    class="fixed top-6 right-6 z-[9999] max-w-md bg-white border border-slate-100 rounded-2xl shadow-xl flex items-center gap-3.5 p-4.5 transition-all duration-300 transform">
+    
+    <!-- Success Icon -->
+    <div *ngIf="toastType === 'success'" class="bg-emerald-50 text-emerald-600 p-2 rounded-xl border border-emerald-100/50 shrink-0">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+    </div>
+    
+    <!-- Error Icon -->
+    <div *ngIf="toastType === 'error'" class="bg-rose-50 text-rose-600 p-2 rounded-xl border border-rose-100/50 shrink-0">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+    </div>
+
+    <!-- Content Text -->
+    <div class="flex-1 min-w-[200px]">
+      <p class="text-xs font-bold text-slate-900">
+        {{ toastType === 'success' ? 'Operación Exitosa' : 'Aviso del Sistema' }}
+      </p>
+      <p class="text-[11px] font-medium text-slate-500 mt-0.5 leading-snug">
+        {{ toastMessage }}
+      </p>
+    </div>
+    
+    <!-- Close Button -->
+    <button
+      (click)="toastMessage = null"
+      class="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-50 rounded-lg transition-all shrink-0">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Odoo-Style Corporate Header -->
+  <header class="bg-white text-slate-800 shadow-sm border-b border-slate-200 py-5 px-4 sm:px-8 mb-8">
+    <div class="w-full flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <div class="flex items-center gap-3">
+          <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+            CENS Core Engine
+          </span>
+          <h1 class="text-xl md:text-2xl font-bold text-slate-900">
+            Motor de Nóminas & Parametrización
+          </h1>
+        </div>
+        <p class="text-slate-500 text-sm mt-1">
+          Personalización avanzada de reglas salariales, estructuras de cuentas y cálculo dinámico de haberes a nivel global.
+        </p>
+      </div>
+      <div class="bg-slate-100 rounded-2xl px-5 py-3 border border-slate-200 text-center md:text-right min-w-[200px]">
+        <span class="text-xs text-emerald-600 block uppercase font-sans font-bold">Valores Gubernamentales</span>
+        <span class="text-base font-sans font-bold text-slate-900">UIT: $ {{ uit | number:'1.2-2' }}</span>
+        <span class="block text-[11px] text-slate-500">SMV: $ {{ smv | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="w-full px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+      <!-- Navigation Sidebar -->
+      <div class="lg:col-span-1 space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-3">
+          
+          <h2 class="text-xs font-bold uppercase text-slate-400 px-3 tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-3">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Control CENS-Odoo
+          </h2>
+
+          <!-- MAIN MENU -->
+          <div class="space-y-2.5">
+            
+            <!-- SECTION 1: PARAMETROS DE NOMINA -->
+            <div class="space-y-1">
+              <button
+                (click)="toggleSubmenu('nomina')"
+                class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all text-left">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                  <span>Parámetros de nómina</span>
+                </div>
+                <svg
+                  [class.rotate-180]="expandedMenus['nomina']"
+                  class="w-4 h-4 text-slate-400 transition-transform duration-200"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+
+              <div
+                *ngIf="expandedMenus['nomina']"
+                class="pl-3.5 space-y-0.5 border-l border-slate-100 ml-4.5 transition-all duration-200">
+                
+                <button
+                  (click)="activeTab = 'periodoCalculo'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'periodoCalculo' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'periodoCalculo' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Periodo de cálculo</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'comisionesSp'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'comisionesSp' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'comisionesSp' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Comisiones SP</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'tasasImpuesto'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'tasasImpuesto' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'tasasImpuesto' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Tasas Impuesto</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'nominas'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'nominas' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'nominas' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Nóminas por régimen</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'aportesEmpleador'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'aportesEmpleador' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'aportesEmpleador' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Aportes de empleador</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'conceptos'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'conceptos' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'conceptos' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Conceptos</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'nominaAprobadores'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'nominaAprobadores' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'nominaAprobadores' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Aprobadores de planilla</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'general'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'general' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'general' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Valores generales</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'camposAdicionales'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'camposAdicionales' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'camposAdicionales' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Campos adicionales</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'periodo'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'periodo' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'periodo' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Periodo</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'incrementoSalarial'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'incrementoSalarial' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'incrementoSalarial' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Incremento salarial</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- SECTION 2: PARAMETROS DE CALCULO -->
+            <div class="space-y-1">
+              <button
+                (click)="toggleSubmenu('calculo')"
+                class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all text-left">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                  <span>Parámetros de cálculo</span>
+                </div>
+                <svg
+                  [class.rotate-180]="expandedMenus['calculo']"
+                  class="w-4 h-4 text-slate-400 transition-transform duration-200"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+
+              <div
+                *ngIf="expandedMenus['calculo']"
+                class="pl-3.5 space-y-0.5 border-l border-slate-100 ml-4.5 transition-all duration-200">
+                <button
+                  (click)="activeTab = 'estructuras'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'estructuras' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'estructuras' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Estructuras Salariales</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'reglas'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'reglas' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'reglas' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Reglas y Fórmulas</span>
+                </button>
+
+                <button
+                  (click)="activeTab = 'empleados'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'empleados' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'empleados' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Tipos de Empleados</span>
+                </button>
+                
+                <button
+                  (click)="activeTab = 'pensiones'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'pensiones' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'pensiones' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span>Pensiones (AFP/ONP)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- SECTION 3: PARAMETROS GENERALES -->
+            <div class="space-y-1">
+              <button
+                (click)="toggleSubmenu('general')"
+                class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all text-left">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                  <span>Parámetros generales</span>
+                </div>
+                <svg
+                  [class.rotate-180]="expandedMenus['general']"
+                  class="w-4 h-4 text-slate-400 transition-transform duration-200"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+
+              <div
+                *ngIf="expandedMenus['general']"
+                class="pl-3.5 space-y-0.5 border-l border-slate-100 ml-4.5 transition-all duration-200">
+                <button
+                  (click)="activeTab = 'simulador'"
+                  [class]="'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all text-left ' + (activeTab === 'simulador' ? 'bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600' : 'text-slate-600 hover:bg-slate-50 font-medium')">
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="activeTab === 'simulador' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                  <span class="flex-1">Sandbox Simulador</span>
+                  <span class="bg-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded font-bold font-sans">LIVE</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="bg-white text-slate-700 rounded-2xl shadow-sm p-5 space-y-3 border border-slate-200">
+          <h3 class="text-xs font-semibold text-slate-900 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Consola del Desarrollador
+          </h3>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Puedes cambiar el código en la pestaña de <strong>Reglas y Fórmulas</strong>. El simulador compilará la nómina ejecutando el código ingresado en base a variables como <code class="text-emerald-600 font-sans">WAGE</code> o <code class="text-emerald-600 font-sans">DAYS</code>.
+          </p>
+          <div class="pt-2 border-t border-slate-100 flex justify-between text-[10px] text-slate-400">
+            <span>Estado del Compilador:</span>
+            <span class="text-emerald-600 font-sans font-bold">✓ ONLINE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Panel Content -->
+      <div class="lg:col-span-3 space-y-6 min-w-0">
+
+        <!-- TAB: PERIODO DE CALCULO -->
+        <app-periodo-calculo *ngIf="activeTab === 'periodoCalculo'"></app-periodo-calculo>
+
+        <!-- TAB: COMISIONES SP -->
+        <app-comisiones-sp *ngIf="activeTab === 'comisionesSp'"></app-comisiones-sp>
+
+        <!-- TAB: TASAS IMPUESTO -->
+        <app-tasas-impuesto *ngIf="activeTab === 'tasasImpuesto'"></app-tasas-impuesto>
+
+        <!-- TAB: NOMINAS POR REGIMEN -->
+        <app-nominas-regimen *ngIf="activeTab === 'nominas'"></app-nominas-regimen>
+
+        <!-- TAB: APORTES DE EMPLEADOR -->
+        <app-aportes-empleador *ngIf="activeTab === 'aportesEmpleador'"></app-aportes-empleador>
+
+        <!-- TAB: CONCEPTOS -->
+        <app-conceptos *ngIf="activeTab === 'conceptos'"></app-conceptos>
+
+        <!-- TAB: APROBADORES DE PLANILLA -->
+        <app-nomina-aprobadores *ngIf="activeTab === 'nominaAprobadores'"></app-nomina-aprobadores>
+
+        <!-- TAB 1: VALORES GENERALES -->
+        <app-valores-generales *ngIf="activeTab === 'general'"></app-valores-generales>
+
+        <!-- TAB: CAMPOS ADICIONALES -->
+        <app-campos-adicionales *ngIf="activeTab === 'camposAdicionales'"></app-campos-adicionales>
+
+        <!-- TAB: PERIODO -->
+        <app-periodo *ngIf="activeTab === 'periodo'"></app-periodo>
+
+        <!-- TAB: INCREMENTO SALARIAL -->
+        <app-incremento-salarial *ngIf="activeTab === 'incrementoSalarial'"></app-incremento-salarial>
+
+
+        <!-- TAB 2: ESTRUCTURAS SALARIALES -->
+        <div *ngIf="activeTab === 'estructuras'" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <span class="text-emerald-600">#</span> Estructuras Salariales (Odoo Config)
+              </h2>
+              <p class="text-slate-500 text-xs">Administra las estructuras y agrupa los conjuntos de reglas salariales a ser liquidados.</p>
+            </div>
+            <button
+              (click)="createNewStructure()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2">
+              <span>+ Nueva Estructura</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              *ngFor="let struct of structures"
+              [class.border-emerald-500]="selectedStructureId === struct.id"
+              class="bg-white rounded-xl p-5 border border-slate-200 hover:border-slate-300 transition-all space-y-4 shadow-sm">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="text-[10px] bg-emerald-50 text-emerald-700 font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider mb-1 inline-block">
+                    {{ struct.type }}
+                  </span>
+                  <h3 class="font-bold text-slate-900 text-sm">{{ struct.name }}</h3>
+                </div>
+                <button
+                  (click)="selectedStructureId = struct.id"
+                  [class.bg-emerald-600]="selectedStructureId === struct.id"
+                  [class.text-white]="selectedStructureId === struct.id"
+                  [class.bg-slate-100]="selectedStructureId !== struct.id"
+                  [class.text-slate-700]="selectedStructureId !== struct.id"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">
+                  {{ selectedStructureId === struct.id ? 'Seleccionada' : 'Seleccionar' }}
+                </button>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <div>
+                  <span class="block text-[10px] text-slate-400">Usa días laborados</span>
+                  <span class="font-semibold text-slate-800">{{ struct.useWorkedDays ? 'Sí (Activo)' : 'No' }}</span>
+                </div>
+                <div>
+                  <span class="block text-[10px] text-slate-400">Informe Salida</span>
+                  <span class="font-sans text-emerald-600 font-semibold">{{ struct.reportName }}</span>
+                </div>
+              </div>
+
+              <div>
+                <span class="text-xs font-semibold text-slate-700 block mb-2">Reglas Salariales Asociadas ({{ struct.rules.length }}):</span>
+                <div class="flex flex-wrap gap-1.5">
+                  <span *ngFor="let ruleId of struct.rules" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-1 rounded font-sans">
+                    {{ getRuleCodeById(ruleId) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: REGLAS SALARIALES & PYTHON EDITOR -->
+        <div *ngIf="activeTab === 'reglas'" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <span class="text-emerald-600">#</span> Reglas Salariales y Compilador de Fórmulas
+              </h2>
+              <p class="text-slate-500 text-xs">Edita el código para configurar fórmulas dinámicas. Los cambios se compilan inmediatamente.</p>
+            </div>
+            <button
+              (click)="addNewRule()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-all">
+              + Añadir Nueva Regla
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+            <div class="xl:col-span-5 space-y-2 max-h-[500px] overflow-y-auto pr-1">
+              <div
+                *ngFor="let rule of rules"
+                (click)="selectedRuleId = rule.id"
+                [class]="'p-3 cursor-pointer transition-all flex items-center justify-between rounded-xl border ' + (selectedRuleId === rule.id ? 'bg-emerald-50 border-emerald-300' : 'bg-white hover:bg-slate-50 border-slate-200')">
+                <div class="space-y-1">
+                  <div class="flex items-center gap-2">
+                    <span class="bg-slate-100 text-[10px] text-emerald-700 font-sans font-bold px-1.5 py-0.5 rounded">
+                      {{ rule.code }}
+                    </span>
+                    <span class="font-bold text-xs text-slate-900">{{ rule.name }}</span>
+                  </div>
+                  <span class="text-[10px] text-slate-500 block">{{ rule.category }}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-[9px] bg-slate-100 text-slate-600 font-sans px-1.5 py-0.5 rounded">Seq: {{ rule.sequence }}</span>
+                  <span class="block text-[8px] text-slate-400 mt-0.5">D: {{ rule.debitAccount }} / C: {{ rule.creditAccount }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="xl:col-span-7 bg-white rounded-2xl p-5 border border-slate-200 space-y-4">
+              <div *ngIf="activeRule" class="space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                  <div>
+                    <span class="text-[10px] text-emerald-600 font-sans block font-bold">Editando Regla: {{ activeRule.code }}</span>
+                    <h3 class="text-sm font-bold text-slate-900">{{ activeRule.name }}</h3>
+                  </div>
+                  <button
+                    (click)="deleteRule(activeRule.id)"
+                    class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-2.5 py-1 rounded-lg text-xs transition-all">
+                    Eliminar Regla
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label class="block text-slate-500 text-[10px] font-semibold uppercase mb-1">Nombre</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="activeRule.name"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white">
+                  </div>
+                  <div>
+                    <label class="block text-slate-500 text-[10px] font-semibold uppercase mb-1">Código Odoo</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="activeRule.code"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-emerald-700 font-sans font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white">
+                  </div>
+                  <div>
+                    <label class="block text-slate-500 text-[10px] font-semibold uppercase mb-1">Secuencia Cálculo</label>
+                    <input
+                      type="number"
+                      [(ngModel)]="activeRule.sequence"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 font-sans focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white">
+                  </div>
+                  <div>
+                    <label class="block text-slate-500 text-[10px] font-semibold uppercase mb-1">Categoría</label>
+                    <select
+                      [(ngModel)]="activeRule.category"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white">
+                      <option value="Básico">Básico</option>
+                      <option value="Bruto">Bruto</option>
+                      <option value="Subsidio">Subsidio</option>
+                      <option value="Bonificación">Bonificación</option>
+                      <option value="Deducción">Deducción</option>
+                      <option value="Retención">Retención</option>
+                      <option value="Neto">Neto</option>
+                      <option value="Contribución de la empresa">Contribución de la empresa</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-slate-500 text-[10px] font-semibold uppercase mb-1">Cuenta Débito</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="activeRule.debitAccount"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white">
+                  </div>
+                  <div>
+                    <label class="block text-slate-500 text-[10px] font-semibold uppercase mb-1">Cuenta Crédito</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="activeRule.creditAccount"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white">
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <div class="flex justify-between items-center">
+                    <label class="block text-slate-500 text-[10px] font-semibold uppercase">Código Python de Cálculo</label>
+                    <span class="text-[9px] text-emerald-600 font-sans font-bold">Tipo: Código Python</span>
+                  </div>
+
+                  <div class="relative rounded-xl overflow-hidden border border-slate-200">
+                    <div class="bg-slate-50 text-slate-500 px-4 py-2 text-[10px] font-sans border-b border-slate-200 flex justify-between">
+                      <span>Expresión: result = ...</span>
+                      <span class="text-emerald-600 font-semibold">Odoo Sandbox Executable</span>
+                    </div>
+                    <textarea
+                      rows="5"
+                      [(ngModel)]="activeRule.pythonCode"
+                      class="w-full bg-slate-900 text-emerald-400 font-sans text-xs p-4 focus:outline-none focus:ring-0 leading-relaxed"></textarea>
+                  </div>
+
+                  <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Glosario de Variables Disponibles:</span>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[10px] text-slate-600 font-sans">
+                      <div><strong class="text-slate-950 font-semibold">WAGE</strong>: Sueldo Básico</div>
+                      <div><strong class="text-slate-950 font-semibold">DAYS</strong>: Días Laborados</div>
+                      <div><strong class="text-slate-950 font-semibold">SMV</strong>: Sueldo Mín. Vital</div>
+                      <div><strong class="text-slate-950 font-semibold">UIT</strong>: UIT Vigente</div>
+                      <div><strong class="text-slate-950 font-semibold">ASIG_FAM</strong>: Asignación Fam.</div>
+                      <div><strong class="text-slate-950 font-semibold">VALES</strong>: Vales Alimentos</div>
+                      <div><strong class="text-slate-950 font-semibold">RET_JUDIC</strong>: Reten. Alimentos</div>
+                      <div><strong class="text-slate-950 font-semibold">PENSION</strong>: Tasa Pensiones</div>
+                      <div><strong class="text-slate-950 font-semibold">BASIC</strong>: Subtotal Básico</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="!activeRule" class="h-64 flex flex-col justify-center items-center text-center text-slate-400">
+                <svg class="w-10 h-10 text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <p class="text-xs">Selecciona o crea una regla para editar su fórmula salarial.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: TIPOS DE EMPLEADOS -->
+        <div *ngIf="activeTab === 'empleados'" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <span class="text-emerald-600">#</span> Tipos de Empleados (CENS-Odoo Config)
+              </h2>
+              <p class="text-slate-500 text-xs">Administra las clasificaciones de contratos y su ID correspondiente en Odoo.</p>
+            </div>
+            <button
+              (click)="addEmployeeType()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-all">
+              + Añadir Tipo de Empleado
+            </button>
+          </div>
+
+          <div class="overflow-hidden border border-slate-200 rounded-2xl bg-white shadow-sm">
+            <table class="min-w-full divide-y divide-slate-200 text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px] font-bold">
+                <tr>
+                  <th class="px-6 py-4">ID de Odoo</th>
+                  <th class="px-6 py-4">Nombre de Tipo de Empleado</th>
+                  <th class="px-6 py-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 font-medium">
+                <tr *ngFor="let type of employeeTypes" class="hover:bg-slate-50 transition-all">
+                  <td class="px-6 py-4 font-sans font-semibold text-emerald-600"># {{ type.id }}</td>
+                  <td class="px-6 py-4 text-slate-900 font-semibold">{{ type.name }}</td>
+                  <td class="px-6 py-4 text-right">
+                    <button
+                      (click)="deleteEmployeeType(type.id)"
+                      class="text-red-500 hover:text-red-700 text-xs font-bold transition-all">
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 5: SISTEMA DE PENSIONES -->
+        <div *ngIf="activeTab === 'pensiones'" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span class="text-emerald-600">#</span> Sistemas de Pensiones (AFP / ONP)
+            </h2>
+            <p class="text-slate-500 text-xs">Modifica los porcentajes retenidos según lo publicado periódicamente por la SBS.</p>
+          </div>
+
+          <!-- ONP -->
+          <div class="bg-gradient-to-r from-slate-50 to-indigo-50 rounded-2xl p-5 border border-indigo-200">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="bg-indigo-600 text-white text-xs font-sans px-2.5 py-1 rounded font-bold uppercase tracking-wider">ONP</span>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Oficina de Normalización Previsional</h3>
+                <p class="text-xs text-slate-500">Descuento único porcentual plano.</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+              <div>
+                <label class="block text-slate-600 text-[10px] font-semibold uppercase mb-1">Tasa Descuento ONP (%)</label>
+                <div class="relative">
+                  <input
+                    type="number"
+                    [(ngModel)]="onpPct"
+                    class="w-full bg-white border border-slate-300 rounded-xl py-2 px-4 font-sans font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <span class="absolute right-3.5 top-2 text-slate-400 font-bold">%</span>
+                </div>
+              </div>
+              <div class="md:col-span-2">
+                <p class="text-xs text-slate-600 leading-relaxed bg-white p-3 rounded-xl border border-indigo-100">
+                  La ONP no tiene primas de seguro ni comisiones por flujo, se aplica sobre la remuneración asegurable de manera lineal.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- AFP List -->
+          <div class="space-y-4">
+            <h3 class="text-xs font-bold uppercase text-slate-400 tracking-widest">Administradoras de Fondos de Pensiones (AFP)</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div *ngFor="let afp of afps" class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <span class="font-bold text-sm text-slate-900">{{ afp.name }}</span>
+                  <span class="text-[9px] bg-emerald-50 text-emerald-700 font-sans font-bold px-2 py-0.5 rounded-full border border-emerald-200">SBS Activa</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                  <div>
+                    <label class="block text-[9px] text-slate-400 uppercase font-bold">Aporte Oblig.</label>
+                    <input
+                      type="number"
+                      [(ngModel)]="afp.aporte"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-center font-sans text-xs text-slate-950 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                  </div>
+                  <div>
+                    <label class="block text-[9px] text-slate-400 uppercase font-bold">Seguro (SIS)</label>
+                    <input
+                      type="number"
+                      [(ngModel)]="afp.seguro"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-center font-sans text-xs text-slate-950 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                  </div>
+                  <div>
+                    <label class="block text-[9px] text-slate-400 uppercase font-bold">Comisión</label>
+                    <input
+                      type="number"
+                      [(ngModel)]="afp.comision"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-center font-sans text-xs text-slate-950 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                  </div>
+                </div>
+
+                <div class="bg-slate-50 rounded-lg p-2.5 flex justify-between items-center text-xs">
+                  <span class="text-slate-500">Total Descuento:</span>
+                  <span class="font-sans text-emerald-700 font-semibold">{{ afp.aporte + afp.seguro + afp.comision | number:'1.2-2' }} %</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 6: SANDBOX SIMULADOR DE BOLETA -->
+        <div *ngIf="activeTab === 'simulador'" class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+          <div class="xl:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Variables del Trabajador</h2>
+              <p class="text-slate-500 text-xs mt-0.5">Define los parámetros de prueba para ver el cálculo en base a tus fórmulas.</p>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-slate-500 text-[10px] font-semibold uppercase">Estructura Salarial Utilizada</label>
+              <select
+                [(ngModel)]="selectedStructureId"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-900 font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                <option *ngFor="let s of structures" [value]="s.id">{{ s.name }}</option>
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-slate-500 text-[10px] font-semibold uppercase">Tipo de Empleado (Contrato)</label>
+              <select
+                [(ngModel)]="simEmployeeTypeId"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                <option *ngFor="let t of employeeTypes" [value]="t.id">{{ t.name }} (ID: {{ t.id }})</option>
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-slate-500 text-[10px] font-semibold uppercase">Sueldo del Contrato ($)</label>
+              <div class="relative">
+                <span class="absolute left-3.5 top-2.5 text-slate-400 font-bold text-xs">$</span>
+                <input
+                  type="number"
+                  [(ngModel)]="simSalary"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-9 pr-4 font-sans text-sm font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-slate-500 text-[10px] font-semibold uppercase">Días Computados / Laborados</label>
+              <input
+                type="number"
+                min="1"
+                max="30"
+                [(ngModel)]="simDays"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 font-sans text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <div>
+                <span class="text-xs font-semibold text-slate-700 block">¿Tiene Hijos? (Asig. Familiar)</span>
+                <span class="text-[10px] text-slate-500">Calcula 10% de SMV sobre el sueldo bruto.</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="simHasChildren"
+                  class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+              </label>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-slate-500 text-[10px] font-semibold uppercase">Régimen Pensionario</label>
+              <select
+                [(ngModel)]="simPensionType"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                <option value="onp">ONP (Público)</option>
+                <option *ngFor="let afp of afps" [value]="afp.id">{{ afp.name }}</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-500 text-[9px] font-semibold uppercase mb-1">Vales Alimentación</label>
+                <input
+                  type="number"
+                  [(ngModel)]="simVales"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 font-sans text-xs text-slate-900">
+              </div>
+              <div>
+                <label class="block text-slate-500 text-[9px] font-semibold uppercase mb-1">Retención Alimentos</label>
+                <input
+                  type="number"
+                  [(ngModel)]="simRetJudicial"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 font-sans text-xs text-slate-900">
+              </div>
+            </div>
+          </div>
+
+          <div class="xl:col-span-7 space-y-4">
+            <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+              <div class="bg-slate-50 p-6 flex justify-between items-start border-b border-slate-200">
+                <div>
+                  <span class="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">Planilla Generada Exitosamente</span>
+                  <h3 class="text-lg font-bold text-slate-900">BOLETA SIMULADA DE TRABAJADOR</h3>
+                  <p class="text-[11px] text-slate-500">Estructura: <strong class="text-slate-800">{{ getSelectedStructureName() }}</strong></p>
+                </div>
+                <div class="text-right">
+                  <span class="bg-emerald-55 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full text-[11px] font-semibold">
+                    Odoo 16+ Engine
+                  </span>
+                  <span class="block text-[10px] text-slate-400 mt-1 font-sans">USD / Local Currency</span>
+                </div>
+              </div>
+
+              <div class="p-6 space-y-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4 border-b border-slate-200 text-[11px] text-slate-500">
+                  <div>
+                    <span>Tipo Contrato:</span>
+                    <span class="block text-slate-900 font-semibold">{{ getSelectedEmployeeTypeName() }}</span>
+                  </div>
+                  <div>
+                    <span>Días Base:</span>
+                    <span class="block text-slate-900 font-sans font-semibold">{{ simDays }} / 30</span>
+                  </div>
+                  <div>
+                    <span>Régimen Pensionario:</span>
+                    <span class="block text-slate-900 font-semibold uppercase">{{ simPensionType }}</span>
+                  </div>
+                  <div>
+                    <span>Tasa Aplicable:</span>
+                    <span class="block text-emerald-700 font-sans font-bold">{{ activePensionPct | number:'1.2-2' }} %</span>
+                  </div>
+                </div>
+
+                <div class="space-y-3">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 pb-1.5 flex justify-between">
+                    <span>Resultados del Cálculo de Fórmulas</span>
+                    <span class="text-[9px] text-slate-400 font-sans">Orden por Secuencia de Regla</span>
+                  </h4>
+
+                  <div class="space-y-2">
+                    <div *ngFor="let item of computedPayrollLines" class="flex items-center justify-between text-xs p-2.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition-all shadow-sm">
+                      <div class="space-y-0.5">
+                        <div class="flex items-center gap-2">
+                          <span class="bg-slate-200 text-[9px] text-slate-700 font-sans px-1.5 py-0.5 rounded">
+                            {{ item.code }}
+                          </span>
+                          <span class="font-bold text-slate-900">{{ item.name }}</span>
+                        </div>
+                        <span class="text-[9px] text-slate-500 block">{{ item.category }} · Cuenta: {{ item.debitAccount }}</span>
+                      </div>
+                      <div class="text-right">
+                        <span
+                          [class.text-emerald-700]="item.category === 'Básico' || item.category === 'Bruto' || item.category === 'Bonificación' || item.category === 'Subsidio'"
+                          [class.text-red-600]="item.category === 'Deducción' || item.category === 'Retención'"
+                          [class.text-slate-950]="item.category === 'Neto'"
+                          [class.text-slate-600]="item.category === 'Contribución de la empresa'"
+                          class="font-sans font-bold text-sm">
+                          $ {{ item.value | number:'1.2-2' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-white flex justify-between items-center shadow-lg">
+                  <div>
+                    <span class="text-xs text-emerald-400 uppercase font-black tracking-wider">Sueldo Neto a Transferir</span>
+                    <span class="block text-[10px] text-slate-400 mt-0.5">Suma líquida post-deducciones y retenciones de ley</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-xl font-sans font-bold text-white">$ {{ getNetSalaryValue() | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-4 text-xs shadow-sm">
+              <div class="bg-emerald-50 text-emerald-700 p-2.5 rounded-xl border border-emerald-200 font-black font-sans">
+                LOGS
+              </div>
+              <div>
+                <span class="font-bold text-slate-900 block">Compilación de Fórmulas Odoo Exitosa</span>
+                <p class="text-slate-500 text-[11px]">
+                  Se procesaron {{ computedPayrollLines.length }} reglas salariales secuenciales para el tipo de empleado ID {{ simEmployeeTypeId }}.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

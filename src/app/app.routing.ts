@@ -2,6 +2,7 @@ import { Route } from '@angular/router';
 import { authGuard, noAuthGuard } from 'app/core/auth/auth.guard';
 import { LayoutComponent } from 'app/layout/layout.component';
 import { InitialDataResolver } from 'app/app.resolvers';
+import { MainModule } from './modules/parametrizacion/main/main.module';
 
 // @formatter:off
 /* eslint-disable max-len */
@@ -110,6 +111,9 @@ export const appRoutes: Route[] = [
                 {path: 'contrato', loadChildren: () => import('app/modules/gestionPersonal/contrato/contrato.module').then(m => m.ContratoModule)},
                 {path: 'registro-usuario', loadChildren: () => import('app/modules/gestionPersonal/registro-usuario/registro-usuario.module').then(m => m.RegistroUsuarioModule)},
             ]},
+
+            // Parametrizacion
+            {path: 'parametrizacion', loadChildren: () => import('app/modules/parametrizacion/main/main.module').then(m => m.MainModule)},
 
             // Mantenimiento
             {path: 'mantenimiento', children: [

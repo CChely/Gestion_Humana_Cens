@@ -1,0 +1,920 @@
+<!-- Contenedor Principal (Tipografía Sans Integrada) -->
+<div class="space-y-6 font-sans">
+    <!-- Breadcrumbs and Header -->
+  <div class="flex flex-col gap-1">
+    <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+      <span>Parametrización</span>
+      <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      <span>Parámetros de nómina</span>
+      <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      <span class="text-blue-600 font-semibold">Conceptos</span>
+    </div>
+     <h2 class="text-xl font-bold text-slate-900 tracking-tight mt-1">Conceptos</h2>
+     <p class="text-slate-500 text-[11px] mt-1 leading-relaxed max-w-4xl">
+       Configuración dinámica de haberes, descuentos y otros conceptos que intervienen en el cálculo de planillas.
+     </p>
+  </div>
+
+  <!-- Main Card Container -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <!-- Top Action Panel: Search, Toggles, and Actions -->
+    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/50">
+      
+      <!-- Search Box -->
+      <div class="relative w-full sm:max-w-md">
+        <span class="absolute left-3.5 top-2.5 text-slate-400">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </span>
+        <input 
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="currentPage = 1"
+          placeholder="Buscar por concepto, alias o PLAME..."
+          class="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-semibold placeholder-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+      </div>
+
+      <!-- Right Control buttons: Segmented Toggle and Buttons -->
+      <div class="flex items-center gap-2 flex-wrap shrink-0 justify-end">
+        <!-- View Toggle Segmented Control -->
+        <div class="bg-slate-100 p-0.5 rounded-xl border border-slate-200 flex items-center shrink-0">
+          <button
+            (click)="showJsonView = false"
+            [class]="!showJsonView ? 'bg-white text-slate-800 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span>Tabla</span>
+          </button>
+          <button
+            (click)="showJsonView = true"
+            [class]="showJsonView ? 'bg-white text-slate-800 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            <span>JSON</span>
+          </button>
+        </div>
+
+        <!-- Acciones dropdown -->
+        <button 
+          class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+          <span>Acciones</span>
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <!-- Filtrar button -->
+        <button 
+          class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+          <span>Filtrar</span>
+          <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-1">0</span>
+        </button>
+
+        <!-- + Agregar Button -->
+        <button 
+          *ngIf="!showJsonView"
+          (click)="openAddModal()"
+          class="bg-blue-600 hover:bg-blue-500 text-white rounded-xl px-4 py-2 text-xs font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 transition-all shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Agregar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW: JSON -->
+    <div *ngIf="showJsonView" class="p-6 bg-slate-900 text-blue-400 font-mono text-[11px] overflow-x-auto">
+      <pre>{{ list | json }}</pre>
+    </div>
+
+    <!-- VIEW 1: TABLA DE DATOS -->
+    <div *ngIf="!showJsonView" class="p-0">
+      <div class="overflow-x-auto border border-slate-100 rounded-xl bg-white m-6">
+        <table class="min-w-full divide-y divide-slate-200 text-left text-xs font-medium text-slate-700">
+          <thead class="bg-slate-50 text-slate-400 uppercase tracking-widest text-[9px] font-bold">
+            <tr>
+              <th class="py-5 pl-6 pr-3 w-8">
+                <input type="checkbox" class="rounded text-blue-600 focus:ring-blue-500 border-slate-300 w-4 h-4 cursor-pointer" />
+              </th>
+              
+              <!-- Columnas Ordenables -->
+              <th (click)="setSort('NOMBRE')" class="py-5 px-6 cursor-pointer hover:bg-slate-100/50 transition-colors w-80">
+                <div class="flex items-center gap-1.5">
+                  <span>Concepto</span>
+                  <svg class="w-3.5 h-3.5 text-slate-400" [class.text-blue-600]="sortField === 'NOMBRE'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" [d]="sortField === 'NOMBRE' && sortDirection === 'desc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+                  </svg>
+                </div>
+              </th>
+
+              <th (click)="setSort('ALIAS')" class="py-5 px-6 cursor-pointer hover:bg-slate-100/50 transition-colors w-40">
+                <div class="flex items-center gap-1.5">
+                  <span>Alias</span>
+                  <svg class="w-3.5 h-3.5 text-slate-400" [class.text-blue-600]="sortField === 'ALIAS'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" [d]="sortField === 'ALIAS' && sortDirection === 'desc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+                  </svg>
+                </div>
+              </th>
+
+              <th (click)="setSort('PLAME.CODIGO')" class="py-5 px-6 cursor-pointer hover:bg-slate-100/50 transition-colors w-40">
+                <div class="flex items-center gap-1.5">
+                  <span>ID PLAME</span>
+                  <svg class="w-3.5 h-3.5 text-slate-400" [class.text-blue-600]="sortField === 'PLAME.CODIGO'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" [d]="sortField === 'PLAME.CODIGO' && sortDirection === 'desc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+                  </svg>
+                </div>
+              </th>
+
+              <th (click)="setSort('CLASECONCEPTO.DESCRIPCION')" class="py-5 px-6 cursor-pointer hover:bg-slate-100/50 transition-colors w-52">
+                <div class="flex items-center gap-1.5">
+                  <span>Clase</span>
+                  <svg class="w-3.5 h-3.5 text-slate-400" [class.text-blue-600]="sortField === 'CLASECONCEPTO.DESCRIPCION'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" [d]="sortField === 'CLASECONCEPTO.DESCRIPCION' && sortDirection === 'desc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+                  </svg>
+                </div>
+              </th>
+
+              <th (click)="setSort('SECUENCIA_CALCULO')" class="py-5 px-6 cursor-pointer hover:bg-slate-100/50 transition-colors w-40">
+                <div class="flex items-center gap-1.5">
+                  <span>Secuencia</span>
+                  <svg class="w-3.5 h-3.5 text-slate-400" [class.text-blue-600]="sortField === 'SECUENCIA_CALCULO'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" [d]="sortField === 'SECUENCIA_CALCULO' && sortDirection === 'desc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+                  </svg>
+                </div>
+              </th>
+
+              <th (click)="setSort('FLG_ACTIVO')" class="py-5 px-6 cursor-pointer hover:bg-slate-100/50 transition-colors w-40">
+                <div class="flex items-center gap-1.5">
+                  <span>Estado</span>
+                  <svg class="w-3.5 h-3.5 text-slate-400" [class.text-blue-600]="sortField === 'FLG_ACTIVO'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" [d]="sortField === 'FLG_ACTIVO' && sortDirection === 'desc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+                  </svg>
+                </div>
+              </th>
+
+              <th class="py-5 pr-6 pl-4 text-right w-24">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+            <tr 
+              *ngFor="let item of getPaginatedList(); let i = index" 
+              class="hover:bg-slate-50/50 transition-colors group">
+              
+              <td class="py-5 pl-6 pr-3">
+                <input type="checkbox" class="rounded text-blue-600 focus:ring-blue-500 border-slate-300 w-4 h-4 cursor-pointer" />
+              </td>
+
+              <!-- Concepto / Nombre -->
+              <td class="py-5 px-6 font-bold text-slate-900">
+                {{ item.NOMBRE }}
+              </td>
+
+              <!-- Alias -->
+              <td class="py-5 px-6 font-semibold text-slate-600">
+                {{ item.ALIAS }}
+              </td>
+
+              <!-- ID PLAME -->
+              <td class="py-5 px-6 font-medium text-slate-500">
+                {{ item.PLAME?.CODIGO || 'N/A' }}
+              </td>
+
+              <!-- Clase -->
+              <td class="py-5 px-6">
+                <span class="text-slate-600 font-medium">{{ item.CLASECONCEPTO?.DESCRIPCION }}</span>
+              </td>
+
+              <!-- SECUENCIA (Edición Inline con Input numérico interactivo) -->
+              <td class="py-5 px-6">
+                <div class="relative w-24">
+                  <input 
+                    type="number"
+                    [value]="item.SECUENCIA_CALCULO"
+                    (change)="updateInlineSequence(item, $event)"
+                    min="1"
+                    class="w-full px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-center font-bold text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-xs" />
+                </div>
+              </td>
+
+              <!-- Estado -->
+              <td class="py-5 px-6">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                  [ngClass]="item.FLG_ACTIVO ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'">
+                  <span class="w-1.5 h-1.5 rounded-full" [ngClass]="item.FLG_ACTIVO ? 'bg-emerald-600 animate-pulse' : 'bg-slate-400'"></span>
+                  {{ item.FLG_ACTIVO ? 'Activo' : 'Inactivo' }}
+                </div>
+              </td>
+
+              <!-- Acciones individuales (Botón Editar) -->
+              <td class="py-5 pr-6 pl-4 text-right">
+                <div class="relative inline-block text-left">
+                  <!-- Botón Editar Premium Directo -->
+                  <button 
+                    (click)="openEditModal(item)"
+                    class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200/80 hover:border-blue-200 rounded-xl text-[11px] font-bold transition-all shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    <span>Editar</span>
+                  </button>
+
+                  <!-- Botón Eliminar Rápido -->
+                  <button 
+                    (click)="openDeleteConfirm(item)"
+                    class="ml-1.5 inline-flex items-center justify-center p-1.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200/60 hover:border-rose-100 rounded-xl transition-all shadow-sm"
+                    title="Eliminar Concepto">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Estado Vacío -->
+            <tr *ngIf="getFilteredList().length === 0">
+              <td colspan="8" class="py-12 text-center text-slate-400">
+                <div class="flex flex-col items-center justify-center space-y-2">
+                  <svg class="w-10 h-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="text-sm font-semibold text-slate-500">No se encontraron conceptos coincidentes</span>
+                  <span class="text-[11px] text-slate-400">Prueba con otros términos de búsqueda o agrega un nuevo concepto.</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div *ngIf="getFilteredList().length > 0" class="bg-slate-50/70 border-t border-slate-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-slate-500">
+        <div class="flex items-center gap-2">
+          <span>Mostrar</span>
+          <select 
+            [(ngModel)]="pageSize"
+            (change)="currentPage = 1"
+            class="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-emerald-500 font-bold text-slate-700">
+            <option [value]="5">5 filas</option>
+            <option [value]="10">10 filas</option>
+            <option [value]="25">25 filas</option>
+          </select>
+          <span>de {{ getFilteredList().length }} conceptos registrados</span>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button 
+            (click)="setPage(currentPage - 1)" 
+            [disabled]="currentPage === 1"
+            class="p-2 border border-slate-200 bg-white hover:bg-slate-50 rounded-xl transition-all disabled:opacity-40 disabled:hover:bg-white text-slate-600">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <div class="px-3 py-1 bg-white border border-slate-200 rounded-xl text-slate-800 font-bold">
+            Página {{ currentPage }} de {{ getTotalPages() }}
+          </div>
+
+          <button 
+            (click)="setPage(currentPage + 1)" 
+            [disabled]="currentPage === getTotalPages()"
+            class="p-2 border border-slate-200 bg-white hover:bg-slate-50 rounded-xl transition-all disabled:opacity-40 disabled:hover:bg-white text-slate-600">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA 2: CONSOLA JSON OBSIDIAN (Switch toggled) -->
+  <div *ngIf="showJsonView" class="bg-slate-900 border-t border-slate-800 p-6 flex flex-col gap-4 font-mono text-[12px] text-[#d4d4d4]">
+    <!-- Obsidian Panel Header -->
+    <div class="bg-[#252526] border-b border-[#2d2d2d] px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 select-none">
+      <div class="flex items-center gap-2.5">
+        <span class="flex items-center gap-1.5 shrink-0">
+          <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
+          <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
+          <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
+        </span>
+        <div class="h-4 w-px bg-[#3e3e3e]"></div>
+        <span class="text-[#858585] text-xs font-sans tracking-wide">ENDPOINT:</span>
+        <span class="text-[#4fc1ff] select-text text-xs tracking-wider break-all">https://payroll.pipolfy.com/Concepto/RegistroConceptos</span>
+      </div>
+
+      <div class="flex items-center gap-2.5 w-full sm:w-auto shrink-0 justify-end">
+        <button
+          (click)="toggleJsonCollapse()"
+          class="bg-[#2d2d2d] hover:bg-[#3e3e3e] text-[#cccccc] font-sans font-semibold text-xs px-3.5 py-1.5 rounded-lg border border-[#3e3e3e] transition-all">
+          {{ isJsonCollapsed ? 'Expandir todo' : 'Colapsar todo' }}
+        </button>
+        <button
+          (click)="copyJsonToClipboard()"
+          class="bg-blue-600 hover:bg-blue-500 text-white font-sans font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-md shadow-blue-900/20">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+          <span>Copiar JSON</span>
+        </button>
+      </div>
+    </div>
+
+      <!-- JSON Viewer con Plegado -->
+      <div class="p-6 overflow-y-auto max-h-[600px] leading-relaxed text-[#c5c6c8]">
+        <div><span class="text-[#f8f8f2]">{{ '{' }}</span></div>
+        <div class="pl-4">
+          <span class="text-[#ce9178]">"lista"</span><span class="text-[#f8f8f2]">: [</span>
+          
+          <!-- Loop de Elementos -->
+          <div *ngFor="let item of getPaginatedList(); let idx = index; let last = last" class="pl-4 border-l border-neutral-800 hover:border-blue-500/30 transition-colors py-1 relative">
+            
+            <!-- Indicador Plegable Item -->
+            <button 
+              (click)="toggleItemCollapse(idx)"
+              class="absolute left-[-12px] top-1.5 text-neutral-500 hover:text-blue-500 focus:outline-none transition-colors">
+              <svg class="w-3 h-3 transition-transform duration-100" [class.rotate-[-90deg]]="isItemCollapsed(idx)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <!-- Cabecera del Item -->
+            <div>
+              <span class="text-[#f8f8f2]">{{ '{' }}</span> 
+              <span *ngIf="isItemCollapsed(idx)" class="text-neutral-500 text-xs italic"> /* Concepto colapsado: {{item.NOMBRE}} */ {{ '}' }}{{ !last ? ',' : '' }}</span>
+            </div>
+
+            <!-- Nivel Interno Item -->
+            <div *ngIf="!isItemCollapsed(idx)" class="pl-4 space-y-0.5">
+              <div><span class="text-[#ce9178]">"CONCEPTO_ID"</span>: <span class="text-[#b5cea8]">{{ item.CONCEPTO_ID }}</span>,</div>
+              <div><span class="text-[#ce9178]">"PLAME_ID"</span>: <span class="text-[#569cd6]">null</span>,</div>
+              <div><span class="text-[#ce9178]">"CLASECONCEPTO_ID"</span>: <span class="text-[#569cd6]">null</span>,</div>
+              <div><span class="text-[#ce9178]">"SECUENCIA_CALCULO"</span>: <span class="text-[#b5cea8]">{{ item.SECUENCIA_CALCULO }}</span>,</div>
+              <div><span class="text-[#ce9178]">"CODIGO"</span>: <span class="text-[#ce9178]">"{{ item.CODIGO }}"</span>,</div>
+              <div><span class="text-[#ce9178]">"NOMBRE"</span>: <span class="text-[#ce9178]">"{{ item.NOMBRE }}"</span>,</div>
+              <div><span class="text-[#ce9178]">"ALIAS"</span>: <span class="text-[#ce9178]">"{{ item.ALIAS }}"</span>,</div>
+              <div><span class="text-[#ce9178]">"FLG_TIPO"</span>: <span class="text-[#b5cea8]">{{ item.FLG_TIPO }}</span>,</div>
+              <div><span class="text-[#ce9178]">"FLG_DIASBASEMES"</span>: <span class="text-[#b5cea8]">{{ item.FLG_DIASBASEMES }}</span>,</div>
+              <div><span class="text-[#ce9178]">"FLG_ACTIVO"</span>: <span class="text-[#569cd6]">{{ item.FLG_ACTIVO }}</span>,</div>
+              <div><span class="text-[#ce9178]">"FLG_TIPO_DESC"</span>: <span class="text-[#ce9178]">"{{ item.FLG_TIPO_DESC }}"</span>,</div>
+              <div><span class="text-[#ce9178]">"FLG_DIASBASEMES_DESC"</span>: <span class="text-[#ce9178]">"{{ item.FLG_DIASBASEMES_DESC }}"</span>,</div>
+              
+              <!-- Plegable PLAME -->
+              <div class="relative">
+                <button 
+                  (click)="toggleSubObjectCollapse(idx)"
+                  class="absolute left-[-12px] top-1 text-neutral-600 hover:text-blue-500 focus:outline-none transition-colors">
+                  <svg class="w-2.5 h-2.5 transition-transform duration-100" [class.rotate-[-90deg]]="isSubObjectCollapsed(idx)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <span class="text-[#ce9178]">"PLAME"</span>: 
+                <span *ngIf="isSubObjectCollapsed(idx)" class="text-neutral-500 text-xs italic"> {{ '{' }} ... {{ '}' }},</span>
+                <div *ngIf="!isSubObjectCollapsed(idx)" class="pl-4">
+                  <span class="text-[#f8f8f2]">{{ '{' }}</span>
+                  <div class="pl-4">
+                    <div><span class="text-[#ce9178]">"PLAME_ID"</span>: <span class="text-[#b5cea8]">{{ item.PLAME?.PLAME_ID || 0 }}</span>,</div>
+                    <div><span class="text-[#ce9178]">"CODIGO"</span>: <span class="text-[#ce9178]">"{{ item.PLAME?.CODIGO || '' }}"</span>,</div>
+                    <div><span class="text-[#ce9178]">"DESCRIPCION"</span>: <span class="text-[#ce9178]">"{{ item.PLAME?.DESCRIPCION || '' }}"</span>,</div>
+                    <div><span class="text-[#ce9178]">"DROPDOWNDISPLAY"</span>: <span class="text-[#ce9178]">"{{ item.PLAME?.DROPDOWNDISPLAY || '' }}"</span></div>
+                  </div>
+                  <span class="text-[#f8f8f2]">{{ '}' }},</span>
+                </div>
+              </div>
+
+              <!-- Clase Concepto -->
+              <div>
+                <span class="text-[#ce9178]">"CLASECONCEPTO"</span>: <span class="text-[#f8f8f2]">{{ '{' }}</span>
+                <div class="pl-4">
+                  <div><span class="text-[#ce9178]">"CLASECONCEPTO_ID"</span>: <span class="text-[#b5cea8]">{{ item.CLASECONCEPTO?.CLASECONCEPTO_ID }}</span>,</div>
+                  <div><span class="text-[#ce9178]">"CODIGO"</span>: <span class="text-[#ce9178]">"{{ item.CLASECONCEPTO?.CODIGO }}"</span>,</div>
+                  <div><span class="text-[#ce9178]">"DESCRIPCION"</span>: <span class="text-[#ce9178]">"{{ item.CLASECONCEPTO?.DESCRIPCION }}"</span></div>
+                </div>
+                <span class="text-[#f8f8f2]">{{ '}' }},</span>
+              </div>
+
+              <div><span class="text-[#ce9178]">"FLG_GUARDAREFERENCIAS"</span>: <span class="text-[#569cd6]">{{ item.FLG_GUARDAREFERENCIAS }}</span>,</div>
+              <div><span class="text-[#ce9178]">"FLG_FECHACORTE"</span>: <span class="text-[#569cd6]">{{ item.FLG_FECHACORTE }}</span>,</div>
+              <div><span class="text-[#ce9178]">"SerialKey"</span>: <span class="text-[#ce9178]">"{{ item.SerialKey }}"</span>,</div>
+              <div><span class="text-[#ce9178]">"ESTADO"</span>: <span class="text-[#ce9178]">"{{ item.ESTADO }}"</span></div>
+            </div>
+
+            <!-- Cierre del Item -->
+            <div *ngIf="!isItemCollapsed(idx)">
+              <span class="text-[#f8f8f2]">{{ '}' }}</span>{{ !last ? ',' : '' }}
+            </div>
+          </div>
+
+          <span class="text-[#f8f8f2]">]</span>
+        </div>
+
+        <div>
+          <span class="text-[#ce9178]">"pageSize"</span>: <span class="text-[#b5cea8]">{{ conceptosList.length }}</span>,
+        </div>
+        <div>
+          <span class="text-[#ce9178]">"error"</span>: <span class="text-[#569cd6]">false</span>,
+        </div>
+        <div>
+          <span class="text-[#ce9178]">"msj"</span>: <span class="text-[#569cd6]">null</span>
+        </div>
+        <div><span class="text-[#f8f8f2]">{{ '}' }}</span></div>
+      </div>
+    </div>
+
+  <!-- MODAL: AGREGAR / MODIFICAR CONCEPTO (Wizard/Stepper) -->
+  <div *ngIf="isAddEditOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[90vh]">
+      
+      <!-- Encabezado del Modal con Stepper -->
+      <div class="bg-slate-50 border-b border-slate-200 px-6 py-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-md font-extrabold text-slate-900 flex items-center gap-2">
+            <span class="w-2 h-4 bg-blue-600 rounded inline-block"></span>
+            {{ isEditing ? 'Modificar Concepto' : 'Registrar Concepto' }}
+          </h3>
+          <button 
+            (click)="closeAddEditModal()" 
+            class="text-slate-400 hover:text-slate-650 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Barra de Progreso del Stepper (Premium Wizard) -->
+        <div class="flex items-center justify-between max-w-lg mx-auto relative px-2">
+          <!-- Línea Conectora de Fondo -->
+          <div class="absolute left-6 right-6 top-5 h-0.5 bg-slate-200 -z-10"></div>
+          <!-- Línea Conectora Activa -->
+          <div 
+            class="absolute left-6 top-5 h-0.5 bg-blue-600 transition-all duration-300 -z-10"
+            [style.width.%]="(currentStep - 1) * 32">
+          </div>
+
+          <!-- Pasos -->
+          <button 
+            (click)="goToStep(1)"
+            class="flex flex-col items-center gap-1.5 focus:outline-none group">
+            <div 
+              class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all border-2"
+              [ngClass]="currentStep === 1 
+                ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200' 
+                : currentStep > 1 
+                  ? 'bg-blue-100 border-blue-600 text-blue-700' 
+                  : 'bg-white border-slate-350 text-slate-500'">
+              <span *ngIf="currentStep <= 1">1</span>
+              <svg *ngIf="currentStep > 1" class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider" [ngClass]="currentStep >= 1 ? 'text-blue-700' : 'text-slate-400'">Concepto</span>
+          </button>
+
+          <button 
+            (click)="goToStep(2)"
+            class="flex flex-col items-center gap-1.5 focus:outline-none group">
+            <div 
+              class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all border-2"
+              [ngClass]="currentStep === 2 
+                ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200' 
+                : currentStep > 2 
+                  ? 'bg-blue-100 border-blue-600 text-blue-700' 
+                  : 'bg-white border-slate-350 text-slate-500'">
+              <span *ngIf="currentStep <= 2">2</span>
+              <svg *ngIf="currentStep > 2" class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider" [ngClass]="currentStep >= 2 ? 'text-blue-700' : 'text-slate-400'">Grupos</span>
+          </button>
+
+          <button 
+            (click)="goToStep(3)"
+            class="flex flex-col items-center gap-1.5 focus:outline-none group">
+            <div 
+              class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all border-2"
+              [ngClass]="currentStep === 3 
+                ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200' 
+                : currentStep > 3 
+                  ? 'bg-blue-100 border-blue-600 text-blue-700' 
+                  : 'bg-white border-slate-350 text-slate-500'">
+              <span *ngIf="currentStep <= 3">3</span>
+              <svg *ngIf="currentStep > 3" class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider" [ngClass]="currentStep >= 3 ? 'text-blue-700' : 'text-slate-400'">Acumuladores</span>
+          </button>
+
+          <button 
+            (click)="goToStep(4)"
+            class="flex flex-col items-center gap-1.5 focus:outline-none group">
+            <div 
+              class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all border-2"
+              [ngClass]="currentStep === 4 
+                ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200' 
+                : 'bg-white border-slate-350 text-slate-500'">
+              <span>4</span>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider" [ngClass]="currentStep >= 4 ? 'text-blue-700' : 'text-slate-400'">Planillas</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cuerpo del Modal (Scrollable para formularios de Wizard) -->
+      <div class="p-6 overflow-y-auto flex-1 space-y-5">
+        
+        <!-- STEP 1: CONCEPTO (Datos Generales) -->
+        <div *ngIf="currentStep === 1" class="space-y-4 animate-in fade-in">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Nombre -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Nombre del concepto *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formNombre"
+                placeholder="Ej. Remuneración Básica"
+                class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-semibold text-slate-800" />
+            </div>
+
+            <!-- Alias -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Alias del concepto *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formAlias"
+                placeholder="Ej. BASE"
+                class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-semibold text-slate-800 uppercase" />
+            </div>
+
+            <!-- Tipo -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Tipo *</label>
+              <select 
+                [(ngModel)]="formTipo"
+                class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-semibold text-slate-800 bg-white">
+                <option [value]="1">Fijo</option>
+                <option [value]="2">Variable</option>
+                <option [value]="3">Otros</option>
+              </select>
+            </div>
+
+            <!-- Clase -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Clase *</label>
+              <select 
+                [(ngModel)]="formClaseId"
+                class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-semibold text-slate-800 bg-white">
+                <option *ngFor="let opt of claseOptions" [value]="opt.CLASECONCEPTO_ID">{{ opt.DESCRIPCION }}</option>
+              </select>
+            </div>
+
+            <!-- ID PLAME -->
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">ID PLAME *</label>
+              <select 
+                [(ngModel)]="formPlameId"
+                class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-semibold text-slate-800 bg-white">
+                <option *ngFor="let opt of plameOptions" [value]="opt.PLAME_ID">{{ opt.DROPDOWNDISPLAY }}</option>
+              </select>
+            </div>
+
+            <!-- Día Base Mes (Radios) -->
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Día base mes</label>
+              <div class="flex items-center gap-6 mt-1.5">
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+                  <input 
+                    type="radio" 
+                    name="diasBase" 
+                    [value]="1" 
+                    [(ngModel)]="formDiasBaseMes"
+                    class="text-blue-600 focus:ring-blue-500 border-slate-300 w-4 h-4 cursor-pointer" />
+                  30 días
+                </label>
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+                  <input 
+                    type="radio" 
+                    name="diasBase" 
+                    [value]="2" 
+                    [(ngModel)]="formDiasBaseMes"
+                    class="text-blue-600 focus:ring-blue-500 border-slate-300 w-4 h-4 cursor-pointer" />
+                  Días calendario
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <hr class="border-slate-100 my-4" />
+
+          <!-- Toggles del Paso 1 -->
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="block text-xs font-bold text-slate-800">Guarda referencias</span>
+                <span class="text-[10px] text-slate-400">Permite almacenar trazas del concepto para reportes retroactivos.</span>
+              </div>
+              <button 
+                (click)="formGuardaReferencias = !formGuardaReferencias"
+                class="w-10 h-6 flex items-center rounded-full p-1 transition-all duration-300 focus:outline-none"
+                [ngClass]="formGuardaReferencias ? 'bg-emerald-500 justify-end' : 'bg-slate-200 justify-start'">
+                <span class="w-4 h-4 rounded-full bg-white shadow-md"></span>
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="block text-xs font-bold text-slate-800">Fecha corte</span>
+                <span class="text-[10px] text-slate-400">Aplica cortes proporcionales automáticos en base a días trabajados.</span>
+              </div>
+              <button 
+                (click)="formFechaCorte = !formFechaCorte"
+                class="w-10 h-6 flex items-center rounded-full p-1 transition-all duration-300 focus:outline-none"
+                [ngClass]="formFechaCorte ? 'bg-emerald-500 justify-end' : 'bg-slate-200 justify-start'">
+                <span class="w-4 h-4 rounded-full bg-white shadow-md"></span>
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="block text-xs font-bold text-slate-800">Activo</span>
+                <span class="text-[10px] text-slate-400">Determina si el concepto estará disponible para vincular a planillas.</span>
+              </div>
+              <button 
+                (click)="formActivo = !formActivo"
+                class="w-10 h-6 flex items-center rounded-full p-1 transition-all duration-300 focus:outline-none"
+                [ngClass]="formActivo ? 'bg-emerald-500 justify-end' : 'bg-slate-200 justify-start'">
+                <span class="w-4 h-4 rounded-full bg-white shadow-md"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: GRUPOS (Asociaciones) -->
+        <div *ngIf="currentStep === 2" class="space-y-4 animate-in fade-in">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-450 uppercase tracking-wider">Paso 2: Asociar a Grupos</span>
+            <span class="text-[10px] bg-slate-100 text-slate-650 font-bold px-2 py-0.5 rounded">{{ tempGrupos.length }} Grupos</span>
+          </div>
+
+          <!-- Buscador interno de grupos -->
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+            <input 
+              type="text" 
+              [(ngModel)]="searchGrupoQuery"
+              placeholder="Buscar grupo..."
+              class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-800" />
+          </div>
+
+          <!-- Tabla de Asociaciones a Grupos -->
+          <div class="border border-slate-200 rounded-2xl overflow-hidden max-h-[300px] overflow-y-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 border-b border-slate-200/80 font-bold text-[10px] text-slate-500 uppercase tracking-widest">
+                <tr>
+                  <th class="py-3 px-4">Grupo</th>
+                  <th class="py-3 pr-6 text-right w-24">Activo</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-150 font-semibold">
+                <tr 
+                  *ngFor="let g of getFilteredGroups()" 
+                  [ngClass]="g.FLG_ACTIVO ? 'bg-white' : 'bg-slate-50/40 text-slate-400'"
+                  class="hover:bg-slate-50/70 transition-colors">
+                  <td class="py-3.5 px-4 font-bold" [ngClass]="g.FLG_ACTIVO ? 'text-slate-850' : 'text-slate-400'">
+                    {{ g.DESCRIPCION }}
+                  </td>
+                  <td class="py-3.5 pr-6 text-right">
+                    <button 
+                      (click)="toggleAssociation(g)"
+                      class="w-9 h-5.5 flex items-center rounded-full p-0.5 transition-all duration-200 focus:outline-none inline-block"
+                      [ngClass]="g.FLG_ACTIVO ? 'bg-emerald-500 justify-end' : 'bg-slate-200 justify-start'">
+                      <span class="w-4 h-4 rounded-full bg-white shadow-sm"></span>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="getFilteredGroups().length === 0">
+                  <td colspan="2" class="py-6 text-center text-slate-400 italic">No se encontraron grupos</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- STEP 3: ACUMULADORES -->
+        <div *ngIf="currentStep === 3" class="space-y-4 animate-in fade-in">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-450 uppercase tracking-wider">Paso 3: Asociar a Acumuladores</span>
+            <span class="text-[10px] bg-slate-100 text-slate-650 font-bold px-2 py-0.5 rounded">{{ tempAcumuladores.length }} Acumuladores</span>
+          </div>
+
+          <!-- Buscador interno de acumuladores -->
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+            <input 
+              type="text" 
+              [(ngModel)]="searchAcumuladorQuery"
+              placeholder="Buscar acumulador..."
+              class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-800" />
+          </div>
+
+          <!-- Tabla de Asociaciones a Acumuladores -->
+          <div class="border border-slate-200 rounded-2xl overflow-hidden max-h-[300px] overflow-y-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 border-b border-slate-200/80 font-bold text-[10px] text-slate-500 uppercase tracking-widest">
+                <tr>
+                  <th class="py-3 px-4">Acumulador</th>
+                  <th class="py-3 pr-6 text-right w-24">Activo</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-150 font-semibold">
+                <tr 
+                  *ngFor="let a of getFilteredAcumuladores()" 
+                  [ngClass]="a.FLG_ACTIVO ? 'bg-white' : 'bg-slate-50/40 text-slate-400'"
+                  class="hover:bg-slate-50/70 transition-colors">
+                  <td class="py-3.5 px-4 font-bold" [ngClass]="a.FLG_ACTIVO ? 'text-slate-850' : 'text-slate-400'">
+                    {{ a.DESCRIPCION }}
+                  </td>
+                  <td class="py-3.5 pr-6 text-right">
+                    <button 
+                      (click)="toggleAssociation(a)"
+                      class="w-9 h-5.5 flex items-center rounded-full p-0.5 transition-all duration-200 focus:outline-none inline-block"
+                      [ngClass]="a.FLG_ACTIVO ? 'bg-emerald-500 justify-end' : 'bg-slate-200 justify-start'">
+                      <span class="w-4 h-4 rounded-full bg-white shadow-sm"></span>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="getFilteredAcumuladores().length === 0">
+                  <td colspan="2" class="py-6 text-center text-slate-400 italic">No se encontraron acumuladores</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- STEP 4: PLANILLAS -->
+        <div *ngIf="currentStep === 4" class="space-y-4 animate-in fade-in">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-450 uppercase tracking-wider">Paso 4: Vincular a Planillas</span>
+            <span class="text-[10px] bg-slate-100 text-slate-650 font-bold px-2 py-0.5 rounded">{{ tempPlanillas.length }} Planillas</span>
+          </div>
+
+          <!-- Buscador interno de planillas -->
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+            <input 
+              type="text" 
+              [(ngModel)]="searchPlanillaQuery"
+              placeholder="Buscar planilla..."
+              class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-800" />
+          </div>
+
+          <!-- Tabla de Asociaciones a Planillas -->
+          <div class="border border-slate-200 rounded-2xl overflow-hidden max-h-[300px] overflow-y-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 border-b border-slate-200/80 font-bold text-[10px] text-slate-500 uppercase tracking-widest">
+                <tr>
+                  <th class="py-3 px-4">Planilla / Nómina</th>
+                  <th class="py-3 pr-6 text-right w-24">Vincular</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-150 font-semibold">
+                <tr 
+                  *ngFor="let p of getFilteredPlanillas()" 
+                  [ngClass]="p.FLG_ACTIVO ? 'bg-white' : 'bg-slate-50/40 text-slate-400'"
+                  class="hover:bg-slate-50/70 transition-colors">
+                  <td class="py-3.5 px-4 font-bold" [ngClass]="p.FLG_ACTIVO ? 'text-slate-850' : 'text-slate-400'">
+                    {{ p.DESCRIPCION }}
+                  </td>
+                  <td class="py-3.5 pr-6 text-right">
+                    <button 
+                      (click)="toggleAssociation(p)"
+                      class="w-9 h-5.5 flex items-center rounded-full p-0.5 transition-all duration-200 focus:outline-none inline-block"
+                      [ngClass]="p.FLG_ACTIVO ? 'bg-emerald-500 justify-end' : 'bg-slate-200 justify-start'">
+                      <span class="w-4 h-4 rounded-full bg-white shadow-sm"></span>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="getFilteredPlanillas().length === 0">
+                  <td colspan="2" class="py-6 text-center text-slate-400 italic">No se encontraron planillas</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pie del Modal (Equilibrado py y px según Pipolfy UX) -->
+      <div class="bg-slate-50 border-t border-slate-200 px-6 flex items-center justify-between gap-4" style="padding-top: 18px; padding-bottom: 22px;">
+        <!-- Left: Anterior button -->
+        <div>
+          <button 
+            *ngIf="currentStep > 1"
+            (click)="prevStep()"
+            class="text-slate-550 hover:text-slate-800 text-xs font-bold flex items-center gap-1 transition-all">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Anterior
+          </button>
+        </div>
+
+        <!-- Right: Cancel & Siguiente/Guardar -->
+        <div class="flex items-center gap-2">
+          <button 
+            (click)="closeAddEditModal()"
+            class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold transition-all">
+            Cerrar
+          </button>
+
+          <button 
+            *ngIf="currentStep < 4"
+            (click)="nextStep()"
+            class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1">
+            Siguiente
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          <button 
+            *ngIf="currentStep === 4"
+            (click)="saveConcepto()"
+            class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4.5 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+            Guardar Concepto
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMACIÓN DE ELIMINACIÓN -->
+  <div *ngIf="isDeleteConfirmOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
+      <div class="p-6 text-center space-y-4">
+        <!-- Ícono de Advertencia -->
+        <div class="w-12 h-12 bg-rose-50 border border-rose-100 rounded-full flex items-center justify-center mx-auto text-rose-500">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </div>
+
+        <div class="space-y-1.5">
+          <h4 class="text-md font-extrabold text-slate-900">¿Estás seguro de eliminar este concepto?</h4>
+          <p class="text-xs text-slate-500">
+            Esta acción eliminará de forma permanente el concepto <span class="font-bold text-slate-800">"{{ selectedConcepto?.NOMBRE }}"</span> y sus asociaciones con grupos, acumuladores y planillas.
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer de Confirmación -->
+      <div class="bg-slate-50 border-t border-slate-200 px-6 flex items-center justify-end gap-2" style="padding-top: 18px; padding-bottom: 22px;">
+        <button 
+          (click)="closeDeleteConfirm()"
+          class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-650 rounded-xl text-xs font-bold transition-all">
+          Cancelar
+        </button>
+        <button 
+          (click)="executeDelete()"
+          class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-sm">
+          Sí, eliminar concepto
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIONES FLOTANTES -->
+  <div 
+    *ngIf="toastMessage" 
+    class="fixed bottom-6 right-6 z-55 flex items-center gap-3 px-4.5 py-3 rounded-2xl shadow-xl border text-xs font-bold animate-in fade-in transition-all"
+    [ngClass]="toastType === 'success' 
+      ? 'bg-emerald-50 border-emerald-250 text-emerald-800' 
+      : toastType === 'error' 
+        ? 'bg-rose-50 border-rose-250 text-rose-800' 
+        : 'bg-blue-50 border-blue-250 text-blue-800'">
+    
+    <!-- Toast Icon -->
+    <span class="w-2 h-2 rounded-full inline-block"
+      [ngClass]="toastType === 'success' ? 'bg-emerald-600' : toastType === 'error' ? 'bg-rose-600' : 'bg-blue-600'">
+    </span>
+    
+    <span>{{ toastMessage }}</span>
+  </div>
+</div>
