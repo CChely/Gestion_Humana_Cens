@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, ReplaySubject, tap, take, map, filter } from 'rxjs';
 import { Navigation } from 'app/core/navigation/navigation.types';
-import { AuthService, PermissionParent } from 'app/core/auth/auth.service';
+import { AuthService, PermissionNode } from 'app/core/auth/auth.service';
 import { FuseNavigationItem } from '@fuse/components/navigation';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -55,31 +55,43 @@ export class NavigationService
     }
 
     /**
+     * Map PermissionNode to FuseNavigationItem recursively
+     */
+    private _mapNodeToNavItem(node: PermissionNode): FuseNavigationItem {
+        const hasChildren = node.hijos && node.hijos.length > 0;
+        const isRoot = node.parentId === null;
+
+        let type: 'basic' | 'collapsable' | 'group' = 'basic';
+        if (isRoot) {
+            type = hasChildren ? 'group' : 'basic';
+        } else {
+            type = hasChildren ? 'collapsable' : 'basic';
+        }
+
+        const navItem: FuseNavigationItem = {
+            id: node.id || (node.title || 'menu-item-' + Math.random()).toLowerCase().replace(/ /g, '-'),
+            title: node.title || '',
+            type: type,
+            icon: node.icono || undefined,
+            link: node.ruta ? (node.ruta.startsWith('/') ? node.ruta : '/' + node.ruta) : undefined,
+        };
+
+        if (hasChildren) {
+            navItem.children = node.hijos.map(h => this._mapNodeToNavItem(h));
+        }
+
+        return navItem;
+    }
+
+    /**
      * Update navigation from permissions
      *
      * @param permissions
      * @private
      */
-    private _updateNavigationFromPermissions(permissions: PermissionParent[]): void
+    private _updateNavigationFromPermissions(permissions: PermissionNode[]): void
     {
-        const mappedNavigation: FuseNavigationItem[] = permissions.map((p) => {
-            return {
-                id: p.padre.toLowerCase().replace(/ /g, '-'),
-                title: p.padre,
-                type: p.ruta ? 'basic' : 'group',
-                icon: p.icono,
-                link: p.ruta ? (p.ruta.startsWith('/') ? p.ruta : '/' + p.ruta) : undefined,
-                children: p.hijos?.map((h) => {
-                    return {
-                        id: h.nombre.toLowerCase().replace(/ /g, '-'),
-                        title: h.nombre,
-                        type: h.ruta ? 'basic' : 'collapsable',
-                        icon: h.icono,
-                        link: h.ruta ? (h.ruta.startsWith('/') ? h.ruta : '/' + h.ruta) : undefined
-                    };
-                })
-            };
-        });
+        const mappedNavigation: FuseNavigationItem[] = permissions.map(p => this._mapNodeToNavItem(p));
 
         // Actualizar todos los tipos de navegación con el mismo menú dinámico
         this._navigation.next({

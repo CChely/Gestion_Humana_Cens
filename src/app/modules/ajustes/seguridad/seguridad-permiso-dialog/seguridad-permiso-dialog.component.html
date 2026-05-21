@@ -24,77 +24,40 @@
     <form [formGroup]="form" class="p-8 overflow-y-auto max-h-160 bg-white dark:bg-slate-900">
         <div class="grid grid-cols-1 gap-y-6">
             
-            <!-- Modulo -->
-            <div class="flex flex-col gap-2 relative">
+            <!-- Niveles Dinámicos (Módulos y Submódulos) -->
+            <div *ngFor="let nivel of niveles; let i = index" class="flex flex-col gap-2 relative z-[100]" [style.z-index]="100 - i">
                 <label class="text-sm font-bold text-slate-800 dark:text-slate-200 ml-4">
-                    Módulo <span class="text-rose-500">*</span>
+                    {{ i === 0 ? 'Módulo' : 'Submódulo (Nivel ' + i + ')' }} <span class="text-rose-500">*</span>
                 </label>
                 
                 <!-- Custom Select Trigger -->
-                <div (click)="toggleModulo()"
-                     [ngClass]="{'border-indigo-500 ring-2 ring-indigo-500/10': isModuloOpen, 'border-rose-500 ring-2 ring-rose-500/10': form.get('p_IdModulo').invalid && form.get('p_IdModulo').touched}"
+                <div (click)="toggleNivel(i)"
+                     [ngClass]="{'border-indigo-500 ring-2 ring-indigo-500/10': nivel.isOpen, 'border-rose-500 ring-2 ring-rose-500/10': form.get('p_IdModulo').invalid && form.get('p_IdModulo').touched && !nivel.selectedId}"
                      class="flex items-center justify-between w-full px-6 h-12 rounded-full border bg-transparent cursor-pointer transition-all duration-200 border-slate-200 dark:border-slate-700 group hover:border-slate-300 dark:hover:border-slate-600">
-                    <span [class.text-slate-400]="!selectedModuloName" class="text-sm font-medium truncate">
-                        {{ selectedModuloName || 'Seleccione un módulo' }}
+                    <span [class.text-slate-400]="!nivel.selectedName" class="text-sm font-medium truncate">
+                        {{ nivel.selectedName || 'Seleccione un módulo' }}
                     </span>
                     <mat-icon class="icon-size-5 text-slate-400 transition-transform duration-300"
-                              [class.rotate-180]="isModuloOpen"
+                              [class.rotate-180]="nivel.isOpen"
                               [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
                 </div>
 
                 <!-- Custom Dropdown List -->
-                <div *ngIf="isModuloOpen" 
-                     class="absolute top-[85px] left-0 z-50 w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 py-2 animate-in fade-in zoom-in duration-200">
+                <div *ngIf="nivel.isOpen" 
+                     class="absolute top-[85px] left-0 w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 py-2 animate-in fade-in zoom-in duration-200" style="z-index: 1000;">
                     <div class="max-h-60 overflow-y-auto custom-scrollbar">
-                        <div *ngFor="let modulo of modulosRaiz"
-                             (click)="selectModulo(modulo)"
+                        <div *ngFor="let modulo of nivel.modulos"
+                             (click)="selectModulo(i, modulo)"
                              class="px-6 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors flex items-center justify-between">
                             {{ modulo.NombreModulo }}
-                            <mat-icon *ngIf="form.get('p_IdModulo').value === modulo.ModuloId" 
+                            <mat-icon *ngIf="nivel.selectedId === modulo.ModuloId" 
                                       class="icon-size-4 text-indigo-500" [svgIcon]="'heroicons_outline:check'"></mat-icon>
                         </div>
                     </div>
                 </div>
 
-                <span *ngIf="form.get('p_IdModulo').invalid && form.get('p_IdModulo').touched" class="text-xs text-rose-500 ml-4 font-medium mt-1">
+                <span *ngIf="form.get('p_IdModulo').invalid && form.get('p_IdModulo').touched && !nivel.selectedId" class="text-xs text-rose-500 ml-4 font-medium mt-1">
                     Debe seleccionar un módulo
-                </span>
-            </div>
-
-            <!-- Submodulo -->
-            <div *ngIf="submodulosFiltrados.length > 0" class="flex flex-col gap-2 relative">
-                <label class="text-sm font-bold text-slate-800 dark:text-slate-200 ml-4">
-                    Submódulo <span class="text-rose-500">*</span>
-                </label>
-                
-                <!-- Custom SubSelect Trigger -->
-                <div (click)="toggleSubModulo()"
-                     [ngClass]="{'border-sky-500 ring-2 ring-sky-500/10': isSubModuloOpen, 'border-rose-500 ring-2 ring-rose-500/10': form.get('p_IdSubModulo').invalid && form.get('p_IdSubModulo').touched}"
-                     class="flex items-center justify-between w-full px-6 h-12 rounded-full border bg-transparent cursor-pointer transition-all duration-200 border-slate-200 dark:border-slate-700 group hover:border-slate-300 dark:hover:border-slate-600">
-                    <span [class.text-slate-400]="!selectedSubModuloName" class="text-sm font-medium truncate">
-                        {{ selectedSubModuloName || 'Seleccione un submódulo' }}
-                    </span>
-                    <mat-icon class="icon-size-5 text-slate-400 transition-transform duration-300"
-                              [class.rotate-180]="isSubModuloOpen"
-                              [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
-                </div>
-
-                <!-- Custom SubDropdown List -->
-                <div *ngIf="isSubModuloOpen" 
-                     class="absolute top-[85px] left-0 z-50 w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 py-2 animate-in fade-in zoom-in duration-200">
-                    <div class="max-h-60 overflow-y-auto custom-scrollbar">
-                        <div *ngFor="let sub of submodulosFiltrados"
-                             (click)="selectSubModulo(sub)"
-                             class="px-6 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-sky-50 dark:hover:bg-sky-900/20 hover:text-sky-600 dark:hover:text-sky-400 cursor-pointer transition-colors flex items-center justify-between">
-                            {{ sub.NombreModulo }}
-                            <mat-icon *ngIf="form.get('p_IdSubModulo').value === sub.ModuloId" 
-                                      class="icon-size-4 text-sky-500" [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                        </div>
-                    </div>
-                </div>
-
-                <span *ngIf="form.get('p_IdSubModulo').invalid && form.get('p_IdSubModulo').touched" class="text-xs text-rose-500 ml-4 font-medium mt-1">
-                    Debe seleccionar un submódulo
                 </span>
             </div>
 

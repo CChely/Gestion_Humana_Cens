@@ -27,28 +27,25 @@ export interface AuthState {
     isAuthenticated: boolean;
     user: { id: string; correo: string; name: string } | null;
     token: string | null;
-    permissions: PermissionParent[] | null;
+    permissions: PermissionNode[] | null;
     containerId: string | null;
 }
 
-export interface PermissionChild {
-    nombre: string;
-    EsVisibleMenu: boolean;
-    EsActivo: boolean;
-    icono: string;
+export interface PermissionNode {
+    id: string;
+    parentId: string | null;
+    title: string;
     ruta: string;
+    icono: string | null;
+    esVisibleMenu: boolean;
+    esActivo: boolean;
+    orden: number;
     permisos: string[];
-}
-
-export interface PermissionParent {
-    padre: string;
-    ruta: string;
-    icono: string;
-    hijos: PermissionChild[];
+    hijos: PermissionNode[];
 }
 
 export interface PermissionsResponse {
-    data: PermissionParent[];
+    data: PermissionNode[];
     errors: any[];
     message: string;
     metadata: any[];
@@ -164,7 +161,7 @@ export class AuthService {
      *
      * @param permissions
      */
-    set permissionsValue(permissions: PermissionParent[]) {
+    set permissionsValue(permissions: PermissionNode[]) {
         this._authState.update((state) => ({
             ...state,
             permissions: permissions,

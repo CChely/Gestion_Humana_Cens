@@ -15,8 +15,6 @@ export class SeguridadPermisoDialogComponent implements OnInit {
     mode: 'create' | 'edit' = 'create';
     permiso: Permiso;
     modulos: Modulo[] = [];
-    modulosRaiz: Modulo[] = [];
-    submodulosFiltrados: Modulo[] = [];
     acciones: any[] = [];
     isSaving: boolean = false;
     procedimientos: Procedimiento[] = [];
@@ -24,12 +22,16 @@ export class SeguridadPermisoDialogComponent implements OnInit {
     selectedProcedimientoIds: number[] = [];
     searchQueryProcedimientos: string = '';
 
+    // Estructura dinámica de niveles
+    niveles: {
+        modulos: Modulo[];
+        selectedId: number | null;
+        selectedName: string;
+        isOpen: boolean;
+    }[] = [];
+
     // Estados para selectores personalizados
-    isModuloOpen: boolean = false;
-    isSubModuloOpen: boolean = false;
     isAccionOpen: boolean = false;
-    selectedModuloName: string = '';
-    selectedSubModuloName: string = '';
     selectedAccionName: string = '';
 
     constructor(
@@ -45,7 +47,6 @@ export class SeguridadPermisoDialogComponent implements OnInit {
 
         this.form = this._fb.group({
             p_IdModulo: [null, [Validators.required]],
-            p_IdSubModulo: [null],
             p_IdAccion: [this.permiso?.AccionId || null, [Validators.required]],
             p_TipoValidacion: ['AND'],
             p_Descripcion: [this.permiso?.DescripcionPermiso || '', [Validators.maxLength(500)]]
@@ -77,21 +78,7 @@ export class SeguridadPermisoDialogComponent implements OnInit {
             });
         }
 
-        // Escuchar cambios en el módulo para filtrar submódulos
-        this.form.get('p_IdModulo').valueChanges.subscribe(moduloId => {
-            this.filterSubmodulos(moduloId);
-            const mod = this.modulosRaiz.find(m => m.ModuloId === moduloId);
-            this.selectedModuloName = mod ? mod.NombreModulo : '';
-            if (this.mode === 'create' || !this.form.get('p_IdSubModulo').value) {
-                this.selectedSubModuloName = '';
-            }
-        });
-
-        this.form.get('p_IdSubModulo').valueChanges.subscribe(subModuloId => {
-            const sub = this.submodulosFiltrados.find(m => m.ModuloId === subModuloId);
-            this.selectedSubModuloName = sub ? sub.NombreModulo : (subModuloId === null ? 'Ninguno' : '');
-        });
-
+        // No necesitamos suscribirnos a p_IdModulo porque la selección lo actualizará directamente.
         this.loadCatalogs();
         this.loadProcedimientos();
     }
@@ -104,28 +91,60 @@ export class SeguridadPermisoDialogComponent implements OnInit {
         this._seguridadService.getModulos().subscribe(res => {
             if (res.status) {
                 this.modulos = res.data;
-                // Filtrar solo los módulos principales (sin padre)
-                this.modulosRaiz = this.modulos.filter(m => !m.ModuloPadreId);
+                const modulosRaiz = this.modulos.filter(m => !m.ModuloPadreId);
+                
+                this.niveles = [{
+                    modulos: modulosRaiz,
+                    selectedId: null,
+                    selectedName: '',
+                    isOpen: false
+                }];
 
                 // Si estamos editando, inicializar los selectores de módulos usando la info del SP
                 if (this.permiso) {
                     this._seguridadService.getPermisoById(this.permiso.PermisoId).subscribe(res => {
                         if (res.status && res.data && res.data.length > 0) {
                             const detalle = res.data[0];
-                            
                             if (detalle) {
-                                if (detalle.ModuloPadreId) {
-                                    // Es un submódulo
-                                    this.form.get('p_IdModulo').setValue(detalle.ModuloPadreId);
-                                    setTimeout(() => {
-                                        this.form.get('p_IdSubModulo').setValue(detalle.ModuloId);
-                                        const sub = this.modulos.find(m => m.ModuloId === detalle.ModuloId);
-                                        this.selectedSubModuloName = sub ? sub.NombreModulo : '';
-                                    }, 100);
-                                } else {
-                                    // Es un módulo raíz
-                                    this.form.get('p_IdModulo').setValue(detalle.ModuloId);
+                                // Reconstruir el path desde el módulo final hasta la raíz
+                                let currentId = detalle.ModuloId;
+                                const path: Modulo[] = [];
+                                while (currentId) {
+                                    const mod = this.modulos.find(m => m.ModuloId === currentId);
+                                    if (mod) {
+                                        path.unshift(mod);
+                                        currentId = mod.ModuloPadreId;
+                                    } else {
+                                        break;
+                                    }
                                 }
+
+                                this.niveles = [];
+                                let currentPadreId = null;
+                                for (let i = 0; i < path.length; i++) {
+                                    const mod = path[i];
+                                    const opciones = this.modulos.filter(m => m.ModuloPadreId === currentPadreId);
+                                    this.niveles.push({
+                                        modulos: opciones,
+                                        selectedId: mod.ModuloId,
+                                        selectedName: mod.NombreModulo,
+                                        isOpen: false
+                                    });
+                                    currentPadreId = mod.ModuloId;
+                                }
+
+                                const hijos = this.modulos.filter(m => m.ModuloPadreId === currentPadreId);
+                                if (hijos.length > 0) {
+                                    this.niveles.push({
+                                        modulos: hijos,
+                                        selectedId: null,
+                                        selectedName: '',
+                                        isOpen: false
+                                    });
+                                }
+
+                                // Establecer valor final
+                                this.form.get('p_IdModulo').setValue(detalle.ModuloId);
                             }
                         }
                     });
@@ -194,24 +213,7 @@ export class SeguridadPermisoDialogComponent implements OnInit {
         return this.selectedProcedimientoIds.includes(id);
     }
 
-    /**
-     * Filtrar submódulos basados en el módulo padre
-     */
-    filterSubmodulos(moduloPadreId: number): void {
-        this.submodulosFiltrados = this.modulos.filter(m => m.ModuloPadreId === moduloPadreId);
-        
-        const subModuloControl = this.form.get('p_IdSubModulo');
-        
-        if (this.submodulosFiltrados.length > 0) {
-            subModuloControl.setValidators([Validators.required]);
-        } else {
-            subModuloControl.clearValidators();
-        }
-        
-        // Resetear el valor del submódulo al cambiar el padre y actualizar validez
-        subModuloControl.setValue(null);
-        subModuloControl.updateValueAndValidity();
-    }
+
 
     selectAccion(accion: any): void {
         this.form.get('p_IdAccion').setValue(accion.AccionId);
@@ -224,7 +226,7 @@ export class SeguridadPermisoDialogComponent implements OnInit {
 
         this.isSaving = true;
         const data = this.form.value;
-        const finalModuloId = data.p_IdSubModulo || data.p_IdModulo;
+        const finalModuloId = data.p_IdModulo;
 
         if (this.mode === 'edit') {
             const payload = {
@@ -280,32 +282,41 @@ export class SeguridadPermisoDialogComponent implements OnInit {
     }
 
     /**
-     * Selectores Personalizados
+     * Selectores Personalizados Dinámicos
      */
-    toggleModulo(): void {
-        this.isModuloOpen = !this.isModuloOpen;
-        this.isSubModuloOpen = false;
-    }
-
-    toggleSubModulo(): void {
-        this.isSubModuloOpen = !this.isSubModuloOpen;
-        this.isModuloOpen = false;
+    toggleNivel(index: number): void {
+        this.niveles.forEach((n, i) => n.isOpen = (i === index) ? !n.isOpen : false);
         this.isAccionOpen = false;
     }
 
     toggleAccionSelect(): void {
         this.isAccionOpen = !this.isAccionOpen;
-        this.isModuloOpen = false;
-        this.isSubModuloOpen = false;
+        this.niveles.forEach(n => n.isOpen = false);
     }
 
-    selectModulo(modulo: Modulo): void {
-        this.form.get('p_IdModulo').setValue(modulo.ModuloId);
-        this.isModuloOpen = false;
-    }
+    selectModulo(index: number, modulo: Modulo): void {
+        this.niveles[index].selectedId = modulo.ModuloId;
+        this.niveles[index].selectedName = modulo.NombreModulo;
+        this.niveles[index].isOpen = false;
 
-    selectSubModulo(modulo: Modulo | null): void {
-        this.form.get('p_IdSubModulo').setValue(modulo ? modulo.ModuloId : null);
-        this.isSubModuloOpen = false;
+        // Eliminar niveles inferiores
+        this.niveles.splice(index + 1);
+
+        // Buscar si tiene hijos
+        const hijos = this.modulos.filter(m => m.ModuloPadreId === modulo.ModuloId);
+        
+        if (hijos.length > 0) {
+            // Si tiene hijos, se requiere seleccionar el siguiente nivel
+            this.niveles.push({
+                modulos: hijos,
+                selectedId: null,
+                selectedName: '',
+                isOpen: false
+            });
+            this.form.get('p_IdModulo').setValue(null);
+        } else {
+            // Es un nodo hoja, se establece el valor
+            this.form.get('p_IdModulo').setValue(modulo.ModuloId);
+        }
     }
 }
