@@ -171,6 +171,19 @@ export class SeguridadService {
     }
 
     /**
+     * Eliminar un módulo existente
+     */
+    deleteModulo(idModulo: number): Observable<any> {
+        return this._httpClient.post(`${environment.apiUrl}/collection/doit/dbo.uspModuloEliminar`, {
+            "data": {
+                "p_IdModulo": idModulo,
+                "p_IdUsuarioActual": 1 // TODO: Obtener del servicio de autenticación
+            },
+            "params": null
+        });
+    }
+
+    /**
      * Guardar asociación de permiso con procedimiento
      */
     savePermisoProcedimiento(data: any): Observable<any> {

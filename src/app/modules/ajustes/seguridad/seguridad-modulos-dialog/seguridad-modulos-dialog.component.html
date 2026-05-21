@@ -121,6 +121,14 @@
                                     <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
                                 </button>
 
+                                <!-- Eliminar -->
+                                <button mat-icon-button
+                                    (click)="$event.stopPropagation(); eliminarModulo(node)"
+                                    class="text-slate-400 hover:text-red-600 transition-colors duration-200"
+                                    matTooltip="Eliminar módulo">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                </button>
+
                                 <!-- Badge -->
                                 <span *ngIf="depth === 0"
                                     class="px-3 py-1 rounded-full bg-sky-500 text-white text-[10px] font-black uppercase">
