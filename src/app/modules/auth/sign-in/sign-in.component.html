@@ -178,3 +178,59 @@
         </div>
     </div>
 </div>
+
+<!-- Success Modal Overlay -->
+<div *ngIf="showSuccessModal" class="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-card w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 transform transition-all relative">
+        <!-- Small Logo in top-left corner -->
+        <div class="absolute top-6 left-6 w-10">
+            <img src="assets/img/imgGH-Logo.png" alt="Logo">
+        </div>
+        
+        <!-- Modal body -->
+        <div class="p-8 pt-12">
+            <div class="flex flex-col items-center justify-center mb-8">
+                <div class="relative mb-6">
+                    <div *ngIf="userInfo?.avatar; else noAvatar" class="w-24 h-24 rounded-full overflow-hidden border-4 border-white dark:border-slate-900 shadow-md">
+                        <img [src]="userInfo.avatar" alt="Avatar" class="w-full h-full object-cover">
+                    </div>
+                    <ng-template #noAvatar>
+                        <div class="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center border-4 border-white dark:border-slate-900 shadow-md">
+                            <mat-icon class="icon-size-12" [svgIcon]="'heroicons_outline:user'"></mat-icon>
+                        </div>
+                    </ng-template>
+                    <div class="absolute bottom-0 right-0 w-8 h-8 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center shadow-sm">
+                        <mat-icon class="text-white icon-size-5" [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                    </div>
+                </div>
+                <h2 class="text-3xl font-extrabold text-center text-slate-900 dark:text-white tracking-tight leading-tight">¡Bienvenido!</h2>
+            </div>
+            
+            <div class="flex flex-col gap-1 text-md px-2">
+                <div class="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800/60">
+                    <span class="text-slate-500 dark:text-slate-400 font-medium">Usuario</span>
+                    <span class="font-bold text-slate-800 dark:text-white">{{ userInfo?.name }}</span>
+                </div>
+                <div class="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800/60">
+                    <span class="text-slate-500 dark:text-slate-400 font-medium">Email</span>
+                    <span class="font-bold text-slate-800 dark:text-white truncate max-w-[180px]" [title]="userInfo?.email">{{ userInfo?.email }}</span>
+                </div>
+                <div class="flex justify-between items-center py-3">
+                    <span class="text-slate-500 dark:text-slate-400 font-medium">Rol(es)</span>
+                    <span class="font-bold text-slate-800 dark:text-white">{{ userInfo?.roles }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="p-8 pt-2">
+            <button 
+                mat-flat-button
+                [color]="'primary'"
+                class="fuse-mat-button-large w-full"
+                (click)="continueNavigation()">
+                Aceptar
+            </button>
+        </div>
+    </div>
+</div>

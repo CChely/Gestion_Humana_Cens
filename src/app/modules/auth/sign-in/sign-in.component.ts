@@ -42,6 +42,10 @@ export class AuthSignInComponent implements OnInit
     signInForm: UntypedFormGroup;
     showAlert: boolean = false;
 
+    showSuccessModal: boolean = false;
+    userInfo: { name: string, email: string, avatar?: string, roles?: string } = { name: '', email: '' };
+    redirectURL: string = '';
+
     constructor(
         private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
@@ -141,7 +145,7 @@ export class AuthSignInComponent implements OnInit
                 );
             })
         ).subscribe(
-            () => {
+            (response: any) => {
                 // ── Remember Me logic ──────────────────────────────────────
                 if (rememberMe) {
                     // 1. Store email in localStorage (no password — safe)
@@ -157,11 +161,40 @@ export class AuthSignInComponent implements OnInit
                 }
                 // ──────────────────────────────────────────────────────────
 
-                const redirectURL =
+                this.redirectURL =
                     this._activatedRoute.snapshot.queryParamMap.get('redirectURL')
                     || '/signed-in-redirect';
 
-                this._router.navigateByUrl(redirectURL);
+                const currentUser = this._authService.user();
+                
+                // Get the displayed name without the domain if it's an email
+                let displayUser = currentUser?.name || response?.data?.name || email;
+                if (displayUser.includes('@')) {
+                    displayUser = displayUser.split('@')[0];
+                }
+
+                let rolesStr = '';
+                if (response?.data?.roles && Array.isArray(response.data.roles)) {
+                    if (response.data.roles.length > 0 && typeof response.data.roles[0] === 'object') {
+                        rolesStr = response.data.roles.map((r: any) => r.NombreRol || r.name || r.roleName).join(', ');
+                    } else {
+                        rolesStr = response.data.roles.join(', ');
+                    }
+                } else if (typeof response?.data?.perfil === 'string') {
+                    // Fallback to perfil if roles are not returned as array
+                    rolesStr = response.data.perfil;
+                }
+
+                let avatarUrl = localStorage.getItem('userAvatarUrl') || (currentUser as any)?.avatar || null;
+
+                this.userInfo = {
+                    name: displayUser,
+                    email: currentUser?.correo || response?.data?.correo || email,
+                    avatar: avatarUrl,
+                    roles: rolesStr || 'Usuario'
+                };
+
+                this.showSuccessModal = true;
             },
             (error: any) => {
                 this.signInForm.enable();
@@ -180,6 +213,11 @@ export class AuthSignInComponent implements OnInit
                 this.showAlert = true;
             }
         );
+    }
+
+    continueNavigation(): void {
+        this.showSuccessModal = false;
+        this._router.navigateByUrl(this.redirectURL);
     }
 
     // -----------------------------------------------------------------------------------------------------
