@@ -19,6 +19,13 @@
  */
 
 /**
+ * sockjs-client expects Node.js `global` to be available. Webpack 5 no longer
+ * polyfills it automatically, so we expose `window` as `global` before the
+ * library is loaded.
+ */
+(window as any).global = window;
+
+/**
  * By default, zone.js will patch all possible macroTask and DomEvents
  * user can disable parts of macroTask/DomEvents patch by setting following flags
  * because those flags need to be set before `zone.js` being loaded, and webpack

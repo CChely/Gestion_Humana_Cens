@@ -3,6 +3,17 @@
 /*  @ Styles from this file will override 'vendors.scss' and Fuse's base styles.
 /* ----------------------------------------------------------------------------------------------------- */
 
+/* Ensure the app always uses the full viewport width */
+html,
+body,
+app-root,
+layout,
+empty-layout,
+modern-layout {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
 .no-padding-dialog {
     .mat-dialog-container {
         padding: 0 !important;

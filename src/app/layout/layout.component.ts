@@ -1,12 +1,16 @@
-import { Component, Inject, OnDestroy, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, Renderer2, ViewEncapsulation, inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { combineLatest, filter, map, Subject, takeUntil } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FuseConfigService } from '@fuse/services/config';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { FUSE_VERSION } from '@fuse/version';
 import { Layout } from 'app/layout/layout.types';
 import { AppConfig } from 'app/core/config/app.config';
+import { AuthService } from 'app/core/auth/auth.service';
+import { PermissionWebSocketService } from 'app/core/services/permission-websocket.service';
+import { PermissionUpdateEvent } from 'app/core/models/permission-update-event.model';
 
 @Component({
     selector     : 'layout',
@@ -20,20 +24,33 @@ export class LayoutComponent implements OnInit, OnDestroy
     layout: Layout;
     scheme: 'dark' | 'light';
     theme: string;
+    permissionToastMessage: string | null = null;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
-    /**
-     * Constructor
-     */
+    private _authService = inject(AuthService);
+    private _permissionWebSocketService = inject(PermissionWebSocketService);
+
     constructor(
         private _activatedRoute: ActivatedRoute,
         @Inject(DOCUMENT) private _document: any,
         private _renderer2: Renderer2,
         private _router: Router,
         private _fuseConfigService: FuseConfigService,
-        private _fuseMediaWatcherService: FuseMediaWatcherService
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
     )
     {
+        toObservable(this._authService.isAuthenticated)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((isAuthenticated: boolean) => {
+                if ( isAuthenticated )
+                {
+                    this._permissionWebSocketService.connect();
+                }
+                else
+                {
+                    this._permissionWebSocketService.disconnect();
+                }
+            });
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -102,6 +119,13 @@ export class LayoutComponent implements OnInit, OnDestroy
 
         // Set the app version
         this._renderer2.setAttribute(this._document.querySelector('[ng-version]'), 'fuse-version', FUSE_VERSION);
+
+        // Escuchar eventos de actualización de permisos y mostrar notificación
+        this._permissionWebSocketService.permissionUpdate$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((event: PermissionUpdateEvent) => {
+                this.permissionToastMessage = this._buildPermissionToastMessage(event);
+            });
     }
 
     /**
@@ -112,11 +136,25 @@ export class LayoutComponent implements OnInit, OnDestroy
         // Unsubscribe from all subscriptions
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
+
+        // Cerrar conexión WebSocket de permisos
+        this._permissionWebSocketService.disconnect();
     }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Private methods
     // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Build a user-friendly message for the permission update toast.
+     *
+     * @param event
+     * @private
+     */
+    private _buildPermissionToastMessage(event: PermissionUpdateEvent): string
+    {
+        return `El rol "${event.roleName}" ha sido modificado. El menú se está actualizando.`;
+    }
 
     /**
      * Update the selected layout

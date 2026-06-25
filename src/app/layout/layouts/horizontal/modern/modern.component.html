@@ -69,8 +69,7 @@
     <div class="flex flex-col flex-auto w-full">
         <!-- *ngIf="true" hack is required here for router-outlet to work correctly.
              Otherwise, layout changes won't be registered and the view won't be updated! -->
-        <div class="m-2 lg:rounded-xl lg:border lg:shadow-xs" 
-        style="display: flex; flex: 1 1 auto; flex-direction: column; height: auto; background: white;">
+        <div class="flex flex-col flex-auto w-full h-full bg-white">
             <router-outlet *ngIf="true"></router-outlet>
         </div>
     </div>

@@ -19,5 +19,10 @@
     <!-- Modern -->
 <modern-layout *ngIf="layout === 'modern'"></modern-layout>
 
- 
- 
+<!-- Permission update toast -->
+<permission-toast
+    [message]="permissionToastMessage"
+    type="info"
+    (closed)="permissionToastMessage = null">
+</permission-toast>
+
