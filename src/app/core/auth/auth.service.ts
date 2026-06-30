@@ -78,6 +78,9 @@ export class AuthService {
         // Initialise from localStorage on boot
         this._initializeAuthState();
 
+        // Refresh permissions from backend if token is valid
+        this._refreshPermissionsOnBoot();
+
         // Persist any changes to localStorage for later restores
         effect(() => {
             const state = this._authState();
@@ -144,6 +147,30 @@ export class AuthService {
                 };
             }
         }
+    }
+
+    /**
+     * Fetch fresh permissions from backend on boot if token is valid.
+     * Silently ignores errors — the app works with cached localStorage data.
+     */
+    private _refreshPermissionsOnBoot(): void {
+        console.log('[AuthService] _refreshPermissionsOnBoot called, isAuthenticated:', this.isAuthenticated());
+        if (!this.isAuthenticated()) {
+            return;
+        }
+
+        console.log('[AuthService] Fetching permissions from backend...');
+        this.getPermissions().subscribe({
+            next: (response) => {
+                console.log('[AuthService] Permissions response:', response);
+                if (response.status && response.data) {
+                    this.permissionsValue = response.data;
+                }
+            },
+            error: (err) => {
+                console.error('[AuthService] Error refrescando permisos al iniciar:', err);
+            },
+        });
     }
 
     /** Compatibility getter for existing code */

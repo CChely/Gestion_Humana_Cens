@@ -4,8 +4,8 @@
 
 export const environment = {
     production: false,
-    apiUrl: 'https://dev.recursoshumanos.cens.cloud/api/v1',
-    wsUrl: 'http://localhost:8086'
+    apiUrl: 'http://localhost:8086/api/v1',
+    wsUrl: 'http://localhost:8086',
 };
 
 /*

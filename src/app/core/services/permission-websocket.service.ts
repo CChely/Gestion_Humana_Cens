@@ -203,14 +203,18 @@ export class PermissionWebSocketService implements OnDestroy {
         this._subscription = this._client.subscribe(
             "user/queue/permissions",
             (message: IMessage) => {
-                try {
-                    const event: PermissionUpdateEvent = JSON.parse(
-                        message.body,
-                    );
-                    this._handlePermissionUpdate(event);
-                } catch (err) {
-                    this._log("Error al parsear mensaje de permisos:", err);
-                }
+                // Procesamos fuera de NgZone para que la HTTP interceptor
+                // no trackee el GET /auth/permissions y evitemos NG0100.
+                this._ngZone.runOutsideAngular(() => {
+                    try {
+                        const event: PermissionUpdateEvent = JSON.parse(
+                            message.body,
+                        );
+                        this._handlePermissionUpdate(event);
+                    } catch (err) {
+                        this._log("Error al parsear mensaje de permisos:", err);
+                    }
+                });
             },
         );
     }
@@ -267,6 +271,7 @@ export class PermissionWebSocketService implements OnDestroy {
         );
 
         this._permissionUpdateSubject.next(event);
+
         this._refreshPermissions();
     }
 
@@ -281,7 +286,11 @@ export class PermissionWebSocketService implements OnDestroy {
             next: (response) => {
                 this._isRefreshingPermissions = false;
                 if (response.status && response.data) {
-                    this._authService.permissionsValue = response.data;
+                    // Volvemos a NgZone para que Angular detecte el cambio
+                    // y reconstruya el menú de navegación.
+                    this._ngZone.run(() => {
+                        this._authService.permissionsValue = response.data;
+                    });
                     this._log("Permisos refrescados correctamente.");
                 } else {
                     this._log(
@@ -387,12 +396,12 @@ export class PermissionWebSocketService implements OnDestroy {
         const host = base.replace(/^https?:\/\//, "");
         const protocol = isSecure ? "wss://" : "ws://";
 
-        return `${protocol}${host}/ws?token=${encodeURIComponent(token)}`;
+        return `${protocol}${host}/ws/websocket?token=${encodeURIComponent(token)}`;
     }
 
     private _buildSockJsUrl(token: string): string {
         const base = environment.wsUrl;
-        return `${base}/ws?token=${encodeURIComponent(token)}`;
+        return `${base}/ws/websocket?token=${encodeURIComponent(token)}`;
     }
 
     private _disconnectClient(): void {
